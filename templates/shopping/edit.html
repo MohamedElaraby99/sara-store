@@ -1,0 +1,253 @@
+﻿{% extends "base.html" %}
+
+{% block title %}تعديل Ù…Ù†ØªØ¬ - قائمة النواقص - Ø¥Ø¯Ø§Ø±Ø© Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pencil"></i>
+                        تعديل Ù…Ù†ØªØ¬ ÙÙŠ قائمة النواقص
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        تعديل Ø¨ÙŠØ§Ù†Ø§Øª: <strong>{{ item.item_name }}</strong>
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.item_name.label(class="form-label") }}
+                                    {{ form.item_name(class="form-control") }}
+                                    {% if form.item_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.item_name.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.quantity_needed.label(class="form-label") }}
+                                    {{ form.quantity_needed(class="form-control", step="0.01", min="0.01") }}
+                                    {% if form.quantity_needed.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.quantity_needed.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.unit_type.label(class="form-label") }}
+                                    {{ form.unit_type(class="form-select") }}
+                                    {% if form.unit_type.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.unit_type.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.estimated_price.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.estimated_price(class="form-control", step="0.01", min="0") }}
+                                        <span class="input-group-text">Ø¬.Ù…</span>
+                                    </div>
+                                    {% if form.estimated_price.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.estimated_price.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">السعر المتوقع Ù„Ù„ÙˆØ­Ø¯Ø© Ø§Ù„ÙˆØ§Ø­Ø¯Ø©</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.priority.label(class="form-label") }}
+                                    {{ form.priority(class="form-select") }}
+                                    {% if form.priority.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.priority.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-control") }}
+                                    {% if form.category.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.category.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Ù…Ø«Ù„: ÙƒØªØ¨ØŒ Ø£Ø¯ÙˆØ§Øª Ù…ÙƒØªØ¨ÙŠØ©ØŒ Ø¥Ù„Ø®</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.supplier.label(class="form-label") }}
+                            {{ form.supplier(class="form-control") }}
+                            {% if form.supplier.errors %}
+                            <div class="text-danger">
+                                {% for error in form.supplier.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Ø§Ø³Ù… المورد Ø£Ùˆ Ø§Ù„Ù…ÙƒØ§Ù† Ø§Ù„Ù…Ù‚ØªØ±Ø­ Ù„Ù„Ø´Ø±Ø§Ø¡</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3") }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger">
+                                {% for error in form.notes.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Ø£ÙŠ Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ© Ø­ÙˆÙ„ المنتج</small>
+                        </div>
+
+                        <!-- Ù…Ø¹Ø§ÙŠÙ†Ø© Ø§Ù„ØªÙƒÙ„ÙØ© Ø§Ù„Ù…ØªÙˆÙ‚Ø¹Ø© -->
+                        <div class="card bg-light mb-3" style="display: none;" id="costPreview">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-calculator"></i>
+                                    Ø§Ù„ØªÙƒÙ„ÙØ© Ø§Ù„Ù…ØªÙˆÙ‚Ø¹Ø©
+                                </h6>
+                                <p class="card-text">
+                                    <strong>Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„ØªÙƒÙ„ÙØ© Ø§Ù„Ù…ØªÙˆÙ‚Ø¹Ø©: <span id="totalCost">0.00</span> Ø¬.Ù…</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ© -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Ù…Ø¹Ù„ÙˆÙ…Ø§Øª المنتج
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">ØªØ§Ø±ÙŠØ® Ø§Ù„Ø¥Ø¶Ø§ÙØ©:</small>
+                                        <p>{{ item.created_at|egypt_date }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Ø¢Ø®Ø± ØªØ­Ø¯ÙŠØ«:</small>
+                                        <p>{{ item.updated_at|egypt_date }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Ø£Ø¶ÙŠÙ Ø¨ÙˆØ§Ø³Ø·Ø©:</small>
+                                        <p>{{ item.user.username }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('shopping_list') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i>
+                                Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„Ù‚Ø§Ø¦Ù…Ø©
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-success me-2"
+                                    onclick="markPurchased({{ item.id }})">
+                                    <i class="bi bi-check-circle"></i>
+                                    ØªÙ… Ø§Ù„Ø´Ø±Ø§Ø¡
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i>
+                                    Ø­ÙØ¸ Ø§Ù„ØªØºÙŠÙŠØ±Ø§Øª
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const quantityInput = document.getElementById('quantity_needed');
+        const priceInput = document.getElementById('estimated_price');
+        const costPreview = document.getElementById('costPreview');
+        const totalCostSpan = document.getElementById('totalCost');
+
+        function updateCost() {
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+
+            if (total > 0) {
+                totalCostSpan.textContent = total.toFixed(2);
+                costPreview.style.display = 'block';
+            } else {
+                costPreview.style.display = 'none';
+            }
+        }
+
+        quantityInput.addEventListener('input', updateCost);
+        priceInput.addEventListener('input', updateCost);
+
+        // ØªØ­Ø¯ÙŠØ« Ø§Ù„ØªÙƒÙ„ÙØ© Ø¹Ù†Ø¯ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø©
+        updateCost();
+    });
+
+    function markPurchased(itemId) {
+        if (confirm('Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† Ø£Ù† Ù‡Ø°Ø§ المنتج ØªÙ… Ø´Ø±Ø§Ø¤Ù‡ØŸ Ø³ÙŠØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø­Ø§Ù„ØªÙ‡ ÙƒÙ€ "ØªÙ… Ø§Ù„Ø´Ø±Ø§Ø¡"')) {
+            fetch(`/shopping-list/${itemId}/mark-purchased`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '{{ url_for("shopping_list") }}';
+                    } else {
+                        alert('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© المنتج');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© المنتج');
+                });
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+# Core Flask dependencies
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-WTF==1.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.5
+WTForms==3.0.1
+Werkzeug==2.3.7
+
+# Environment and configuration
+python-dotenv==1.0.1
+
+# Database drivers
+SQLAlchemy==2.0.27
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+
+# Excel file processing
+openpyxl==3.1.2
+
+# Production server
+gunicorn==21.2.0
+
+# Security and validation
+email-validator==2.1.0.post1
+MarkupSafe==2.1.3
+cryptography==41.0.7
+
+# Email support (for password reset)
+Flask-Mail==0.9.1
+
+# Rate limiting (optional)
+Flask-Limiter==3.5.0
+redis==5.0.1
+
+# Monitoring and logging
+flask-cors==4.0.0
+
+# Additional security
+flask-talisman==1.1.0
+
+# CLI management tools
+click==8.1.7
+
+# Timezone support
+pytz==2023.3
+
+# Development and debugging tools (remove in production)
+flask-debugtoolbar==0.13.1 

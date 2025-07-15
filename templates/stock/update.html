@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+
+{% block title %}تحديث المخزون - إدارة Norko Store{% endblock %}
+
+{% block extra_js %}
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: #0d6efd;
+    }
+
+    .product-card.selected {
+        border-color: #198754;
+        background-color: #f8fff9;
+    }
+
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .filter-btn.active {
+        background-color: var(--bs-primary) !important;
+        color: white !important;
+        border-color: var(--bs-primary) !important;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #0d6efd, #0b5ed7) !important;
+    }
+
+    .stock-progress {
+        transition: width 0.3s ease;
+    }
+</style>
+
+<script>
+    let allProducts = [];
+    let filteredProducts = [];
+    let selectedProduct = null;
+    let categories = [];
+    let searchTimeout;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadProducts()
+            .then(() => loadCategories())
+            .then(() => setupEventListeners());
+    });
+
+    async function loadProducts() {
+        try {
+            const response = await fetch('/api/products');
+            allProducts = await response.json();
+            console.log('Loaded products:', allProducts);
+            console.log('Sample product categories:', allProducts.slice(0, 3).map(p => ({ name: p.name, category: p.category })));
+            filteredProducts = [...allProducts];
+            displayProducts(filteredProducts);
+            updateProductCount();
+            return Promise.resolve();
+        } catch (error) {
+            console.error('Error loading products:', error);
+            showError('خطأ في تحميل المنتجات');
+            return Promise.reject(error);
+        }
+    }
+
+    async function loadCategories() {
+        try {
+            // Load categories for filter dropdown
+            const response = await fetch('/api/categories');
+            categories = await response.json();
+            console.log('Loaded categories:', categories);
+
+            const categorySelect = document.getElementById('categoryFilter');
+            const productSelect = document.getElementById('productSelect');
+
+            // Clear existing options (except the first "جميع الفئات" option)
+            categorySelect.innerHTML = '<option value="">جميع الفئات</option>';
+
+            // Populate category filter with all available categories
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+            console.log('Category filter populated with:', categories.map(c => c.name));
+
+            // Populate product select dropdown
+            allProducts.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} (المخزون: ${product.stock})`;
+                productSelect.appendChild(option);
+            });
+
+            return Promise.resolve();
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            // Fallback to using categories from products if API fails
+            const categorySelect = document.getElementById('categoryFilter');
+            const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
+            console.log('Fallback categories from products:', uniqueCategories);
+
+            categorySelect.innerHTML = '<option value="">جميع الفئات</option>';
+            uniqueCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            return Promise.resolve(); // Still resolve even in fallback
+        }
+    }
+
+    function setupEventListeners() {
+        // Search input
+        const searchInput = document.getElementById('productSearch');
+        searchInput.addEventListener('input', function (e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(e.target.value);
+            }, 300);
+        });
+
+        // Category filter
+        const categoryFilter = document.getElementById('categoryFilter');
+        categoryFilter.addEventListener('change', function () {
+            applyFilters();
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                this.classList.toggle('active');
+                applyFilters();
+            });
+        });
+
+        // Product select dropdown
+        const productSelect = document.getElementById('productSelect');
+        productSelect.addEventListener('change', function () {
+            if (this.value) {
+                const product = allProducts.find(p => p.id == this.value);
+                if (product) {
+                    selectProductById(product.id);
+                }
+            }
+        });
+
+        // Quantity input
+        const quantityInput = document.getElementById('quantityInput');
+        quantityInput.addEventListener('input', updateNewStockTotal);
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+    }
+
+    function performSearch(query) {
+        if (query.length >= 2) {
+            const results = allProducts.filter(product =>
+                product.name.toLowerCase().includes(query.toLowerCase())
+            );
+            displaySearchResults(results.slice(0, 5));
+        } else {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    }
+
+    function displaySearchResults(results) {
+        const container = document.getElementById('searchResults');
+
+        if (results.length === 0) {
+            container.innerHTML = `
+                <div class="p-3 text-center">
+                    <i class="bi bi-search text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2 mb-0">لا توجد نتائج</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = results.map(product => `
+                <div class="search-result-item p-3 border-bottom" style="cursor: pointer;" 
+                     onclick="selectProductFromSearch(${product.id})">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${product.name}</h6>
+                            <small class="text-muted">${product.category} - المخزون: ${product.stock}</small>
+                        </div>
+                        <span class="badge ${getStockBadgeClass(product)}">
+                            ${getStockStatus(product)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        container.style.display = 'block';
+    }
+
+    function selectProductFromSearch(productId) {
+        selectProductById(productId);
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('productSearch').value = '';
+    }
+
+    function applyFilters() {
+        const searchQuery = document.getElementById('productSearch').value.toLowerCase();
+        const selectedCategory = document.getElementById('categoryFilter').value;
+        const activeFilters = Array.from(document.querySelectorAll('.filter-btn.active')).map(btn => btn.dataset.filter);
+
+        console.log('Applying filters:', { searchQuery, selectedCategory, activeFilters });
+
+        filteredProducts = allProducts.filter(product => {
+            // Text search
+            const matchesSearch = !searchQuery || product.name.toLowerCase().includes(searchQuery);
+
+            // Category filter
+            const matchesCategory = !selectedCategory || product.category === selectedCategory;
+
+            // Status filters
+            let matchesStatus = true;
+            if (activeFilters.length > 0) {
+                matchesStatus = activeFilters.some(filter => {
+                    switch (filter) {
+                        case 'out-of-stock':
+                            return product.stock <= 0;
+                        case 'low-stock':
+                            return product.stock > 0 && product.stock <= product.min_stock_threshold;
+                        case 'available':
+                            return product.stock > product.min_stock_threshold;
+                        default:
+                            return true;
+                    }
+                });
+            }
+
+            const matches = matchesSearch && matchesCategory && matchesStatus;
+
+            // Debug specific product if category filter is applied
+            if (selectedCategory && !matchesCategory) {
+                console.log(`Product ${product.name} - category: "${product.category}" vs selected: "${selectedCategory}" - matches: ${matches}`);
+            }
+
+            return matches;
+        });
+
+        console.log(`Filtered ${filteredProducts.length} products from ${allProducts.length} total`);
+        displayProducts(filteredProducts);
+        updateProductCount();
+    }
+
+    function displayProducts(products) {
+        const container = document.getElementById('productsGrid');
+        const template = document.getElementById('productCardTemplate');
+
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">لا توجد منتجات تطابق معايير البحث</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        products.forEach(product => {
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector('.product-name').textContent = product.name;
+            clone.querySelector('.product-category').textContent = product.category;
+            clone.querySelector('.product-stock').textContent = product.stock;
+            clone.querySelector('.product-unit').textContent = product.unit_type || 'وحدة';
+            clone.querySelector('.product-price').textContent = (product.retail_price || product.price || 0) + ' ج.م';
+
+            const badge = clone.querySelector('.stock-status');
+            const progressBar = clone.querySelector('.stock-progress');
+
+            // Set stock status
+            badge.className = `badge ${getStockBadgeClass(product)}`;
+            badge.textContent = getStockStatus(product);
+
+            // Set progress bar
+            const stockPercentage = Math.min((product.stock / (product.min_stock_threshold * 3)) * 100, 100);
+            progressBar.style.width = stockPercentage + '%';
+            progressBar.className = `progress-bar ${getProgressBarClass(product)}`;
+
+            // Set product data
+            const card = clone.querySelector('.product-card');
+            card.dataset.productId = product.id;
+            card.dataset.productData = JSON.stringify(product);
+
+            container.appendChild(clone);
+        });
+    }
+
+    function selectProduct(cardElement) {
+        // Remove previous selection
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selection to clicked card
+        cardElement.classList.add('selected');
+
+        // Get product data
+        selectedProduct = JSON.parse(cardElement.dataset.productData);
+
+        // Update UI
+        updateSelectedProductInfo();
+        updateProductSelect();
+        document.getElementById('updateBtn').disabled = false;
+    }
+
+    function selectProductById(productId) {
+        const product = allProducts.find(p => p.id == productId);
+        if (product) {
+            selectedProduct = product;
+            updateSelectedProductInfo();
+            updateProductSelect();
+            document.getElementById('updateBtn').disabled = false;
+
+            // Highlight in grid if visible
+            const card = document.querySelector(`[data-product-id="${productId}"]`);
+            if (card) {
+                document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            }
+        }
+    }
+
+    function updateSelectedProductInfo() {
+        if (!selectedProduct) return;
+
+        document.getElementById('selectedProductName').textContent = selectedProduct.name;
+        document.getElementById('currentStock').textContent = selectedProduct.stock;
+        document.getElementById('minThreshold').textContent = selectedProduct.min_stock_threshold || 'غير محدد';
+        document.getElementById('selectedProductInfo').style.display = 'block';
+
+        updateNewStockTotal();
+    }
+
+    function updateProductSelect() {
+        if (selectedProduct) {
+            document.getElementById('productSelect').value = selectedProduct.id;
+        }
+    }
+
+    function updateNewStockTotal() {
+        if (!selectedProduct) return;
+
+        const quantityInput = document.getElementById('quantityInput');
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const newTotal = selectedProduct.stock + quantity;
+
+        document.getElementById('newStockTotal').value = newTotal + ' ' + (selectedProduct.unit_type || 'وحدة');
+    }
+
+    function updateProductCount() {
+        document.getElementById('productCount').textContent = filteredProducts.length + ' منتج';
+    }
+
+    function clearSearch() {
+        document.getElementById('productSearch').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('searchResults').style.display = 'none';
+
+        // Reset filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Reset to all products
+        filteredProducts = [...allProducts];
+        displayProducts(filteredProducts);
+        updateProductCount();
+    }
+
+    function getStockBadgeClass(product) {
+        if (product.stock <= 0) return 'bg-danger';
+        if (product.stock <= product.min_stock_threshold) return 'bg-warning text-dark';
+        return 'bg-success';
+    }
+
+    function getStockStatus(product) {
+        if (product.stock <= 0) return 'نفد';
+        if (product.stock <= product.min_stock_threshold) return 'منخفض';
+        return 'متوفر';
+    }
+
+    function getProgressBarClass(product) {
+        if (product.stock <= 0) return 'bg-danger';
+        if (product.stock <= product.min_stock_threshold) return 'bg-warning';
+        return 'bg-success';
+    }
+
+    function showError(message) {
+        const container = document.getElementById('productsGrid');
+        container.innerHTML = `
+            <div class="col-12 text-center py-4">
+                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                <p class="text-danger mt-2">${message}</p>
+                <button class="btn btn-outline-primary" onclick="loadProducts()">إعادة المحاولة</button>
+            </div>
+        `;
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-3">
+                <i class="bi bi-arrow-up-circle"></i>
+                تحديث المخزون
+            </h1>
+            <p class="text-muted">إضافة كميات جديدة للمنتجات مع إمكانية البحث والفلترة</p>
+        </div>
+    </div>
+
+    <!-- Advanced Product Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-search"></i>
+                        البحث عن المنتجات
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Quick Search -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="search-container position-relative">
+                                <input type="text" id="productSearch" class="form-control form-control-lg"
+                                    placeholder="🔍 ابحث عن منتج بالاسم..." autocomplete="off">
+                                <div id="searchResults"
+                                    class="search-results position-absolute w-100 bg-white border rounded shadow-lg"
+                                    style="display: none; z-index: 1000; max-height: 300px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select id="categoryFilter" class="form-select form-select-lg">
+                                <option value="">جميع الفئات</option>
+                                <!-- Categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary btn-lg w-100"
+                                onclick="clearSearch()">
+                                <i class="bi bi-arrow-clockwise"></i> مسح
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filter Buttons -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-danger filter-btn"
+                                    data-filter="out-of-stock">
+                                    <i class="bi bi-x-circle"></i> نفد المخزون
+                                </button>
+                                <button type="button" class="btn btn-outline-warning filter-btn"
+                                    data-filter="low-stock">
+                                    <i class="bi bi-exclamation-triangle"></i> مخزون منخفض
+                                </button>
+                                <button type="button" class="btn btn-outline-success filter-btn"
+                                    data-filter="available">
+                                    <i class="bi bi-check-circle"></i> متوفر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Product Selection Panel -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul"></i>
+                        اختيار المنتج
+                    </h5>
+                    <span id="productCount" class="badge bg-secondary">0 منتج</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="productsGrid" class="row g-3 p-3">
+                        <div class="col-12 text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                            <p class="mt-2 text-muted">جاري تحميل المنتجات...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Update Form -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-plus-circle"></i>
+                        تحديث المخزون
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="selectedProductInfo" class="mb-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading" id="selectedProductName">اسم المنتج</h6>
+                            <p class="mb-1">المخزون الحالي: <strong id="currentStock">0</strong></p>
+                            <p class="mb-0">الحد الأدنى: <strong id="minThreshold">0</strong></p>
+                        </div>
+                    </div>
+
+                    <form method="POST" id="stockUpdateForm">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.product_id.label(class="form-label fw-bold") }}
+                            {{ form.product_id(class="form-select", id="productSelect") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.quantity.label(class="form-label fw-bold") }}
+                            {{ form.quantity(class="form-control", min="0.01", step="0.01", id="quantityInput") }}
+                            <div class="form-text">الكمية التي سيتم إضافتها للمخزون الحالي</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">المخزون بعد التحديث</label>
+                            <input type="text" class="form-control bg-light" id="newStockTotal" readonly>
+                            <div class="form-text">إجمالي المخزون بعد إضافة الكمية الجديدة</div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3", placeholder="ملاحظات حول تحديث المخزون") }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="updateBtn" disabled>
+                                <i class="bi bi-check-circle"></i>
+                                تحديث المخزون
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">العودة للرئيسية</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Card Template -->
+<template id="productCardTemplate">
+    <div class="col-md-6 mb-3">
+        <div class="card product-card h-100" style="cursor: pointer;" onclick="selectProduct(this)">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="card-title mb-0 product-name"></h6>
+                    <span class="badge stock-status"></span>
+                </div>
+                <div class="product-details">
+                    <p class="card-text mb-1">
+                        <small class="text-muted product-category"></small>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stock-info">
+                            <span class="fw-bold product-stock"></span>
+                            <small class="text-muted product-unit"></small>
+                        </div>
+                        <div class="product-price text-primary fw-bold"></div>
+                    </div>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar stock-progress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}

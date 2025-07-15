@@ -1,0 +1,81 @@
+{
+  "passed": 16,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "File exists: static/js/service-worker.js",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "File exists: static/js/db-manager.js",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "File exists: static/js/sync-manager.js",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "File exists: static/js/offline-handler.js",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "File exists: templates/offline.html",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "File exists: templates/offline-demo.html",
+      "passed": true,
+      "message": "File found"
+    },
+    {
+      "name": "Service Worker content validation",
+      "passed": true,
+      "message": "All required keywords found"
+    },
+    {
+      "name": "API GET /api/products",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /api/categories",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /api/customers",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API POST /api/sync",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /api/offline-status",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /offline-demo",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /offline.html",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "API GET /static/js/service-worker.js",
+      "passed": true,
+      "message": "Status: 200"
+    }
+  ]
+}

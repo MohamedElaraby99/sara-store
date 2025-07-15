@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}التقارير - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="bi bi-graph-up me-2"></i>
+                    التقارير والإحصائيات
+                </h2>
+            </div>
+
+            <!-- أزرار الاستيراد والتصدير -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <button class="btn btn-lg btn-success" onclick="downloadFullDatabaseExcel()">
+                            <i class="bi bi-file-earmark-excel me-2"></i>
+                            تحميل كل قاعدة البيانات (Excel)
+                        </button>
+                        {% if current_user.is_admin() %}
+                        <a href="{{ url_for('products') }}" class="btn btn-lg btn-primary">
+                            <i class="bi bi-upload me-2"></i>
+                            استيراد منتجات من Excel
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Range Filter and Export Options -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-funnel me-2"></i>
+                                فلترة البيانات والتصدير
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">من تاريخ:</label>
+                                    <input type="date" class="form-control" name="start_date" id="startDate"
+                                        value="{{ start_date }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">إلى تاريخ:</label>
+                                    <input type="date" class="form-control" name="end_date" id="endDate"
+                                        value="{{ end_date }}">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="bi bi-search me-1"></i>تحديث
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">فترة التقرير</h6>
+                            <p class="card-text">
+                                <strong>من:</strong> {{ start_date }}<br>
+                                <strong>إلى:</strong> {{ end_date }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Performance Indicators -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_revenue|currency }}</h4>
+                                    <p class="card-text">إجمالي المبيعات</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-currency-dollar fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_sales_count }}</h4>
+                                    <p class="card-text">عدد عمليات البيع</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-cart fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_profit|currency }}</h4>
+                                    <p class="card-text">إجمالي الأرباح</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-graph-up fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ net_profit|currency }}</h4>
+                                    <p class="card-text">صافي الربح</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-wallet2 fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional KPIs Row -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card border-secondary">
+                        <div class="card-body text-center">
+                            <h5 class="text-secondary">{{ total_cost|currency }}</h5>
+                            <small class="text-muted">التكلفة الإجمالية</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card border-secondary">
+                        <div class="card-body text-center">
+                            <h5 class="text-secondary">{{ "%.1f"|format(profit_margin) }}%</h5>
+                            <small class="text-muted">هامش الربح</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card border-secondary">
+                        <div class="card-body text-center">
+                            <h5 class="text-secondary">{{ total_expenses|currency }}</h5>
+                            <small class="text-muted">إجمالي المصاريف</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card border-danger">
+                        <div class="card-body text-center">
+                            <h5 class="text-danger">{{ total_debts|currency }}</h5>
+                            <small class="text-muted">إجمالي الديون</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h5 class="text-warning">{{ total_credit_sales }}</h5>
+                            <small class="text-muted">المبيعات الآجلة</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <h5 class="text-success">{{ "%.1f"|format(payment_rate) }}%</h5>
+                            <small class="text-muted">معدل التسديد</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Tables Row -->
+            <div class="row">
+                <!-- Daily Sales Chart -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-graph-up me-2"></i>
+                                المبيعات اليومية
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="dailySalesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-star me-2"></i>
+                                أكثر المنتجات مبيعاً
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if top_products %}
+                            <div class="list-group list-group-flush">
+                                {% for product in top_products[:8] %}
+                                <div class="list-group-item border-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ product[0] }}</strong><br>
+                                        <small class="text-muted">{{ product[1] }} وحدة</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">{{ product[2]|currency }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">لا توجد بيانات متاحة للفترة المحددة</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Analysis -->
+            {% if expenses_by_type %}
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-cash-coin me-2"></i>
+                                تحليل المصاريف حسب النوع
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for expense_type, amount in expenses_by_type.items() %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ expense_type }}</span>
+                                <span class="badge bg-danger">{{ amount|currency }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Debtors -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                أكبر المدينين
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if top_debtors %}
+                            <div class="list-group list-group-flush">
+                                {% for debtor_data in top_debtors %}
+                                <div class="list-group-item border-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ debtor_data[0].name }}</strong><br>
+                                        <small class="text-muted">{{ debtor_data[2] }} مبيعة غير مسددة</small>
+                                        {% if debtor_data[3] %}
+                                        <br><small class="text-muted">آخر بيع: {{ debtor_data[3].strftime('%Y-%m-%d')
+                                            }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill">{{ debtor_data[1]|currency }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">لا توجد ديون مستحقة</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Debt Analysis Summary -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-clipboard-data me-2"></i>
+                                ملخص تحليل الديون والمدفوعات
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-danger">{{ total_debts|currency }}</h4>
+                                        <p class="text-muted mb-0">إجمالي الديون المستحقة</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-warning">{{ customers_with_debts }}</h4>
+                                        <p class="text-muted mb-0">عدد العملاء المدينين</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-info">{{ total_payments|currency }}</h4>
+                                        <p class="text-muted mb-0">إجمالي المدفوعات</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ "%.1f"|format(payment_rate) }}%</h4>
+                                    <p class="text-muted mb-0">معدل التسديد</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    function downloadFullDatabaseExcel() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري التحميل...';
+
+        fetch('/api/export/full-database')
+            .then(response => {
+                if (!response.ok) throw new Error('فشل تحميل البيانات');
+                return response.json();
+            })
+            .then(data => {
+                const wb = XLSX.utils.book_new();
+
+                // ملخص التقرير
+                if (data.report_summary && data.report_summary.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.report_summary);
+                    XLSX.utils.book_append_sheet(wb, ws, 'ملخص التقرير');
+                }
+
+                // المبيعات
+                if (data.sales && data.sales.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.sales);
+                    XLSX.utils.book_append_sheet(wb, ws, 'المبيعات');
+                }
+
+                // تفاصيل المبيعات (الأصناف المباعة)
+                if (data.sale_items && data.sale_items.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.sale_items);
+                    XLSX.utils.book_append_sheet(wb, ws, 'تفاصيل المبيعات');
+                }
+
+                // العملاء
+                if (data.customers && data.customers.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.customers);
+                    XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+                }
+
+                // الديون
+                if (data.debts && data.debts.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.debts);
+                    XLSX.utils.book_append_sheet(wb, ws, 'الديون');
+                }
+
+                // المنتجات
+                if (data.products && data.products.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.products);
+                    XLSX.utils.book_append_sheet(wb, ws, 'المنتجات');
+                }
+
+                // الفئات
+                if (data.categories && data.categories.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.categories);
+                    XLSX.utils.book_append_sheet(wb, ws, 'الفئات');
+                }
+
+                // المدفوعات
+                if (data.payments && data.payments.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.payments);
+                    XLSX.utils.book_append_sheet(wb, ws, 'المدفوعات');
+                }
+
+                // المصاريف
+                if (data.expenses && data.expenses.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.expenses);
+                    XLSX.utils.book_append_sheet(wb, ws, 'المصاريف');
+                }
+
+                // المستخدمين (إذا كان متاحًا للمشرف)
+                if (data.users && data.users.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.users);
+                    XLSX.utils.book_append_sheet(wb, ws, 'المستخدمين');
+                }
+
+                // إحصائيات المخزون
+                if (data.stock_summary && data.stock_summary.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.stock_summary);
+                    XLSX.utils.book_append_sheet(wb, ws, 'إحصائيات المخزون');
+                }
+
+                // إنشاء اسم الملف مع التاريخ والوقت
+                const now = new Date();
+                const dateStr = now.getFullYear() + '-' +
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(now.getDate()).padStart(2, '0');
+                const timeStr = String(now.getHours()).padStart(2, '0') + '-' +
+                    String(now.getMinutes()).padStart(2, '0');
+                const fileName = `نظام_مكتبة Norko_قاعدة_البيانات_الكاملة_${dateStr}_${timeStr}.xlsx`;
+
+                // تحميل الملف
+                XLSX.writeFile(wb, fileName);
+
+                // إظهار رسالة نجاح
+                alert(`تم تصدير قاعدة البيانات بنجاح!\nالملف: ${fileName}\n\nتم تصدير البيانات التالية:\n` +
+                    `• ملخص التقرير: ${data.report_summary ? data.report_summary.length : 0} سجل\n` +
+                    `• المبيعات: ${data.sales ? data.sales.length : 0} عملية بيع\n` +
+                    `• تفاصيل المبيعات: ${data.sale_items ? data.sale_items.length : 0} صنف مباع\n` +
+                    `• العملاء: ${data.customers ? data.customers.length : 0} عميل\n` +
+                    `• الديون: ${data.debts ? data.debts.length : 0} دين\n` +
+                    `• المنتجات: ${data.products ? data.products.length : 0} منتج\n` +
+                    `• الفئات: ${data.categories ? data.categories.length : 0} فئة\n` +
+                    `• المدفوعات: ${data.payments ? data.payments.length : 0} دفعة\n` +
+                    `• المصاريف: ${data.expenses ? data.expenses.length : 0} مصروف\n` +
+                    `• المستخدمين: ${data.users ? data.users.length : 0} مستخدم\n` +
+                    `• إحصائيات المخزون: ${data.stock_summary ? data.stock_summary.length : 0} تقرير`);
+            })
+            .catch(error => {
+                console.error('Database export error:', error);
+                alert('حدث خطأ أثناء تحميل قاعدة البيانات: ' + error.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-file-earmark-excel me-2"></i>تحميل كل قاعدة البيانات (Excel)';
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة المستخدمين - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-people"></i>
+                        إدارة المستخدمين
+                    </h1>
+                    <p class="text-muted">إدارة حسابات المستخدمين والصلاحيات</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('add_user') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        إضافة مستخدم جديد
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="card-title mb-0">قائمة المستخدمين</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>اسم المستخدم</th>
+                            <th>الدور</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>عدد المبيعات</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr class="{% if user.id == current_user.id %}table-info{% endif %}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-2 
+                                        {% if user.role == 'admin' %}bg-danger{% else %}bg-primary{% endif %}">
+                                        <i class="bi bi-person text-white"></i>
+                                    </div>
+                                    <div>
+                                        <strong>{{ user.username }}</strong>
+                                        {% if user.id == current_user.id %}
+                                        <small class="text-muted">(أنت)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-shield-check"></i> مدير
+                                </span>
+                                {% else %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-person-badge"></i> بائع
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.created_at|arabic_date }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ user.sales|length }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> نشط
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    {% if user.id != current_user.id %}
+                                    <a href="{{ url_for('edit_user', id=user.id) }}" class="btn btn-outline-primary"
+                                        title="تعديل المستخدم">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if user.sales|length == 0 %}
+                                    <button type="button" class="btn btn-outline-danger" title="حذف المستخدم"
+                                        onclick="showDeleteModal({{ user.id }}, '{{ user.username }}')"
+                                        data-user-id="{{ user.id }}" data-user-name="{{ user.username }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        title="لا يمكن الحذف - المستخدم لديه مبيعات" disabled>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        title="لا يمكنك تعديل أو حذف حسابك الشخصي" disabled>
+                                        <i class="bi bi-lock"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                <h4 class="text-muted mt-3">لا يوجد مستخدمون</h4>
+                <p class="text-muted">أضف أول مستخدم للنظام</p>
+                <a href="{{ url_for('add_user') }}" class="btn btn-primary">إضافة مستخدم جديد</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    تأكيد حذف المستخدم
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="hideDeleteModal()"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-person-x text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <p class="text-center mb-3">
+                    هل أنت متأكد من رغبتك في حذف المستخدم <strong id="userNameToDelete"></strong>؟
+                </p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    سيتم حذف جميع بيانات المستخدم ولا يمكن التراجع عن هذا الإجراء!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideDeleteModal()">
+                    <i class="bi bi-x-circle me-2"></i>
+                    إلغاء
+                </button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>
+                        حذف المستخدم
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    /* إصلاح مشكلة الطبقة الشفافة في modal حذف المستخدم */
+    #deleteModal {
+        z-index: 9999 !important;
+        position: fixed !important;
+    }
+
+    #deleteModal .modal-dialog {
+        z-index: 10001 !important;
+        margin: 50px auto !important;
+        pointer-events: auto !important;
+        position: relative !important;
+    }
+
+    #deleteModal .modal-content {
+        z-index: 10002 !important;
+        pointer-events: auto !important;
+        position: relative !important;
+        background: white !important;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5) !important;
+        margin-top: 130px;
+    }
+
+    #deleteModal.show {
+        display: block !important;
+        z-index: 9999 !important;
+    }
+
+    /* إخفاء backdrop تماماً أو جعله في خلفية بعيدة */
+    #deleteModal+.modal-backdrop,
+    #deleteModal~.modal-backdrop,
+    .modal-backdrop {
+        z-index: 9998 !important;
+        opacity: 0.3 !important;
+        background-color: rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* التأكد من أن الأزرار قابلة للضغط */
+    #deleteModal .modal-footer .btn,
+    #deleteModal .modal-header .btn-close {
+        z-index: 10003 !important;
+        position: relative !important;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+
+    /* التأكد من أن كامل modal قابل للتفاعل */
+    #deleteModal * {
+        pointer-events: auto !important;
+    }
+
+    /* Custom backdrop styling */
+    .custom-backdrop {
+        z-index: 9998 !important;
+        pointer-events: none !important;
+        background-color: rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* إزالة أي تأثير من bootstrap على modal */
+    #deleteModal {
+        background: none !important;
+    }
+
+    #deleteModal.show {
+        background: none !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteModal = document.getElementById('deleteModal');
+
+        if (deleteModal) {
+            const userNameSpan = document.getElementById('userNameToDelete');
+            const deleteForm = document.getElementById('deleteForm');
+
+            // تنظيف أي أحداث سابقة
+            deleteModal.removeEventListener('show.bs.modal', null);
+
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                // منع الأحداث المتداخلة
+                event.stopPropagation();
+
+                // تنظيف أي طبقات backdrop إضافية
+                const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+                existingBackdrops.forEach(backdrop => backdrop.remove());
+
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+
+                if (userNameSpan && userName) {
+                    userNameSpan.textContent = userName;
+                }
+
+                if (deleteForm && userId) {
+                    deleteForm.action = `/users/${userId}/delete`;
+                }
+
+                // التأكد من أن modal مرئي بشكل صحيح
+                setTimeout(() => {
+                    deleteModal.style.display = 'block';
+                    deleteModal.style.zIndex = '1056';
+                }, 50);
+            });
+
+            // التأكد من ظهور الـ modal بشكل صحيح
+            deleteModal.addEventListener('shown.bs.modal', function () {
+                // إزالة أي طبقات إضافية قد تكون موجودة
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach((backdrop, index) => {
+                    if (index > 0) {
+                        backdrop.remove();
+                    } else {
+                        // تعديل backdrop الأساسي
+                        backdrop.style.zIndex = '9998';
+                        backdrop.style.opacity = '0.3';
+                        backdrop.style.pointerEvents = 'none'; // منع التفاعل مع backdrop
+                    }
+                });
+
+                // التأكد من أن الـ modal في المقدمة
+                deleteModal.style.zIndex = '9999';
+                deleteModal.style.pointerEvents = 'auto';
+
+                // التأكد من عمل الأزرار
+                const modalContent = deleteModal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.zIndex = '10002';
+                    modalContent.style.pointerEvents = 'auto';
+                    modalContent.style.position = 'relative';
+                }
+
+                // التأكد من أن جميع العناصر داخل modal قابلة للتفاعل
+                const allModalElements = deleteModal.querySelectorAll('*');
+                allModalElements.forEach(element => {
+                    element.style.pointerEvents = 'auto';
+                });
+            });
+
+            // Handle form submission
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function (e) {
+                    // Add loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>جاري الحذف...';
+                        submitBtn.disabled = true;
+                    }
+
+                    // إغلاق الـ modal بعد الإرسال
+                    setTimeout(() => {
+                        hideDeleteModal();
+                    }, 100);
+                });
+            }
+        }
+    });
+
+    // دالة مخصصة لإظهار modal الحذف
+    function showDeleteModal(userId, userName) {
+        // إزالة أي backdrop موجود
+        const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+        existingBackdrops.forEach(backdrop => backdrop.remove());
+
+        const deleteModal = document.getElementById('deleteModal');
+        const userNameSpan = document.getElementById('userNameToDelete');
+        const deleteForm = document.getElementById('deleteForm');
+
+        if (userNameSpan) {
+            userNameSpan.textContent = userName;
+        }
+
+        if (deleteForm) {
+            deleteForm.action = `/users/${userId}/delete`;
+        }
+
+        // إظهار modal مع تجاوز bootstrap
+        deleteModal.style.display = 'block';
+        deleteModal.style.zIndex = '9999';
+        deleteModal.style.pointerEvents = 'auto';
+        deleteModal.classList.add('show');
+
+        // إضافة backdrop مخصص
+        const customBackdrop = document.createElement('div');
+        customBackdrop.className = 'modal-backdrop fade show custom-backdrop';
+        customBackdrop.style.zIndex = '9998';
+        customBackdrop.style.opacity = '0.3';
+        customBackdrop.style.pointerEvents = 'none';
+        customBackdrop.id = 'customBackdrop';
+        document.body.appendChild(customBackdrop);
+
+        // منع scroll في body
+        document.body.classList.add('modal-open');
+
+        // التأكد من أن كل العناصر داخل modal قابلة للتفاعل
+        const allModalElements = deleteModal.querySelectorAll('*');
+        allModalElements.forEach(element => {
+            element.style.pointerEvents = 'auto';
+        });
+    }
+
+    // دالة لإخفاء modal
+    function hideDeleteModal() {
+        const deleteModal = document.getElementById('deleteModal');
+        const customBackdrop = document.getElementById('customBackdrop');
+
+        deleteModal.style.display = 'none';
+        deleteModal.classList.remove('show');
+
+        if (customBackdrop) {
+            customBackdrop.remove();
+        }
+
+        document.body.classList.remove('modal-open');
+    }
+
+    // إضافة event listeners للإغلاق
+    document.addEventListener('DOMContentLoaded', function () {
+        // زر الإغلاق
+        const closeBtn = document.querySelector('#deleteModal .btn-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hideDeleteModal);
+        }
+
+        // زر الإلغاء
+        const cancelBtn = document.querySelector('#deleteModal .btn-secondary');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', hideDeleteModal);
+        }
+
+        // الضغط على backdrop للإغلاق
+        document.addEventListener('click', function (e) {
+            const deleteModal = document.getElementById('deleteModal');
+            if (e.target === deleteModal) {
+                hideDeleteModal();
+            }
+        });
+
+        // الضغط على Escape للإغلاق
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const deleteModal = document.getElementById('deleteModal');
+                if (deleteModal.classList.contains('show')) {
+                    hideDeleteModal();
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

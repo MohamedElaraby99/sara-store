@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2a5298">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Norko Store">
+    <meta name="msapplication-TileColor" content="#1e3c72">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+
+    <title>{% block title %}إدارة Norko Store{% endblock %}</title>
+
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <!-- Offline Support Scripts -->
+    <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/static/js/service-worker.js')
+                    .then(function (registration) {
+                        console.log('ServiceWorker registration successful');
+
+                        // التحقق من وجود تحديثات
+                        registration.addEventListener('updatefound', function () {
+                            console.log('New service worker found, installing...');
+
+                            registration.installing.addEventListener('statechange', function () {
+                                if (registration.installing.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        // إشعار المستخدم بوجود تحديث
+                                        showUpdateNotification(registration);
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        function showUpdateNotification(registration) {
+            if (confirm('يتوفر تحديث جديد للتطبيق. هل تريد تحديثه الآن؟')) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+            }
+        }
+
+        // توفير CSRF token للتطبيق
+        {% if csrf_token %}
+        window.csrf_token = "{{ csrf_token() }}";
+        {% endif %}
+    </script>
+
+    <style>
+        body {
+            padding-top: 100px;
+            padding-bottom: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+            border-radius: 8px;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 1050 !important;
+            position: absolute !important;
+        }
+
+        .navbar-nav .dropdown {
+            position: relative;
+            z-index: 1040;
+        }
+
+        .navbar-modern {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 0 4px 20px rgba(30, 60, 114, 0.3);
+            backdrop-filter: blur(10px);
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1030;
+
+        }
+
+        .btn-outline-warning,
+        .btn-success,
+        .btn-outline-light {
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-warning:hover,
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        main {
+            flex: 1;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-modern {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+            border-top: 3px solid #2a5298;
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-link {
+            color: white !important;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            transform: scale(1.05);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+            color: #e0f2fe !important;
+        }
+
+        .footer-text {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #1a355e 0%, #235084 100%);
+            box-shadow: 0 2px 10px rgba(42, 82, 152, 0.3);
+        }
+
+        /* Firefox Scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #2a5298 #f1f1f1;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            /* Fix mobile dropdown behavior */
+            .navbar-collapse {
+                background-color: rgba(30, 60, 114, 0.95);
+                margin: 0 -15px;
+                padding: 10px 15px;
+                border-radius: 0 0 15px 15px;
+            }
+
+            .navbar-collapse .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                border: none;
+                box-shadow: none;
+                background-color: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 8px;
+                margin: 8px 0;
+                padding: 8px 0;
+            }
+
+            .navbar-collapse .dropdown-item {
+                color: rgba(255, 255, 255, 0.9) !important;
+                padding: 10px 20px;
+                border-radius: 6px;
+                margin: 2px 10px;
+                transition: all 0.2s ease;
+            }
+
+            .navbar-collapse .dropdown-item:hover,
+            .navbar-collapse .dropdown-item:focus {
+                background-color: rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+            }
+
+            .navbar-collapse .dropdown-header {
+                color: rgba(255, 255, 255, 0.7) !important;
+                font-size: 0.8rem;
+                padding: 8px 20px 4px;
+            }
+
+            .navbar-collapse .dropdown-divider {
+                border-top-color: rgba(255, 255, 255, 0.2);
+                margin: 8px 15px;
+            }
+
+            /* تعديل المسافات للموبايل */
+            body {
+                padding-top: 120px;
+            }
+
+            main {
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
+            }
+
+            /* Smaller scrollbar on mobile */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-light">
+    <!-- Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="bi bi-book"></i>
+                إدارة Norko Store
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> لوحة التحكم
+                        </a>
+                    </li>
+
+                    <!-- قائمة المنتجات - للأدمن فقط -->
+                    {% if current_user.is_admin() %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-box"></i> المنتجات
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('products') }}">
+                                    <i class="bi bi-list"></i> عرض المنتجات
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('add_product') }}">
+                                    <i class="bi bi-plus-circle"></i> إضافة منتج
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('categories') }}">
+                                    <i class="bi bi-tags"></i> الفئات
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('update_stock') }}">
+                                    <i class="bi bi-arrow-up-circle"></i> تحديث المخزون
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- قائمة المبيعات -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-cart"></i> المبيعات
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('new_sale') }}">
+                                    <i class="bi bi-plus-circle"></i> بيع جديد
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sales') }}">
+                                    <i class="bi bi-list"></i> عرض المبيعات
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('returns') }}">
+                                    <i class="bi bi-arrow-return-left"></i> المرتجعات
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('price_ticket') }}">
+                                    <i class="bi bi-tag"></i> تيكت الأسعار
+                                </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- مولد QR -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('qr_generator') }}">
+                            <i class="bi bi-qr-code"></i> مولد QR
+                        </a>
+                    </li>
+
+                    <!-- قائمة العملاء والديون - للأدمن فقط -->
+                    {% if current_user.is_admin() %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-people"></i> العملاء
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('customers') }}">
+                                    <i class="bi bi-list"></i> عرض العملاء
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('add_customer') }}">
+                                    <i class="bi bi-person-plus"></i> إضافة عميل
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('debts_report') }}">
+                                    <i class="bi bi-exclamation-triangle text-danger"></i> الديون المستحقة
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- قائمة الإدارة - للأدمن فقط -->
+                    {% if current_user.is_admin() %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-graph-up"></i> التقارير
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('reports') }}">
+                                    <i class="bi bi-bar-chart"></i> تقارير المبيعات
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('debts_report') }}">
+                                    <i class="bi bi-exclamation-triangle"></i> تقرير الديون
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('products') }}?stock_status=low">
+                                    <i class="bi bi-exclamation-circle text-warning"></i> مخزون منخفض
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products') }}?stock_status=out">
+                                    <i class="bi bi-x-circle text-danger"></i> نفد المخزون
+                                </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- قائمة الإدارة -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-gear"></i> الإدارة
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">إدارة النظام</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('categories') }}">
+                                    <i class="bi bi-tags"></i> إدارة الفئات
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('update_stock') }}">
+                                    <i class="bi bi-arrow-up-circle"></i> تحديث المخزون
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('expenses') }}">
+                                    <i class="bi bi-cash-coin"></i> إدارة المصاريف
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('shopping_list') }}">
+                                    <i class="bi bi-cart-plus"></i> قائمة النواقص
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('qr_generator') }}">
+                                    <i class="bi bi-qr-code"></i> مولد رموز QR
+                                </a></li>
+                            <!-- <li><a class="dropdown-item" href="{{ url_for('offline_demo') }}">
+                                    <i class="bi bi-wifi-off"></i> اختبار الوضع غير المتصل
+                                </a></li> -->
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">المستخدمين</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('users') }}">
+                                    <i class="bi bi-people"></i> إدارة المستخدمين
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <div class="d-flex">
+                    <!-- مؤشر الديون - للأدمن فقط -->
+                    {% if current_user.is_admin() and global_total_debt > 0 %}
+                    <a href="{{ url_for('debts_report') }}"
+                        class="btn btn-outline-warning btn-sm me-2 position-relative" title="الديون المستحقة">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        ديون
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ global_customers_with_debt }}
+                        </span>
+                    </a>
+                    {% endif %}
+
+                    <!-- زر البيع السريع -->
+                    <a href="{{ url_for('new_sale') }}" class="btn btn-success btn-sm me-2" title="بيع جديد">
+                        <i class="bi bi-plus-circle me-1"></i>بيع سريع
+                    </a>
+
+                    <span class="navbar-text me-3">
+                        مرحباً، {{ current_user.username }}
+                        {% if current_user.is_admin() %}
+                        <span class="badge bg-warning">مدير</span>
+                        {% else %}
+                        <span class="badge bg-info">بائع</span>
+                        {% endif %}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> خروج
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container-fluid">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-modern">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-text">
+                    جميع الحقوق محفوظة © 2025 |
+                    Powered by
+                    <div class="company-icon me-2">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fikra Software"
+                            class="img-fluid" style="width: 100px; height: auto;">
+                    </div>
+                    <a href="https://fikra.solutions/" target="_blank" class="footer-link">
+                        Fikra Software
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS (with offline fallback) -->
+    <script>
+        // تحميل Bootstrap JS مع fallback للعمل غير المتصل
+        (function () {
+            const bootstrapScript = document.createElement('script');
+            bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+            bootstrapScript.async = true;
+
+            // معالج النجاح
+            bootstrapScript.onload = function () {
+                console.log('✅ Bootstrap JS loaded successfully from CDN');
+                window.bootstrapAvailable = true;
+            };
+
+            // معالج الخطأ
+            bootstrapScript.onerror = function () {
+                console.log('⚠️ Bootstrap JS CDN failed, creating basic fallback');
+                window.bootstrapAvailable = false;
+
+                // إنشاء Bootstrap fallback أساسي
+                window.bootstrap = {
+                    Modal: function () {
+                        return {
+                            show: function () { console.log('Modal show - Bootstrap fallback'); },
+                            hide: function () { console.log('Modal hide - Bootstrap fallback'); },
+                            dispose: function () { console.log('Modal dispose - Bootstrap fallback'); }
+                        };
+                    },
+                    Dropdown: function () {
+                        return {
+                            show: function () { console.log('Dropdown show - Bootstrap fallback'); },
+                            hide: function () { console.log('Dropdown hide - Bootstrap fallback'); }
+                        };
+                    },
+                    Alert: function () {
+                        return {
+                            close: function () { console.log('Alert close - Bootstrap fallback'); }
+                        };
+                    }
+                };
+
+                // إضافة طرق ثابتة
+                window.bootstrap.Modal.getInstance = function () { return null; };
+                window.bootstrap.Dropdown.getInstance = function () { return null; };
+            };
+
+            // إضافة timeout للتحقق من التحميل
+            setTimeout(function () {
+                if (!window.bootstrap && !window.bootstrapAvailable) {
+                    console.log('⏰ Bootstrap JS timeout - initializing fallback');
+                    bootstrapScript.onerror();
+                }
+            }, 5000);
+
+            document.head.appendChild(bootstrapScript);
+        })();
+    </script>
+    <!-- Chart.js for charts (with offline fallback) -->
+    <script>
+        // تحميل Chart.js مع fallback للعمل غير المتصل
+        (function () {
+            const chartScript = document.createElement('script');
+            chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            chartScript.async = true;
+
+            // معالج النجاح
+            chartScript.onload = function () {
+                console.log('✅ Chart.js loaded successfully from CDN');
+                window.chartJsAvailable = true;
+            };
+
+            // معالج الخطأ
+            chartScript.onerror = function () {
+                console.log('⚠️ Chart.js CDN failed, creating fallback');
+                window.chartJsAvailable = false;
+
+                // إنشاء Chart fallback بسيط
+                window.Chart = function () {
+                    console.log('📊 Chart.js not available - using fallback');
+                    return {
+                        destroy: function () { },
+                        update: function () { },
+                        render: function () { }
+                    };
+                };
+
+                // إضافة طرق أساسية
+                window.Chart.register = function () { };
+                window.Chart.defaults = { responsive: true };
+            };
+
+            // إضافة timeout للتحقق من التحميل
+            setTimeout(function () {
+                if (!window.Chart && !window.chartJsAvailable) {
+                    console.log('⏰ Chart.js timeout - initializing fallback');
+                    chartScript.onerror();
+                }
+            }, 5000);
+
+            document.head.appendChild(chartScript);
+        })();
+    </script>
+
+    <!-- Mobile dropdown fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize all dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl, {
+                    autoClose: true
+                });
+            });
+
+            // Add extra mobile support
+            if (window.innerWidth <= 768) {
+                dropdownElementList.forEach(function (element) {
+                    element.addEventListener('click', function (e) {
+                        // Ensure the dropdown works on mobile
+                        var dropdown = bootstrap.Dropdown.getInstance(element);
+                        if (!dropdown) {
+                            dropdown = new bootstrap.Dropdown(element);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <!-- Universal Modal Fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // حل شامل لجميع الـ modals في النظام
+            function initializeModals() {
+                const modals = document.querySelectorAll('.modal');
+
+                modals.forEach(function (modal) {
+                    // إزالة أي backdrop قديم
+                    function cleanupBackdrops() {
+                        const backdrops = document.querySelectorAll('.modal-backdrop');
+                        backdrops.forEach(backdrop => backdrop.remove());
+                    }
+
+                    // إصلاح الـ modal عند الفتح
+                    modal.addEventListener('show.bs.modal', function () {
+                        cleanupBackdrops();
+
+                        // إخفاء أي dropdowns مفتوحة
+                        const openDropdowns = document.querySelectorAll('.navbar .dropdown-menu.show');
+                        openDropdowns.forEach(dropdown => {
+                            dropdown.classList.remove('show');
+                        });
+                    });
+
+                    // إصلاح نهائي بعد الظهور
+                    modal.addEventListener('shown.bs.modal', function () {
+                        cleanupBackdrops();
+
+                        // تطبيق الأنماط مباشرة
+                        this.style.zIndex = '9999';
+                        this.style.display = 'block';
+
+                        const dialog = this.querySelector('.modal-dialog');
+                        if (dialog) {
+                            dialog.style.zIndex = '10000';
+                            dialog.style.position = 'relative';
+                        }
+
+                        const content = this.querySelector('.modal-content');
+                        if (content) {
+                            content.style.zIndex = '10001';
+                            content.style.position = 'relative';
+                            content.style.pointerEvents = 'auto';
+                        }
+                    });
+
+                    // تنظيف بعد الإخفاء
+                    modal.addEventListener('hidden.bs.modal', function () {
+                        cleanupBackdrops();
+                    });
+
+                    // إضافة وظيفة الإغلاق بالنقر خارج المحتوى
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === this) {
+                            const modalInstance = bootstrap.Modal.getInstance(this);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        }
+                    });
+                });
+
+                // مراقبة أي backdrop جديد وحذفه فوراً
+                const observer = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        mutation.addedNodes.forEach(function (node) {
+                            if (node.nodeType === 1 && node.classList && node.classList.contains('modal-backdrop')) {
+                                node.remove();
+                            }
+                        });
+                    });
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: false
+                });
+            }
+
+            // تطبيق الإصلاحات
+            initializeModals();
+
+            // إعادة تطبيق الإصلاحات عند إضافة modals جديدة
+            const modalObserver = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    mutation.addedNodes.forEach(function (node) {
+                        if (node.nodeType === 1 && (node.classList.contains('modal') || node.querySelector('.modal'))) {
+                            initializeModals();
+                        }
+                    });
+                });
+            });
+
+            modalObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
+
+    <!-- Offline Support Scripts -->
+    <script src="{{ url_for('static', filename='js/db-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sync-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/offline-handler.js') }}"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // تسجيل Service Worker للعمل في وضع الأوفلاين
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                // قائمة المسارات المختلفة لتجربتها
+                const serviceWorkerPaths = [
+                    '/service-worker.js',
+                    '/static/js/service-worker.js'
+                ];
+
+                async function registerServiceWorker() {
+                    for (const path of serviceWorkerPaths) {
+                        try {
+                            console.log(`🔄 Trying to register Service Worker from: ${path}`);
+
+                            const registration = await navigator.serviceWorker.register(path, {
+                                scope: '/'
+                            });
+
+                            console.log('✅ Service Worker registered successfully:', registration.scope);
+
+                            // تفعيل background sync
+                            if ('sync' in window.ServiceWorkerRegistration.prototype) {
+                                console.log('✅ Background Sync supported');
+                            }
+
+                            // التحديث التلقائي
+                            registration.addEventListener('updatefound', () => {
+                                const newWorker = registration.installing;
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('🔄 Service Worker updated');
+                                        if (confirm('تم تحديث التطبيق. هل تريد إعادة تحميل الصفحة؟')) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                });
+                            });
+
+                            // نجح التسجيل، اخرج من الحلقة
+                            return registration;
+
+                        } catch (error) {
+                            console.log(`❌ Failed to register from ${path}:`, error.message);
+                            continue;
+                        }
+                    }
+
+                    // إذا فشل جميع المسارات
+                    console.log('❌ All Service Worker registration attempts failed');
+                    console.log('ℹ️ App will work without offline capabilities');
+                }
+
+                registerServiceWorker().catch(error => {
+                    console.log('❌ Service Worker registration completely failed:', error);
+                });
+            });
+        } else {
+            console.log('❌ Service Worker not supported in this browser');
+        }
+
+        // تهيئة نظام الأوفلاين عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                // تأخير قصير للسماح للصفحة بالتحميل
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // تهيئة مدير قاعدة البيانات المحلية
+                if (typeof DBManager !== 'undefined') {
+                    window.dbManager = new DBManager();
+                    await window.dbManager.init();
+                    console.log('✅ Database Manager initialized');
+                } else {
+                    console.log('⚠️ DBManager not available');
+                }
+
+                // تهيئة مدير المزامنة
+                if (typeof SyncManager !== 'undefined') {
+                    window.syncManager = new SyncManager();
+                    await window.syncManager.init();
+                    console.log('✅ Sync Manager initialized');
+                } else {
+                    console.log('⚠️ SyncManager not available');
+                }
+
+                // تهيئة معالج الأوفلاين
+                if (typeof OfflineHandler !== 'undefined') {
+                    window.offlineHandler = new OfflineHandler();
+                    await window.offlineHandler.init();
+                    console.log('✅ Offline Handler initialized');
+                } else {
+                    console.log('⚠️ OfflineHandler not available');
+                }
+
+                // تحديث فوري لحالة الشبكة بعد التهيئة
+                if (window.syncManager) {
+                    window.syncManager.updateOnlineStatus();
+                }
+
+                // تحميل البيانات المحلية
+                if (window.syncManager) {
+                    // تحميل البيانات الأساسية في الخلفية
+                    setTimeout(async () => {
+                        try {
+                            await window.syncManager.performSync();
+                            console.log('🔄 Initial data sync completed');
+                        } catch (error) {
+                            console.log('⚠️ Initial sync failed - will work offline with cached data:', error.message);
+                        }
+                    }, 3000);
+                }
+
+                // مراقبة حالة الشبكة
+                window.addEventListener('online', function () {
+                    console.log('🌐 Network connection restored');
+                    if (window.syncManager) {
+                        setTimeout(() => {
+                            window.syncManager.performSync();
+                        }, 1000);
+                    }
+                });
+
+                window.addEventListener('offline', function () {
+                    console.log('📴 Network connection lost - switching to offline mode');
+                });
+
+            } catch (error) {
+                console.error('❌ Error initializing offline features:', error);
+            }
+        });
+
+        // إضافة طرق مساعدة للمطورين
+        window.offlineUtils = {
+            // فحص حالة الأوفلاين
+            checkOfflineStatus: async function () {
+                if (window.syncManager) {
+                    const status = await window.syncManager.getStatus();
+                    console.log('📊 Offline Status:', status);
+                    return status;
+                } else {
+                    console.log('❌ SyncManager not available');
+                }
+            },
+
+            // مزامنة يدوية
+            forceSync: async function () {
+                if (window.syncManager) {
+                    await window.syncManager.performSync();
+                    console.log('🔄 Manual sync completed');
+                } else {
+                    console.log('❌ SyncManager not available');
+                }
+            },
+
+            // مسح البيانات المحلية
+            clearOfflineData: async function () {
+                if (window.dbManager && confirm('هل أنت متأكد من حذف جميع البيانات المحلية؟')) {
+                    await window.dbManager.clearAllData();
+                    console.log('🗑️ All offline data cleared');
+                } else {
+                    console.log('❌ DBManager not available');
+                }
+            },
+
+            // إعادة تحميل البيانات
+            reloadData: async function () {
+                if (window.syncManager) {
+                    await window.syncManager.syncDataFromServer();
+                    console.log('⬇️ Data reloaded from server');
+                } else {
+                    console.log('❌ SyncManager not available');
+                }
+            },
+
+            // فحص Service Worker
+            checkServiceWorker: async function () {
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    console.log('🔧 Service Worker Registration:', registration);
+                    return registration;
+                } else {
+                    console.log('❌ Service Worker not supported');
+                }
+            },
+
+            // تشخيص سلامة قاعدة البيانات
+            diagnoseDatabaseIntegrity: async function () {
+                if (window.dbManager) {
+                    const results = await window.dbManager.diagnoseDatabaseIntegrity();
+                    console.log('🔍 Database Integrity Diagnosis completed');
+                    return results;
+                } else {
+                    console.log('❌ DBManager not available');
+                }
+            },
+
+            // إصلاح البيانات التالفة
+            fixCorruptedData: async function () {
+                if (window.dbManager && window.syncManager) {
+                    console.log('🔧 Starting data repair...');
+
+                    // إعادة تحميل البيانات من الخادم
+                    await window.syncManager.syncDataFromServer();
+
+                    // فحص سلامة البيانات بعد الإصلاح
+                    const results = await window.dbManager.diagnoseDatabaseIntegrity();
+
+                    console.log('✅ Data repair completed');
+                    return results;
+                } else {
+                    console.log('❌ Required managers not available');
+                }
+            },
+
+            // فحص حالة المكتبات الخارجية
+            checkExternalLibraries: function () {
+                const status = {
+                    bootstrap: {
+                        available: !!window.bootstrap,
+                        fromCDN: !!window.bootstrapAvailable,
+                        fallback: !!window.bootstrap && !window.bootstrapAvailable
+                    },
+                    chartJs: {
+                        available: !!window.Chart,
+                        fromCDN: !!window.chartJsAvailable,
+                        fallback: !!window.Chart && !window.chartJsAvailable
+                    }
+                };
+
+                console.log('📚 External Libraries Status:', status);
+
+                // إظهار تحذيرات إذا كانت المكتبات تعمل على fallback
+                if (status.bootstrap.fallback) {
+                    console.warn('⚠️ Bootstrap is using fallback - some UI features may be limited');
+                }
+                if (status.chartJs.fallback) {
+                    console.warn('⚠️ Chart.js is using fallback - charts will not be displayed');
+                }
+
+                return status;
+            },
+
+            // إعادة تحميل المكتبات الخارجية
+            reloadExternalLibraries: async function () {
+                console.log('🔄 Attempting to reload external libraries...');
+
+                // إعادة تحميل الصفحة لإعادة تحميل جميع المكتبات
+                if (confirm('سيتم إعادة تحميل الصفحة لإعادة تحميل المكتبات الخارجية. هل تريد المتابعة؟')) {
+                    location.reload();
+                }
+            }
+        };
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

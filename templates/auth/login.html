@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>تسجيل الدخول - إدارة Norko Store</title>
+
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-md-4">
+                <div class="card shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <div class="icon-container mb-3">
+                                <i class="bi bi-journal-text text-primary" style="font-size: 3.5rem;"></i>
+                            </div>
+                            <h3 class="mt-3 mb-1">إدارة Norko Store</h3>
+                            <p class="text-muted mb-0">مرحباً بك، يرجى تسجيل الدخول للمتابعة</p>
+                        </div>
+
+                        <!-- عرض رسائل الخطأ والنجاح -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'warning' if category == 'warning' else 'info' }} alert-dismissible fade show"
+                            role="alert">
+                            <i
+                                class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" id="loginForm">
+                            {{ form.hidden_tag() }}
+
+                            <div class="mb-3">
+                                {{ form.username.label(class="form-label fw-bold") }}
+                                {{ form.username(class="form-control form-control-lg", placeholder="أدخل اسم المستخدم",
+                                id="username") }}
+                                {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.password.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    {{ form.password(class="form-control form-control-lg", placeholder="أدخل كلمة
+                                    المرور",
+                                    id="passwordField") }}
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    {{ form.remember_me(class="form-check-input") }}
+                                    {{ form.remember_me.label(class="form-check-label text-muted") }}
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <span id="submitText">تسجيل الدخول</span>
+                                    <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none"
+                                        role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer للمطور -->
+                <div class="text-center mt-4">
+                    <div class="developer-footer">
+                        <a href="https://fikra.solutions/" target="_blank" rel="noopener noreferrer"
+                            class="developer-link text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="company-icon me-2">
+                                    <svg width="226" height="314" viewBox="0 0 226 314" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_2311_2)">
+                                            <path
+                                                d="M222.67 242.4C222.12 242.34 217.25 235.37 215.69 233.82C202.05 220.28 177.14 219.92 159.86 225.41C149.37 228.74 140.73 233.2 136.92 244.19C147.26 244.32 158.57 241.07 168.89 241.88C170.36 242 176.59 243.02 176.49 244.82C176.47 245.16 172.12 245.53 169.99 246.96C160.84 253.09 160.13 266.77 156.21 276.38C147.17 298.52 136.12 302.03 113.78 302.57C111.49 302.63 96.8599 302.97 96.2899 302.3C95.4699 301.33 105.6 282.56 106.87 279.27C110.3 270.4 113.17 259.84 114.94 250.53C112.4 253.15 108.03 251.89 105.92 254.92C100.98 280.78 88.8799 319.26 55.4199 313.23C59.6299 308.26 64.4799 304.38 68.5899 299.24C73.7799 292.74 77.8799 284.83 81.2199 277.26L86.1799 261.54C83.6099 263.47 74.7199 266.14 73.2599 268.07C71.3199 270.63 70.6899 280.54 68.3299 284.18C63.4899 291.67 57.0699 289.94 49.8599 291.84C41.5899 294.01 32.5299 298.36 24.0199 299.07C18.3099 299.55 10.4399 297.61 4.65991 296.77C6.55991 295.07 8.87991 295.84 11.1599 294.52C18.3399 290.36 22.3599 275.68 24.8699 267.7C25.9099 264.39 26.1099 259.75 27.2999 256.28C36.5199 233.8 62.3199 241.46 81.3999 240.56C79.2899 249.02 75.2199 257.36 74.8199 266.12C77.7099 263.09 85.0099 261.91 87.0099 258.76C88.2399 252.27 90.6799 244.71 90.7499 238.21C90.7699 236.8 88.8999 235.79 91.1799 235.06C93.6999 234.26 103.82 234.26 107.17 234.22C108.61 234.2 112.61 232.4 111.05 235.63C108.82 240.26 108.06 247.06 107.23 252.17C109.07 250.29 114.82 250.96 116.07 249.41C116.73 248.59 116.56 246.56 117.24 245.34C121.22 238.21 125.47 233.69 132.33 229.06C125.11 228.24 117.27 230.38 109.99 231.07C87.1799 233.24 48.0499 236.21 29.2499 221.53C19.1099 213.61 13.8199 203.83 10.0299 191.77C9.60991 190.42 8.14991 187.26 9.35991 186.28C29.9799 222.47 73.5699 216.94 108.63 213.22C141.34 209.75 186.72 195.54 212.78 222.49C215.14 224.93 224.08 235.67 225.05 238.07C225.77 239.86 223.68 242.51 222.68 242.4H222.67ZM119.18 295.24C128.23 297.31 131.67 286.59 134.35 279.8C136.47 274.43 137.36 267.96 139.28 262.82C141.43 257.06 144.77 251.66 147.54 246.21C144.73 245.69 138.4 246.1 136.73 248.29C131.14 263.96 127.48 280.74 119.17 295.25L119.18 295.24ZM33.5999 291.63C36.5599 292.91 47.6599 288.15 48.8899 286.28C49.8699 281.26 61.2099 247.4 59.9399 245.71C59.1699 244.68 56.6699 246.16 55.6599 246.83C40.7299 256.79 48.3699 280.95 33.5999 291.62V291.63Z"
+                                                fill="#113352" />
+                                            <path
+                                                d="M7.81982 252.68C13.8098 250.4 10.4198 237.81 11.9098 235.99C12.7098 235.01 25.4498 233.78 26.1498 234.3C28.1998 235.81 26.7898 247.54 24.3498 249.97C21.3798 252.93 11.8498 253.85 7.81982 252.68Z"
+                                                fill="#1B98C3" />
+                                            <path
+                                                d="M19.3199 255.58C13.3299 257.86 16.7199 270.45 15.2299 272.27C14.4299 273.25 1.68989 274.48 0.989891 273.96C-1.06011 272.45 0.349891 260.72 2.78989 258.29C5.75989 255.33 15.2899 254.41 19.3199 255.58Z"
+                                                fill="#1B98C3" />
+                                            <path
+                                                d="M183.28 258.91L186.13 252.14C187.14 249.94 185.52 240.72 186.74 239.78C187.34 239.32 201.32 238.25 201.77 238.85C202.12 239.31 201.84 249.22 201.41 250.49C198.56 259 189.51 256.08 183.28 258.91Z"
+                                                fill="#1B98C3" />
+                                            <path
+                                                d="M18.0701 94.52C18.0701 42.32 60.3901 0 112.59 0C164.79 0 207.11 42.32 207.11 94.52C207.11 124.4 193.24 151.04 171.59 168.37C188.53 152.57 199.13 130.05 199.13 105.06C199.13 57.26 160.38 18.52 112.59 18.52C64.8001 18.52 26.0501 57.26 26.0501 105.06C26.0501 130.05 36.6501 152.57 53.5901 168.37C31.9401 151.05 18.0701 124.41 18.0701 94.52Z"
+                                                fill="#113352" />
+                                            <path
+                                                d="M84.82 211.68V202.96C84.82 201.56 85.96 200.43 87.35 200.43H92.97V191.42L64.43 162.93C62.32 160.83 61.14 157.98 61.14 155V144.77L59.97 144.42C53.08 142.36 48.63 135.8 49.37 128.44C50.06 121.6 55.57 115.98 62.39 115.12C71.53 113.98 79.34 121.11 79.34 130.03C79.34 136.72 75.05 142.5 68.67 144.42L67.5 144.77V153.76C67.5 155.84 68.33 157.84 69.8 159.31L99.33 188.78V200.43H109.4V138.71C109.4 136.59 108.56 134.57 107.06 133.07L92.29 118.32V60.96L91.12 60.61C84.23 58.55 79.78 51.98 80.52 44.62C81.21 37.78 86.73 32.16 93.55 31.31C102.69 30.18 110.49 37.3 110.49 46.22C110.49 52.91 106.2 58.69 99.82 60.61L98.65 60.96V115.68L113.32 130.32C114.89 131.88 115.77 134 115.77 136.22V167.74L126.51 157.02V102.3L125.34 101.95C118.45 99.88 114.01 93.32 114.75 85.96C115.44 79.12 120.96 73.5 127.78 72.66C136.91 71.53 144.72 78.65 144.72 87.57C144.72 94.27 140.43 100.05 134.05 101.96L132.88 102.31V159.67L115.77 176.75V200.45H125.84V188.8L157.67 157.03V144.79L156.5 144.44C149.61 142.38 145.17 135.81 145.91 128.45C146.6 121.61 152.12 115.99 158.94 115.14C168.08 114 175.88 121.13 175.88 130.05C175.88 136.74 171.59 142.53 165.2 144.44L164.03 144.79V159.67L132.2 191.44V200.45H137.14C138.91 200.45 140.35 201.89 140.35 203.66V206.71C121.42 209.21 102.32 211.17 84.8 211.7L84.82 211.68ZM67.02 120.46C59.48 118.46 52.75 125.18 54.76 132.72C55.64 136.03 58.32 138.71 61.63 139.59C69.17 141.59 75.89 134.87 73.89 127.33C73.01 124.02 70.33 121.34 67.02 120.46ZM132.42 77.99C124.87 75.98 118.14 82.71 120.15 90.26C121.03 93.57 123.71 96.25 127.02 97.12C134.56 99.12 141.28 92.4 139.28 84.86C138.4 81.55 135.73 78.87 132.42 77.99Z"
+                                                fill="#1B98C3" />
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_2311_2">
+                                                <rect width="225.18" height="313.86" fill="white" />
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <span class="company-text">تصميم وتطوير</span>
+                                <div class="company-logo mx-2">
+                                    <span class="fw-bold">Fikra Software</span>
+                                </div>
+                            </div>
+                            <div class="company-tagline mt-1">
+                                <small>حلول تقنية إبداعية</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0 !important;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 0;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
+        }
+
+        .text-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-label {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        h3 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .icon-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .icon-container::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1) 0%, rgba(42, 82, 152, 0.1) 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .input-group .btn-outline-secondary {
+            border-radius: 0 12px 12px 0;
+            border: 2px solid #e9ecef;
+            border-left: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group .form-control {
+            border-radius: 12px 0 0 12px;
+            border-right: none;
+        }
+
+        .input-group .form-control:focus+.btn-outline-secondary,
+        .input-group .btn-outline-secondary:hover {
+            border-color: #1e3c72;
+            background-color: rgba(30, 60, 114, 0.1);
+        }
+
+        .form-check-input:checked {
+            background-color: #1e3c72;
+            border-color: #1e3c72;
+        }
+
+        .form-check-input:focus {
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+        }
+
+        #togglePassword {
+            color: #6c757d;
+        }
+
+        /* تحسين مظهر رسائل التحذير */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border-left: 4px solid #ff4757;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+            color: white;
+            border-left: 4px solid #2ed573;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #feca57 0%, #ff9f43 100%);
+            color: white;
+            border-left: 4px solid #ff6348;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+            color: white;
+            border-left: 4px solid #5f27cd;
+        }
+
+        .alert .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .alert .btn-close:hover {
+            opacity: 1;
+        }
+
+        .alert i {
+            margin-left: 8px;
+        }
+
+        /* استايل footer المطور العصري */
+        .developer-footer {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 20px 30px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .developer-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .developer-footer:hover::before {
+            left: 100%;
+        }
+
+        .developer-footer:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 100%);
+        }
+
+        .developer-link {
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .company-icon {
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .company-text {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .company-logo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .company-logo::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .love-icon {
+            animation: heartbeat 2s infinite;
+            font-size: 1.1rem;
+        }
+
+        .company-tagline {
+            color: #6c757d;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .developer-link:hover .company-icon {
+            transform: rotate(360deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .developer-link:hover .company-logo::after {
+            transform: scaleX(1);
+        }
+
+        .developer-link:hover .company-tagline {
+            opacity: 1;
+            color: #495057;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            50%,
+            100% {
+                transform: scale(1);
+            }
+
+            25%,
+            75% {
+                transform: scale(1.1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .developer-footer {
+                padding: 15px 20px;
+                font-size: 0.85rem;
+            }
+
+            .company-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .company-text {
+                font-size: 0.9rem;
+            }
+
+            .company-logo {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Password visibility toggle and form handling
+        document.addEventListener('DOMContentLoaded', function () {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordField = document.getElementById('passwordField');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const loginForm = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Password visibility toggle
+            if (togglePassword && passwordField && eyeIcon) {
+                togglePassword.addEventListener('click', function () {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    eyeIcon.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+                });
+            }
+
+            // Username input sanitization
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                function sanitizeInput(value) {
+                    return value.replace(/\s+/g, ' ').trim();
+                }
+
+                usernameField.addEventListener('input', function () {
+                    this.value = sanitizeInput(this.value);
+                });
+
+                usernameField.addEventListener('blur', function () {
+                    this.value = sanitizeInput(this.value);
+                });
+            }
+
+            // Form submission handling
+            if (loginForm && submitBtn) {
+                loginForm.addEventListener('submit', function (e) {
+                    // منع الإرسال المتكرر
+                    if (submitBtn.disabled) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // إظهار مؤشر التحميل
+                    submitBtn.disabled = true;
+                    submitText.textContent = 'جاري تسجيل الدخول...';
+                    loadingSpinner.classList.remove('d-none');
+
+                    // إعادة تفعيل الزر بعد 10 ثوان (في حالة حدوث خطأ)
+                    setTimeout(function () {
+                        submitBtn.disabled = false;
+                        submitText.textContent = 'تسجيل الدخول';
+                        loadingSpinner.classList.add('d-none');
+                    }, 10000);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

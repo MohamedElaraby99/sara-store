@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة دفعة - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">إضافة دفعة جديدة</h4>
+            </div>
+            <div class="card-body">
+                <!-- معلومات البيع -->
+                <div class="alert alert-info mb-4">
+                    <h5 class="alert-heading">تفاصيل البيع</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>العميل:</strong> {{ customer.name }}</p>
+                            <p class="mb-1"><strong>رقم البيع:</strong> #{{ sale.id }}</p>
+                            <p class="mb-0"><strong>تاريخ البيع:</strong> {{ sale.sale_date|egypt_datetime }}
+                                }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>إجمالي المبلغ:</strong> {{ "%.2f"|format(sale.total_amount) }} ج.م
+                            </p>
+                            <p class="mb-1"><strong>المبلغ المدفوع:</strong> {{ "%.2f"|format(sale.paid_amount) }} ج.م
+                            </p>
+                            <p class="mb-0"><strong>المبلغ المتبقي:</strong>
+                                <span class="text-danger fw-bold">{{ "%.2f"|format(sale.remaining_amount) }} ج.م</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نموذج الدفعة -->
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.amount.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""),
+                                    max=sale.remaining_amount, step="0.01") }}
+                                    <span class="input-group-text">ج.م</span>
+                                    {% if form.amount.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.amount.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-text">الحد الأقصى: {{ "%.2f"|format(sale.remaining_amount) }} ج.م</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.payment_method.label(class="form-label") }}
+                                {{ form.payment_method(class="form-select" + (" is-invalid" if
+                                form.payment_method.errors else "")) }}
+                                {% if form.payment_method.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.payment_method.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="3", placeholder="ملاحظات إضافية (اختياري)") }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.notes.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- أزرار سريعة للمبلغ -->
+                    <div class="mb-3">
+                        <label class="form-label">مبالغ سريعة:</label>
+                        <div class="btn-group d-block" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2"
+                                onclick="setAmount({{ sale.remaining_amount / 4 }})">
+                                ربع المبلغ ({{ "%.2f"|format(sale.remaining_amount / 4) }})
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2"
+                                onclick="setAmount({{ sale.remaining_amount / 2 }})">
+                                نصف المبلغ ({{ "%.2f"|format(sale.remaining_amount / 2) }})
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                onclick="setAmount({{ sale.remaining_amount }})">
+                                المبلغ كاملاً ({{ "%.2f"|format(sale.remaining_amount) }})
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('customer_account', id=customer.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-right me-2"></i>العودة
+                        </a>
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- الدفعات السابقة -->
+        {% if sale.payments %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">الدفعات السابقة</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>المبلغ</th>
+                                <th>طريقة الدفع</th>
+                                <th>ملاحظات</th>
+                                <th>المستخدم</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in sale.payments %}
+                            <tr>
+                                <td>{{ payment.payment_date|egypt_datetime }}</td>
+                                <td>{{ "%.2f"|format(payment.amount) }} ج.م</td>
+                                <td>{{ payment.payment_method }}</td>
+                                <td>{{ payment.notes or '-' }}</td>
+                                <td>{{ payment.user.username }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function setAmount(amount) {
+        document.getElementById('amount').value = amount.toFixed(2);
+    }
+</script>
+{% endblock %}

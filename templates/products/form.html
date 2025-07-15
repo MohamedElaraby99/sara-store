@@ -1,0 +1,567 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('products') }}">المنتجات</a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
+                </ol>
+            </nav>
+
+            <h1 class="h3 mb-3">
+                <i class="bi bi-box-seam"></i>
+                {{ title }}
+            </h1>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-pencil-square"></i>
+                            بيانات المنتج
+                        </h5>
+                        <div class="text-muted small">
+                            <i class="bi bi-keyboard"></i>
+                            استخدم <kbd>Tab</kbd> أو <kbd>Enter</kbd> للتنقل،
+                            <kbd>Ctrl+Enter</kbd> للحفظ السريع
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                {{ form.name_ar.label(class="form-label fw-bold") }}
+                                {{ form.name_ar(class="form-control" + (" is-invalid" if form.name_ar.errors else ""),
+                                placeholder="أدخل اسم المنتج", tabindex="1") }}
+                                {% if form.name_ar.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name_ar.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                {{ form.category_id.label(class="form-label fw-bold") }}
+                                {{ form.category_id(class="form-select" + (" is-invalid" if form.category_id.errors else
+                                ""), tabindex="2") }}
+                                {% if form.category_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.category_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description_ar.label(class="form-label fw-bold") }}
+                            {{ form.description_ar(class="form-control", rows="3", placeholder="وصف مفصل للمنتج
+                            (اختياري)", tabindex="3") }}
+                            {% if form.description_ar.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.description_ar.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                {{ form.wholesale_price.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    {{ form.wholesale_price(class="form-control" + (" is-invalid" if
+                                    form.wholesale_price.errors else ""),
+                                    step="0.01", min="0", tabindex="4") }}
+                                    <span class="input-group-text">ج.م</span>
+                                </div>
+                                {% if form.wholesale_price.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.wholesale_price.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">سعر الشراء/التكلفة</div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                {{ form.retail_price.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    {{ form.retail_price(class="form-control" + (" is-invalid" if
+                                    form.retail_price.errors else ""),
+                                    step="0.01", min="0", tabindex="5") }}
+                                    <span class="input-group-text">ج.م</span>
+                                </div>
+                                {% if form.retail_price.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.retail_price.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">سعر البيع للعملاء</div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                {{ form.stock_quantity.label(class="form-label fw-bold") }}
+                                {{ form.stock_quantity(class="form-control" + (" is-invalid" if
+                                form.stock_quantity.errors else ""), step="0.01", min="0", tabindex="6") }}
+                                {% if form.stock_quantity.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.stock_quantity.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                {{ form.min_stock_threshold.label(class="form-label fw-bold") }}
+                                {{ form.min_stock_threshold(class="form-control" + (" is-invalid" if
+                                form.min_stock_threshold.errors else ""), step="0.01", min="0", tabindex="7") }}
+                                {% if form.min_stock_threshold.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.min_stock_threshold.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    سيتم تنبيهك عند وصول المخزون لهذا الحد
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.unit_type.label(class="form-label fw-bold") }}
+                                {{ form.unit_type(class="form-select" + (" is-invalid" if form.unit_type.errors else
+                                ""), onchange="toggleUnitDescription()", tabindex="8") }}
+                                {% if form.unit_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.unit_type.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    كامل: يُباع كوحدة واحدة، جزئي: يُباع بأجزاء (صفحة، فصل، إلخ)
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3" id="unitDescriptionDiv">
+                                {{ form.unit_description.label(class="form-label") }}
+                                {{ form.unit_description(class="form-control", placeholder="مثال: صفحة، فصل، قطعة",
+                                tabindex="9") }}
+                                {% if form.unit_description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.unit_description.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    وصف الوحدة للبيع الجزئي
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('products') }}" class="btn btn-outline-secondary" tabindex="12">
+                                <i class="bi bi-arrow-left"></i>
+                                العودة للقائمة
+                            </a>
+
+                            <div class="btn-group" role="group">
+                                <button type="submit" name="action" value="save_and_continue" class="btn btn-success"
+                                    tabindex="10">
+                                    <i class="bi bi-plus-circle"></i>
+                                    {{ "حفظ وإضافة آخر" if title == "إضافة منتج جديد" else "حفظ وإضافة جديد" }}
+                                </button>
+                                <button type="submit" name="action" value="save_and_exit" class="btn btn-primary"
+                                    tabindex="11">
+                                    <i class="bi bi-check-circle"></i>
+                                    {{ form.submit.label.text }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleUnitDescription() {
+        const unitType = document.querySelector('select[name="unit_type"]').value;
+        const unitDescDiv = document.getElementById('unitDescriptionDiv');
+        const unitDescInput = document.querySelector('input[name="unit_description"]');
+
+        if (unitType === 'جزئي') {
+            unitDescDiv.style.display = 'block';
+            unitDescInput.required = true;
+        } else {
+            unitDescDiv.style.display = 'none';
+            unitDescInput.required = false;
+            unitDescInput.value = '';
+        }
+    }
+
+    // Enhanced keyboard navigation
+    function setupKeyboardNavigation() {
+        const formElements = document.querySelectorAll('input, select, textarea, button, a');
+
+        formElements.forEach((element, index) => {
+            element.addEventListener('keydown', function (e) {
+                // Enter key for submit buttons
+                if (e.key === 'Enter' && (element.type === 'submit' || element.tagName === 'BUTTON')) {
+                    element.click();
+                    return;
+                }
+
+                // Enter key for form elements (move to next)
+                if (e.key === 'Enter' && element.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    const currentTabIndex = parseInt(element.getAttribute('tabindex')) || 0;
+                    const nextElement = document.querySelector(`[tabindex="${currentTabIndex + 1}"]`);
+                    if (nextElement) {
+                        nextElement.focus();
+                    }
+                }
+
+                // Ctrl+Enter for quick save and continue
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    const saveAndContinueBtn = document.querySelector('button[value="save_and_continue"]');
+                    if (saveAndContinueBtn) {
+                        saveAndContinueBtn.click();
+                    }
+                }
+            });
+        });
+    }
+
+    // Success message display
+    function showSuccessMessage(message) {
+        // Remove existing alerts
+        const existingAlert = document.querySelector('.alert-success');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        // Create new success alert
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="bi bi-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        // Insert at top of card body
+        const cardBody = document.querySelector('.card-body');
+        cardBody.insertBefore(alert, cardBody.firstChild);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+
+        // Scroll to top to show the message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Clear form for new entry
+    function clearFormForNew() {
+        const form = document.querySelector('form');
+        const inputs = form.querySelectorAll('input[type="text"], input[type="number"], textarea');
+
+        inputs.forEach(input => {
+            if (input.name !== 'csrf_token') {
+                input.value = '';
+            }
+        });
+
+        // Reset select elements to first option
+        const selects = form.querySelectorAll('select');
+        selects.forEach(select => {
+            if (select.options.length > 0) {
+                select.selectedIndex = 0;
+            }
+        });
+
+        // Focus on first input
+        const firstInput = document.querySelector('input[tabindex="1"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+
+        // Trigger unit description toggle
+        toggleUnitDescription();
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleUnitDescription();
+        setupKeyboardNavigation();
+
+        // Focus on first input
+        const firstInput = document.querySelector('input[tabindex="1"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+
+        // Check for success message in URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === '1') {
+            showSuccessMessage('تم حفظ المنتج بنجاح! يمكنك إضافة منتج آخر.');
+            clearFormForNew();
+
+            // Remove success param from URL
+            urlParams.delete('success');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+    });
+
+    // Enhanced form validation with better error handling
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const wholesalePrice = parseFloat(document.querySelector('input[name="wholesale_price"]').value);
+        const retailPrice = parseFloat(document.querySelector('input[name="retail_price"]').value);
+        const stock = parseFloat(document.querySelector('input[name="stock_quantity"]').value);
+        const threshold = parseFloat(document.querySelector('input[name="min_stock_threshold"]').value);
+        const productName = document.querySelector('input[name="name_ar"]').value.trim();
+
+        // Check product name
+        if (!productName) {
+            e.preventDefault();
+            showErrorAlert('يجب إدخال اسم المنتج');
+            document.querySelector('input[name="name_ar"]').focus();
+            return;
+        }
+
+        if (wholesalePrice <= 0) {
+            e.preventDefault();
+            showErrorAlert('يجب أن يكون سعر الجملة أكبر من صفر');
+            document.querySelector('input[name="wholesale_price"]').focus();
+            return;
+        }
+
+        if (retailPrice <= 0) {
+            e.preventDefault();
+            showErrorAlert('يجب أن يكون سعر البيع أكبر من صفر');
+            document.querySelector('input[name="retail_price"]').focus();
+            return;
+        }
+
+        if (retailPrice <= wholesalePrice) {
+            e.preventDefault();
+            showErrorAlert('يجب أن يكون سعر البيع أكبر من سعر الجملة');
+            document.querySelector('input[name="retail_price"]').focus();
+            return;
+        }
+
+        if (stock < 0) {
+            e.preventDefault();
+            showErrorAlert('لا يمكن أن تكون كمية المخزون سالبة');
+            document.querySelector('input[name="stock_quantity"]').focus();
+            return;
+        }
+
+        if (threshold < 0) {
+            e.preventDefault();
+            showErrorAlert('لا يمكن أن يكون الحد الأدنى للمخزون سالباً');
+            document.querySelector('input[name="min_stock_threshold"]').focus();
+            return;
+        }
+
+        // Show loading state
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
+        submitButtons.forEach(btn => {
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> جاري الحفظ...';
+            btn.dataset.originalText = originalText;
+        });
+    });
+
+    // Error alert function
+    function showErrorAlert(message) {
+        // Remove existing error alerts
+        const existingAlert = document.querySelector('.alert-danger');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        // Create new error alert
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        // Insert at top of card body
+        const cardBody = document.querySelector('.card-body');
+        cardBody.insertBefore(alert, cardBody.firstChild);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+
+        // Scroll to top to show the message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+<style>
+    /* Keyboard shortcut styling */
+    kbd {
+        padding: 0.2rem 0.4rem;
+        background-color: #212529;
+        color: #fff;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    /* Enhanced button styling */
+    .btn-group .btn {
+        position: relative;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(25, 135, 84, 0.25);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.25);
+    }
+
+    /* Focus indicators for better keyboard navigation */
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+        outline: 2px solid #0d6efd;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Success alert animation */
+    .alert-success {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Form transitions */
+    .form-control,
+    .form-select {
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Card hover effect */
+    .card {
+        transition: box-shadow 0.15s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    /* Loading button animation */
+    .btn[disabled] {
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+
+    /* Input validation styling */
+    .is-invalid {
+        border-color: #dc3545;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
+    }
+
+    /* Enhanced focus ring */
+    .form-control:focus:invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+
+    /* Better spacing for button group */
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+    }
+
+    .btn-group .btn:last-child {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
+
+    /* Enhanced form container */
+    .card-body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+        transition: all 0.15s ease-in-out;
+    }
+
+    /* Better visual hierarchy */
+    .form-label.fw-bold {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

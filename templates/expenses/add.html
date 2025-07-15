@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مصروف جديد{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        إضافة مصروف جديد
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.description.label(class="form-label required") }}
+                                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors
+                                else "")) }}
+                                {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">وصف المصروف أو الغرض منه</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.amount.label(class="form-label required") }}
+                                <div class="input-group">
+                                    {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""),
+                                    step="0.01", min="0") }}
+                                    <span class="input-group-text">ج.م</span>
+                                </div>
+                                {% if form.amount.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.amount.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.expense_date.label(class="form-label required") }}
+                                {{ form.expense_date(class="form-control" + (" is-invalid" if form.expense_date.errors
+                                else "")) }}
+                                {% if form.expense_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.expense_date.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.expense_type.label(class="form-label required") }}
+                                {{ form.expense_type(class="form-select" + (" is-invalid" if form.expense_type.errors
+                                else "")) }}
+                                {% if form.expense_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.expense_type.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-control" + (" is-invalid" if form.category.errors else ""))
+                                }}
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.category.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">فئة فرعية اختيارية للمصروف</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.notes.label(class="form-label") }}
+                                {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""),
+                                rows="3") }}
+                                {% if form.notes.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.notes.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">ملاحظات إضافية حول المصروف</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> حفظ المصروف
+                                    </button>
+                                    <a href="{{ url_for('expenses') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> إلغاء
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- معلومات إضافية -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        أنواع المصاريف
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-money-bill text-success me-2"></i><strong>رواتب:</strong> رواتب
+                                    الموظفين والعمالة</li>
+                                <li><i class="fas fa-home text-primary me-2"></i><strong>إيجار:</strong> إيجار المحل أو
+                                    المكتب</li>
+                                <li><i class="fas fa-bolt text-warning me-2"></i><strong>فواتير:</strong> الكهرباء
+                                    والمياه والهاتف</li>
+                                <li><i class="fas fa-shopping-cart text-info me-2"></i><strong>مستلزمات:</strong> أكياس
+                                    وأدوات مكتبية</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-tools text-secondary me-2"></i><strong>صيانة:</strong> صيانة المحل
+                                    والأجهزة</li>
+                                <li><i class="fas fa-bullhorn text-danger me-2"></i><strong>تسويق:</strong> إعلانات
+                                    ودعاية</li>
+                                <li><i class="fas fa-car text-dark me-2"></i><strong>مواصلات:</strong> نقل وشحن</li>
+                                <li><i class="fas fa-ellipsis-h text-muted me-2"></i><strong>أخرى:</strong> مصاريف أخرى
+                                    متنوعة</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+</style>
+{% endblock %}

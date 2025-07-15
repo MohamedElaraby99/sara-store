@@ -1,0 +1,365 @@
+﻿{% extends "base.html" %}
+
+{% block title %}قائمة النواقص - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-cart-plus"></i>
+                        قائمة النواقص
+                    </h1>
+                    <p class="text-muted">إدارة المشتريات المطلوبة والمنتجات منخفضة المخزون</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('add_shopping_item') }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i>
+                        إضافة منتج جديد
+                    </a>
+                    <button onclick="printShoppingList()" class="btn btn-primary">
+                        <i class="bi bi-printer"></i>
+                        طباعة القائمة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ملخص الإحصائيات -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-cart text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-2">منتجات مطلوبة</h5>
+                    <h3 class="text-primary">{{ needed_items|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-2">منتجات نفدت</h5>
+                    <h3 class="text-danger">{{ out_of_stock|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="bi bi-dash-circle text-warning" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-2">منتجات منخفضة</h5>
+                    <h3 class="text-warning">{{ low_stock|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-exchange text-success" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-2">إجمالي التكلفة المتوقعة</h5>
+                    <h3 class="text-success">{{ total_estimated_cost|currency }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- منتجات نفدت من المخزون -->
+    {% if out_of_stock %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-exclamation-triangle"></i>
+                منتجات نفدت من المخزون ({{ out_of_stock|length }})
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for product in out_of_stock %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-danger">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ product.name_ar }}</h6>
+                            <p class="card-text">
+                                <small class="text-muted">الفئة: {{ product.category.name_ar if product.category else
+                                    'غير محدد' }}</small><br>
+                                <span class="badge bg-danger">نفد المخزون</span>
+                            </p>
+                            <a href="{{ url_for('add_low_stock_product', product_id=product.id) }}"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i>
+                                إضافة للقائمة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- منتجات منخفضة المخزون -->
+    {% if low_stock %}
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-dash-circle"></i>
+                منتجات منخفضة المخزون ({{ low_stock|length }})
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for product in low_stock %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ product.name_ar }}</h6>
+                            <p class="card-text">
+                                <small class="text-muted">الفئة: {{ product.category.name_ar if product.category else
+                                    'غير محدد' }}</small><br>
+                                <span class="badge bg-warning text-dark">متبقي: {{ product.stock_quantity }} | الحد
+                                    الأدنى: {{ product.min_stock_threshold }}</span>
+                            </p>
+                            <a href="{{ url_for('add_low_stock_product', product_id=product.id) }}"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i>
+                                إضافة للقائمة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- قائمة المنتجات المطلوبة -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-cart-plus"></i>
+                قائمة المنتجات المطلوبة ({{ needed_items|length }})
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if needed_items %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="shoppingTable">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>الكمية المطلوبة</th>
+                            <th>الوحدة</th>
+                            <th>السعر المتوقع</th>
+                            <th>إجمالي التكلفة</th>
+                            <th>الأولوية</th>
+                            <th>الفئة</th>
+                            <th>المورد</th>
+                            <th>تاريخ الإضافة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in needed_items %}
+                        <tr
+                            class="{% if item.priority == 'عالي' %}table-danger{% elif item.priority == 'متوسط' %}table-warning{% endif %}">
+                            <td>
+                                <strong>{{ item.item_name }}</strong>
+                                {% if item.notes %}
+                                <br><small class="text-muted">{{ item.notes[:50] }}{% if item.notes|length > 50 %}...{%
+                                    endif %}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.quantity_needed }}</td>
+                            <td>{{ item.unit_type }}</td>
+                            <td>
+                                {% if item.estimated_price %}
+                                {{ item.estimated_price|currency }}
+                                {% else %}
+                                <span class="text-muted">غير محدد</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.estimated_price %}
+                                <strong>{{ item.total_estimated_cost|currency }}</strong>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.priority == 'عالي' %}
+                                <span class="badge bg-danger">عالي</span>
+                                {% elif item.priority == 'متوسط' %}
+                                <span class="badge bg-warning text-dark">متوسط</span>
+                                {% else %}
+                                <span class="badge bg-secondary">منخفض</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.category or '-' }}</td>
+                            <td>{{ item.supplier or '-' }}</td>
+                            <td>{{ item.created_at|egypt_date }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('edit_shopping_item', id=item.id) }}"
+                                        class="btn btn-sm btn-outline-primary" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('mark_purchased', id=item.id) }}"
+                                        class="d-inline" onsubmit="return confirm('هل تم شراء هذا المنتج؟')">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="تم الشراء">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('delete_shopping_item', id=item.id) }}"
+                                        class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا العنصر؟')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-cart-x" style="font-size: 3rem; color: #6c757d;"></i>
+                <h5 class="mt-3 text-muted">لا توجد منتجات في قائمة النواقص</h5>
+                <p class="text-muted">يمكنك إضافة منتجات جديدة أو إضافة المنتجات منخفضة المخزون</p>
+                <a href="{{ url_for('add_shopping_item') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    إضافة منتج جديد
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- مودال للطباعة -->
+<div class="modal fade" id="printModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">قائمة المشتريات المطلوبة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="printContent">
+                <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">طباعة</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function printShoppingList() {
+        const printContent = document.getElementById('printContent');
+        const table = document.getElementById('shoppingTable');
+
+        if (table) {
+            const printableTable = table.cloneNode(true);
+
+            // إزالة عمود الإجراءات من الطباعة
+            const headers = printableTable.querySelectorAll('th');
+            const actionHeader = headers[headers.length - 1];
+            actionHeader.remove();
+
+            const rows = printableTable.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const actionCell = cells[cells.length - 1];
+                actionCell.remove();
+            });
+
+            printContent.innerHTML = `
+            <div class="text-center mb-4">
+                <h3>قائمة المشتريات المطلوبة</h3>
+                <p>التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
+            </div>
+            <div class="table-responsive">
+                ${printableTable.outerHTML}
+            </div>
+            <div class="mt-4">
+                <p><strong>إجمالي العناصر:</strong> ${rows.length}</p>
+                <p><strong>إجمالي التكلفة المتوقعة:</strong> {{ total_estimated_cost|currency }}</p>
+            </div>
+        `;
+
+            const printModal = new bootstrap.Modal(document.getElementById('printModal'));
+            printModal.show();
+        } else {
+            alert('لا توجد بيانات للطباعة');
+        }
+    }
+
+    // تحسين عرض الجدول على الهواتف المحمولة
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.innerWidth < 768) {
+            const table = document.getElementById('shoppingTable');
+            if (table) {
+                table.classList.add('table-sm');
+            }
+        }
+    });
+</script>
+
+<style>
+    @media print {
+
+        .modal-header,
+        .modal-footer {
+            display: none !important;
+        }
+
+        .modal-body {
+            print-color-adjust: exact;
+        }
+    }
+
+    /* تحسين مظهر الجدول */
+    #shoppingTable th {
+        background-color: #f8f9fa;
+        color: #000;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    #shoppingTable td {
+        vertical-align: middle;
+    }
+
+    /* ألوان الأولويات */
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+
+    .table-warning {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+
+    /* تحسين النصوص على الهواتف المحمولة */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}المصاريف{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-money-bill-wave me-2"></i>
+                            إدارة المصاريف
+                        </h4>
+                        <a href="{{ url_for('add_expense') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> إضافة مصروف جديد
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- فلاتر البحث -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <form method="GET" class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">نوع المصروف</label>
+                                    <select name="type" class="form-select">
+                                        <option value="">جميع الأنواع</option>
+                                        <option value="salary" {{ 'selected' if expense_type=='salary' else '' }}>رواتب
+                                        </option>
+                                        <option value="rent" {{ 'selected' if expense_type=='rent' else '' }}>إيجار
+                                        </option>
+                                        <option value="utilities" {{ 'selected' if expense_type=='utilities' else '' }}>
+                                            فواتير</option>
+                                        <option value="supplies" {{ 'selected' if expense_type=='supplies' else '' }}>
+                                            مستلزمات</option>
+                                        <option value="maintenance" {{ 'selected' if expense_type=='maintenance' else ''
+                                            }}>صيانة</option>
+                                        <option value="marketing" {{ 'selected' if expense_type=='marketing' else '' }}>
+                                            تسويق</option>
+                                        <option value="transport" {{ 'selected' if expense_type=='transport' else '' }}>
+                                            مواصلات</option>
+                                        <option value="other" {{ 'selected' if expense_type=='other' else '' }}>أخرى
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">من تاريخ</label>
+                                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">إلى تاريخ</label>
+                                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-search"></i> بحث
+                                    </button>
+                                    <a href="{{ url_for('expenses') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> مسح
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- إجمالي المصاريف -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calculator me-2"></i>
+                                    إجمالي المصاريف:
+                                    <span class="fw-bold">{{ "%.2f"|format(total_expenses) }} ج.م</span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- جدول المصاريف -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>الوصف</th>
+                                    <th>المبلغ</th>
+                                    <th>نوع المصروف</th>
+                                    <th>الفئة</th>
+                                    <th>التاريخ</th>
+                                    <th>المستخدم</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses.items %}
+                                <tr>
+                                    <td>{{ expense.id }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ expense.description }}</div>
+                                        {% if expense.notes %}
+                                        <small class="text-muted">{{ expense.notes }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6">
+                                            {{ "%.2f"|format(expense.amount) }} ج.م
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ expense.expense_type_ar }}</span>
+                                    </td>
+                                    <td>{{ expense.category or '-' }}</td>
+                                    <td>{{ expense.expense_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ expense.user.username }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('edit_expense', id=expense.id) }}"
+                                                class="btn btn-outline-primary" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('delete_expense', id=expense.id) }}"
+                                                style="display: inline;"
+                                                onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟')">
+                                                <button type="submit" class="btn btn-outline-danger" title="حذف">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <br>
+                                        لا توجد مصاريف مسجلة
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if expenses.pages > 1 %}
+                    <nav aria-label="صفحات المصاريف">
+                        <ul class="pagination justify-content-center">
+                            {% if expenses.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="{{ url_for('expenses', page=expenses.prev_num, type=expense_type, start_date=start_date, end_date=end_date) }}">السابق</a>
+                            </li>
+                            {% endif %}
+
+                            {% for page_num in expenses.iter_pages() %}
+                            {% if page_num %}
+                            {% if page_num != expenses.page %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="{{ url_for('expenses', page=page_num, type=expense_type, start_date=start_date, end_date=end_date) }}">{{
+                                    page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if expenses.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="{{ url_for('expenses', page=expenses.next_num, type=expense_type, start_date=start_date, end_date=end_date) }}">التالي</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}تقرير الديون{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تقرير الديون المستحقة</h2>
+    <div>
+        <a href="{{ url_for('customers') }}" class="btn btn-secondary me-2">
+            <i class="bi bi-people me-2"></i>إدارة العملاء
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer me-2"></i>طباعة التقرير
+        </button>
+    </div>
+</div>
+
+<div class="alert alert-info" role="alert">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>نصيحة:</strong> يمكنك تسديد الديون بسرعة من خلال النقر على زر التسديد السريع
+    <span class="badge bg-success"><i class="bi bi-cash"></i></span> في قائمة العملاء، أو استخدام أزرار "دفع" أسفل كل
+    مبيعة غير مسددة.
+</div>
+
+<!-- ملخص الديون -->
+<div class="row mb-4">
+    <div class="col-lg-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h4>{{ "%.2f"|format(total_debts) }} ج.م</h4>
+                <p class="mb-0">إجمالي الديون</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ customers_with_debts|length }}</h4>
+                <p class="mb-0">عدد العملاء المدينين</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{% set total_unpaid_sales = 0 %}
+                    {% for item in customers_with_debts %}
+                    {% set total_unpaid_sales = total_unpaid_sales + item.unpaid_sales|length %}
+                    {% endfor %}
+                    {{ total_unpaid_sales }}</h4>
+                <p class="mb-0">عدد المبيعات غير المسددة</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ "%.2f"|format(total_debts / customers_with_debts|length if customers_with_debts|length > 0 else
+                    0) }} ج.م
+                </h4>
+                <p class="mb-0">متوسط الدين للعميل</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- قائمة العملاء المدينين -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">تفاصيل الديون حسب العميل</h5>
+    </div>
+    <div class="card-body">
+        {% if customers_with_debts %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>العميل</th>
+                        <th>معلومات الاتصال</th>
+                        <th>إجمالي الدين</th>
+                        <th>عدد المبيعات غير المسددة</th>
+                        <th>آخر مبيعة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in customers_with_debts %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.customer.name }}</strong>
+                            {% if item.customer.notes %}
+                            <br><small class="text-muted">{{ item.customer.notes }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.customer.phone %}
+                            <i class="bi bi-telephone me-1"></i>{{ item.customer.phone }}<br>
+                            {% endif %}
+                            {% if item.customer.address %}
+                            <i class="bi bi-geo-alt me-1"></i><small>{{ item.customer.address }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-danger fs-6">{{ "%.2f"|format(item.debt) }} ج.م</span>
+                        </td>
+                        <td>{{ item.unpaid_sales|length }}</td>
+                        <td>
+                            {% if item.customer.sales %}
+                            {{ item.customer.sales[0].sale_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('customer_account', id=item.customer.id) }}" class="btn btn-primary"
+                                    title="عرض الحساب">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="tel:{{ item.customer.phone }}" class="btn btn-success" title="اتصال" {% if not
+                                    item.customer.phone %}disabled{% endif %}>
+                                    <i class="bi bi-telephone"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- تفاصيل المبيعات غير المسددة -->
+                    <tr class="table-light">
+                        <td colspan="6">
+                            <div class="ps-4">
+                                <h6 class="text-muted mb-2">المبيعات غير المسددة:</h6>
+                                <div class="row">
+                                    {% for sale in item.unpaid_sales %}
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card card-body p-2 bg-white border-start border-danger border-3">
+                                            <small>
+                                                <strong>بيع #{{ sale.id }}</strong><br>
+                                                التاريخ: {{ sale.sale_date.strftime('%Y-%m-%d') }}<br>
+                                                المبلغ: {{ "%.2f"|format(sale.total_amount) }} ج.م<br>
+                                                المتبقي: <span class="text-danger">{{
+                                                    "%.2f"|format(sale.remaining_amount) }} ج.م</span><br>
+                                                <a href="{{ url_for('add_payment', customer_id=item.customer.id, sale_id=sale.id) }}"
+                                                    class="btn btn-sm btn-outline-primary mt-1">
+                                                    <i class="bi bi-cash me-1"></i>دفع
+                                                </a>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-check-circle" style="font-size: 4rem; color: #28a745;"></i>
+            <h4 class="text-success mt-3">ممتاز! لا توجد ديون مستحقة</h4>
+            <p class="text-muted">جميع العملاء قاموا بسداد مبيعاتهم بالكامل</p>
+            <a href="{{ url_for('customers') }}" class="btn btn-primary">
+                <i class="bi bi-people me-2"></i>عرض العملاء
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- تقرير تفصيلي -->
+{% if customers_with_debts %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">إحصائيات تفصيلية</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>أكبر 5 ديون:</h6>
+                <ul class="list-group list-group-flush">
+                    {% for item in customers_with_debts[:5] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ item.customer.name }}
+                        <span class="badge bg-danger">{{ "%.2f"|format(item.debt) }} ج.م</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>توزيع الديون:</h6>
+                <div class="progress mb-2">
+                    {% set large_debts = customers_with_debts|selectattr('debt', '>', 1000)|list|length %}
+                    {% set medium_debts = customers_with_debts|selectattr('debt', '>', 500)|selectattr('debt', '<=',
+                        1000)|list|length %} {% set small_debts=customers_with_debts|selectattr('debt', '<=' ,
+                        500)|list|length %} <div class="progress-bar bg-danger"
+                        style="width: {{ (large_debts / customers_with_debts|length * 100) if customers_with_debts else 0 }}%">
+                        ديون كبيرة ({{ large_debts }})
+                </div>
+                <div class="progress-bar bg-warning"
+                    style="width: {{ (medium_debts / customers_with_debts|length * 100) if customers_with_debts else 0 }}%">
+                    ديون متوسطة ({{ medium_debts }})
+                </div>
+                <div class="progress-bar bg-info"
+                    style="width: {{ (small_debts / customers_with_debts|length * 100) if customers_with_debts else 0 }}%">
+                    ديون صغيرة ({{ small_debts }})
+                </div>
+            </div>
+            <small class="text-muted">
+                كبيرة: أكثر من 1000 ج.م | متوسطة: 500-1000 ج.م | صغيرة: أقل من 500 ج.م
+            </small>
+        </div>
+    </div>
+</div>
+</div>
+{% endif %}
+
+<!-- معلومات التقرير -->
+<div class="card mt-4 d-print-none">
+    <div class="card-body bg-light">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>معلومات التقرير:</h6>
+                <p class="mb-1"><strong>تاريخ التقرير:</strong> {{ current_datetime.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p class="mb-0"><strong>المستخدم:</strong> {{ current_user.username }}</p>
+            </div>
+            <div class="col-md-6">
+                <h6>إجراءات مقترحة:</h6>
+                <ul class="mb-0">
+                    <li>متابعة العملاء الذين لديهم ديون كبيرة</li>
+                    <li>إرسال تذكيرات للعملاء المتأخرين في السداد</li>
+                    <li>وضع حدود ائتمان للعملاء الجدد</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .d-print-none {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #000 !important;
+            page-break-inside: avoid;
+        }
+
+        .btn-group {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}

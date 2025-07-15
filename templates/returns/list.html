@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}المرتجعات - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-arrow-return-left"></i>
+                        إدارة المرتجعات
+                    </h1>
+                    <p class="text-muted">عرض وتتبع جميع عمليات الإرجاع</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('sales') }}" class="btn btn-primary">
+                        <i class="bi bi-cart-check"></i>
+                        المبيعات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">تصفية حسب الحالة:</label>
+                    <select class="form-select" id="statusFilter" onchange="filterReturns()">
+                        <option value="all" {% if status_filter=='all' %}selected{% endif %}>جميع الحالات</option>
+                        <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>قيد المراجعة
+                        </option>
+                        <option value="approved" {% if status_filter=='approved' %}selected{% endif %}>مقبول</option>
+                        <option value="rejected" {% if status_filter=='rejected' %}selected{% endif %}>مرفوض</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Returns Table -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list-ul"></i>
+                قائمة المرتجعات
+                <span class="badge bg-secondary ms-2">{{ returns.total }} مرتجع</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if returns.items %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>رقم المرتجع</th>
+                            <th>رقم البيع</th>
+                            <th>العميل</th>
+                            <th>التاريخ والوقت</th>
+                            <th>إجمالي الاسترداد</th>
+                            <th>سبب الإرجاع</th>
+                            <th>الحالة</th>
+                            <th>طريقة الاسترداد</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for return in returns.items %}
+                        <tr class="return-row" data-return-id="{{ return.id }}">
+                            <td>
+                                <strong class="text-primary">#{{ return.id }}</strong>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('sales') }}" class="text-decoration-none">
+                                    #{{ return.sale_id }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if return.customer %}
+                                {{ return.customer.name }}
+                                {% else %}
+                                <span class="text-muted">زبون نقدي</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ return.return_date|egypt_date }}<br>
+                                <small class="text-muted">{{ return.return_date|egypt_time }}</small>
+                            </td>
+                            <td class="currency text-success fw-bold">
+                                {{ return.total_amount|currency }}
+                            </td>
+                            <td>
+                                <span class="text-truncate" style="max-width: 150px;" title="{{ return.reason }}">
+                                    {{ return.reason[:30] }}{% if return.reason|length > 30 %}...{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if return.status == 'pending' %}
+                                <span class="badge bg-warning">قيد المراجعة</span>
+                                {% elif return.status == 'approved' %}
+                                <span class="badge bg-success">مقبول</span>
+                                {% elif return.status == 'rejected' %}
+                                <span class="badge bg-danger">مرفوض</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ return.refund_method }}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-info"
+                                        onclick="viewReturnDetails({{ return.id }})" title="تفاصيل المرتجع">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if current_user.is_admin() and return.status == 'pending' %}
+                                    <button type="button" class="btn btn-outline-success"
+                                        onclick="processReturn({{ return.id }}, 'approve')" title="قبول المرتجع">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger"
+                                        onclick="processReturn({{ return.id }}, 'reject')" title="رفض المرتجع">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if returns.pages > 1 %}
+            <div class="card-footer bg-white">
+                <nav aria-label="صفحات المرتجعات">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if returns.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('returns', page=returns.prev_num, status=status_filter) }}">السابق</a>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in returns.iter_pages() %}
+                        {% if page_num %}
+                        {% if page_num != returns.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('returns', page=page_num, status=status_filter) }}">{{
+                                page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if returns.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ url_for('returns', page=returns.next_num, status=status_filter) }}">التالي</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-arrow-return-left text-muted" style="font-size: 4rem;"></i>
+                <h4 class="text-muted mt-3">لا توجد مرتجعات</h4>
+                <p class="text-muted">لم يتم تسجيل أي عمليات إرجاع حتى الآن</p>
+                <a href="{{ url_for('sales') }}" class="btn btn-primary">
+                    <i class="bi bi-cart-check"></i>
+                    عرض المبيعات
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Return Details Modal -->
+<div class="modal fade" id="returnDetailsModal" tabindex="-1" aria-labelledby="returnDetailsModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="returnDetailsModalLabel">
+                    <i class="bi bi-arrow-return-left"></i>
+                    تفاصيل المرتجع
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="returnDetailsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Process Return Modal -->
+<div class="modal fade" id="processReturnModal" tabindex="-1" aria-labelledby="processReturnModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="processReturnModalLabel">معالجة المرتجع</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="processReturnForm">
+                    <input type="hidden" id="processReturnId" name="return_id">
+                    <input type="hidden" id="processAction" name="action">
+
+                    <div class="mb-3">
+                        <label for="processNotes" class="form-label">ملاحظات المعالجة:</label>
+                        <textarea class="form-control" id="processNotes" name="notes" rows="3"
+                            placeholder="ملاحظات إضافية (اختياري)"></textarea>
+                    </div>
+
+                    <div id="processMessage" class="alert alert-info">
+                        <p id="processText"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn" id="confirmProcessBtn" onclick="confirmProcessReturn()">تأكيد</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterReturns() {
+        const status = document.getElementById('statusFilter').value;
+        window.location.href = `{{ url_for('returns') }}?status=${status}`;
+    }
+
+    function viewReturnDetails(returnId) {
+        const modal = new bootstrap.Modal(document.getElementById('returnDetailsModal'));
+        const content = document.getElementById('returnDetailsContent');
+
+        // Show loading
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-2">جاري تحميل تفاصيل المرتجع...</p>
+            </div>
+        `;
+
+        modal.show();
+
+        // Fetch return details
+        fetch(`/api/returns/${returnId}`)
+            .then(response => response.json())
+            .then(returnData => {
+                content.innerHTML = generateReturnDetailsHTML(returnData);
+            })
+            .catch(error => {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        حدث خطأ في تحميل تفاصيل المرتجع
+                    </div>
+                `;
+            });
+    }
+
+    function generateReturnDetailsHTML(returnData) {
+        let itemsHTML = '';
+
+        returnData.items.forEach((item, index) => {
+            const rowClass = index % 2 === 0 ? 'table-light' : '';
+            itemsHTML += `
+                <tr class="${rowClass}">
+                    <td>
+                        <div class="fw-bold">${item.product_name}</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-info">${item.quantity_returned}</span>
+                        <small class="text-muted d-block">من ${item.original_quantity}</small>
+                    </td>
+                    <td class="text-center text-primary fw-bold">${item.unit_price.toFixed(2)} ج.م</td>
+                    <td class="text-center text-success fw-bold">${item.total_refund.toFixed(2)} ج.م</td>
+                    <td class="text-center">
+                        <span class="badge ${item.condition === 'جيد' ? 'bg-success' : item.condition === 'متضرر' ? 'bg-warning' : 'bg-danger'}">${item.condition_ar}</span>
+                    </td>
+                    <td class="text-center">
+                        <small class="text-muted">${item.notes || 'لا يوجد'}</small>
+                    </td>
+                </tr>
+            `;
+        });
+
+        const statusBadge = returnData.status === 'pending' ?
+            '<span class="badge bg-warning">قيد المراجعة</span>' :
+            returnData.status === 'approved' ?
+                '<span class="badge bg-success">مقبول</span>' :
+                '<span class="badge bg-danger">مرفوض</span>';
+
+        return `
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>معلومات المرتجع</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>رقم المرتجع:</strong> 
+                                <span class="text-primary">#${returnData.id}</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>رقم البيع:</strong> 
+                                <span class="text-info">#${returnData.sale_id}</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>العميل:</strong> 
+                                ${returnData.customer_name}
+                            </p>
+                            <p class="mb-2">
+                                <strong>التاريخ:</strong> 
+                                ${returnData.return_date}
+                            </p>
+                            <p class="mb-2">
+                                <strong>الوقت:</strong> 
+                                ${returnData.return_time}
+                            </p>
+                            <p class="mb-2">
+                                <strong>الحالة:</strong> 
+                                ${statusBadge}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>تفاصيل الإرجاع</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>سبب الإرجاع:</strong> 
+                                ${returnData.reason}
+                            </p>
+                            <p class="mb-2">
+                                <strong>طريقة الاسترداد:</strong> 
+                                ${returnData.refund_method}
+                            </p>
+                            <p class="mb-2">
+                                <strong>المستخدم:</strong> 
+                                ${returnData.user_name}
+                            </p>
+                            ${returnData.processor_name ? `
+                                <p class="mb-2">
+                                    <strong>معالج بواسطة:</strong> 
+                                    ${returnData.processor_name}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>تاريخ المعالجة:</strong> 
+                                    ${returnData.processed_date}
+                                </p>
+                            ` : ''}
+                            <p class="mb-0">
+                                <strong>ملاحظات:</strong> 
+                                <small class="text-muted">${returnData.notes || 'لا توجد ملاحظات'}</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-list-ul me-2"></i>
+                        تفاصيل الأصناف المرتجعة
+                        <span class="badge bg-secondary ms-2">${returnData.items.length} صنف</span>
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th class="text-center">الكمية المرتجعة</th>
+                                    <th class="text-center">سعر الوحدة</th>
+                                    <th class="text-center">الإجمالي</th>
+                                    <th class="text-center">الحالة</th>
+                                    <th class="text-center">ملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-success text-white">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h5 class="mb-0">
+                                <i class="bi bi-cash-stack me-2"></i>
+                                إجمالي الاسترداد:
+                            </h5>
+                        </div>
+                        <div class="col-4 text-end">
+                            <h4 class="mb-0 fw-bold">${returnData.total_amount.toFixed(2)} ج.م</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    let currentReturnId = null;
+    let currentAction = null;
+
+    function processReturn(returnId, action) {
+        currentReturnId = returnId;
+        currentAction = action;
+
+        const modal = new bootstrap.Modal(document.getElementById('processReturnModal'));
+        const processText = document.getElementById('processText');
+        const confirmBtn = document.getElementById('confirmProcessBtn');
+
+        document.getElementById('processReturnId').value = returnId;
+        document.getElementById('processAction').value = action;
+
+        if (action === 'approve') {
+            processText.textContent = 'هل أنت متأكد من قبول هذا المرتجع؟ سيتم إضافة الكمية إلى المخزون.';
+            confirmBtn.textContent = 'قبول المرتجع';
+            confirmBtn.className = 'btn btn-success';
+        } else {
+            processText.textContent = 'هل أنت متأكد من رفض هذا المرتجع؟';
+            confirmBtn.textContent = 'رفض المرتجع';
+            confirmBtn.className = 'btn btn-danger';
+        }
+
+        modal.show();
+    }
+
+    function confirmProcessReturn() {
+        const notes = document.getElementById('processNotes').value;
+
+        fetch(`/api/returns/${currentReturnId}/process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: currentAction,
+                notes: notes
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // إغلاق النافذة المنبثقة
+                    bootstrap.Modal.getInstance(document.getElementById('processReturnModal')).hide();
+
+                    // إظهار رسالة نجاح وإعادة تحميل الصفحة
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ في معالجة المرتجع');
+            });
+    }
+</script>
+
+<style>
+    .return-row {
+        transition: all 0.3s ease;
+    }
+
+    .return-row:hover {
+        background-color: #f8f9fa !important;
+        transform: scale(1.01);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th {
+        border-top: none;
+    }
+
+    .badge {
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}

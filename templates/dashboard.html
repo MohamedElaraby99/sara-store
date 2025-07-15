@@ -1,0 +1,867 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-3">
+                <i class="bi bi-speedometer2"></i>
+                لوحة التحكم
+            </h1>
+            <p class="text-muted">نظرة عامة على حالة المتجر والمبيعات</p>
+        </div>
+    </div>
+
+    <!-- Advanced Stock Notifications -->
+    {% if out_of_stock_products > 0 or low_stock_products > 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert-banner">
+                {% if out_of_stock_products > 0 %}
+                <div class="alert alert-danger alert-dismissible d-flex align-items-center" role="alert">
+                    <div class="notification-icon">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="alert-heading mb-1">🚨 تحذير: نفد المخزون!</h6>
+                        <p class="mb-0">
+                            يوجد <strong>{{ out_of_stock_products }}</strong> منتج نفد مخزونه ويحتاج إعادة تموين فوري
+                        </p>
+                    </div>
+                    <div class="ms-3">
+                        <a href="{{ url_for('products') }}?stock_status=out" class="btn btn-danger btn-sm">
+                            <i class="bi bi-eye"></i> عرض المنتجات
+                        </a>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+
+                {% if low_stock_products > 0 %}
+                <div class="alert alert-warning alert-dismissible d-flex align-items-center" role="alert">
+                    <div class="notification-icon">
+                        <i class="bi bi-exclamation-circle-fill" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="alert-heading mb-1">⚠️ تنبيه: مخزون منخفض</h6>
+                        <p class="mb-0">
+                            يوجد <strong>{{ low_stock_products }}</strong> منتج بمخزون منخفض يحتاج إعادة تموين قريباً
+                        </p>
+                    </div>
+                    <div class="ms-3">
+                        <a href="{{ url_for('products') }}?stock_status=low" class="btn btn-warning btn-sm">
+                            <i class="bi bi-eye"></i> عرض المنتجات
+                        </a>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ total_products }}</h2>
+                    <p class="stat-label mb-0">إجمالي المنتجات</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-exchange display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ today_revenue|currency }}</h2>
+                    <p class="stat-label mb-0">مبيعات اليوم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-info">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ today_profit|currency }}</h2>
+                    <p class="stat-label mb-0">ربح اليوم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-secondary">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-coin display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ today_expenses|currency }}</h2>
+                    <p class="stat-label mb-0">مصاريف اليوم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-warning">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ low_stock_products }}</h2>
+                    <p class="stat-label mb-0">مخزون منخفض</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-danger">
+                <div class="card-body text-center">
+                    <i class="bi bi-x-circle display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ out_of_stock_products }}</h2>
+                    <p class="stat-label mb-0">نفد المخزون</p>
+                </div>
+            </div>
+        </div>
+
+        {% if total_debt > 0 %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card" style="background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                    <h2 class="stat-number">{{ total_debt|currency }}</h2>
+                    <p class="stat-label mb-0">إجمالي الديون</p>
+                    <small class="stat-label">{{ customers_with_debt }} عميل</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <!-- Recent Sales -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-cart-check text-primary"></i>
+                        أحدث المبيعات
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_sales %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>رقم البيع</th>
+                                    <th>التاريخ</th>
+                                    <th>المبلغ</th>
+                                    <th>البائع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in recent_sales %}
+                                <tr>
+                                    <td>#{{ sale.id }}</td>
+                                    <td>{{ sale.sale_date|arabic_date }}</td>
+                                    <td class="currency">{{ sale.total_amount|currency }}</td>
+                                    <td>{{ sale.user.username }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">لا توجد مبيعات حتى الآن</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-trophy text-warning"></i>
+                        أكثر المنتجات مبيعاً
+                    </h5>
+                    <small class="text-muted">هذا الشهر</small>
+                </div>
+                <div class="card-body">
+                    {% if top_products %}
+                    <div class="list-group list-group-flush">
+                        {% for product, quantity in top_products %}
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ product }}</h6>
+                                    <small class="text-muted">{{ quantity }} وحدة</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ quantity }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-graph-down text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">لا توجد مبيعات هذا الشهر</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Alerts -->
+    {% if low_stock_alerts %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            تنبيهات المخزون
+                        </h5>
+                        <small class="text-dark">{{ low_stock_alerts|length }} منتج يحتاج انتباه</small>
+                    </div>
+                    <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#stockAlertsDetails" aria-expanded="false" aria-controls="stockAlertsDetails">
+                        <i class="bi bi-chevron-down" id="alertsToggleIcon"></i>
+                        <span id="alertsToggleText">عرض التفاصيل</span>
+                    </button>
+                </div>
+
+                <!-- Quick Summary (Always Visible) -->
+                <div class="card-body pb-2">
+                    <div class="row g-2 alert-summary">
+                        {% set critical_count = low_stock_alerts|selectattr('is_out_of_stock')|list|length %}
+                        {% set warning_count = low_stock_alerts|length - critical_count %}
+
+                        {% if critical_count > 0 %}
+                        <div class="col-auto">
+                            <span class="badge bg-danger fs-6">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {{ critical_count }} نفد مخزونه
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        {% if warning_count > 0 %}
+                        <div class="col-auto">
+                            <span class="badge bg-warning text-dark fs-6">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                {{ warning_count }} مخزون منخفض
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-auto">
+                            <a href="{{ url_for('products') }}?stock_status=low" class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-eye"></i> عرض جميع المنتجات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Alerts (Collapsible) -->
+                <div class="collapse" id="stockAlertsDetails">
+                    <div class="card-body pt-0">
+                        <hr class="my-3">
+                        <div class="row">
+                            {% for product in low_stock_alerts[:6] %}
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div
+                                    class="alert {% if product.is_out_of_stock %}alert-danger{% else %}alert-warning{% endif %} mb-0 alert-dismissible">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="alert-heading mb-1">
+                                                <i
+                                                    class="bi {% if product.is_out_of_stock %}bi-x-circle{% else %}bi-exclamation-triangle{% endif %}"></i>
+                                                {{ product.name_ar }}
+                                            </h6>
+                                            <div class="small mb-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>المخزون الحالي:</span>
+                                                    <strong
+                                                        class="{% if product.is_out_of_stock %}text-danger{% else %}text-warning{% endif %}">
+                                                        {{ product.stock_quantity }}
+                                                    </strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>الحد الأدنى:</span>
+                                                    <strong>{{ product.min_stock_threshold }}</strong>
+                                                </div>
+                                            </div>
+                                            {% if current_user.is_admin() %}
+                                            <a href="{{ url_for('edit_product', id=product.id) }}"
+                                                class="btn btn-sm {% if product.is_out_of_stock %}btn-outline-danger{% else %}btn-outline-warning{% endif %}">
+                                                <i class="bi bi-pencil"></i> تحديث المخزون
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                        <button type="button" class="btn-close btn-close-white ms-2"
+                                            onclick="dismissAlert(this)" aria-label="إخفاء"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            {% if low_stock_alerts|length > 6 %}
+                            <div class="col-12 text-center">
+                                <button class="btn btn-outline-warning" onclick="showMoreAlerts(event)">
+                                    <i class="bi bi-chevron-down"></i>
+                                    عرض {{ low_stock_alerts|length - 6 }} تنبيه إضافي
+                                </button>
+                            </div>
+
+                            <!-- Additional alerts (hidden by default) -->
+                            <div id="additionalAlerts" class="col-12" style="display: none;">
+                                <div class="row">
+                                    {% for product in low_stock_alerts[6:] %}
+                                    <div class="col-lg-4 col-md-6 mb-3">
+                                        <div
+                                            class="alert {% if product.is_out_of_stock %}alert-danger{% else %}alert-warning{% endif %} mb-0 alert-dismissible">
+                                            <div class="d-flex align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="alert-heading mb-1">
+                                                        <i
+                                                            class="bi {% if product.is_out_of_stock %}bi-x-circle{% else %}bi-exclamation-triangle{% endif %}"></i>
+                                                        {{ product.name_ar }}
+                                                    </h6>
+                                                    <div class="small mb-2">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>المخزون الحالي:</span>
+                                                            <strong
+                                                                class="{% if product.is_out_of_stock %}text-danger{% else %}text-warning{% endif %}">
+                                                                {{ product.stock_quantity }}
+                                                            </strong>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>الحد الأدنى:</span>
+                                                            <strong>{{ product.min_stock_threshold }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    {% if current_user.is_admin() %}
+                                                    <a href="{{ url_for('edit_product', id=product.id) }}"
+                                                        class="btn btn-sm {% if product.is_out_of_stock %}btn-outline-danger{% else %}btn-outline-warning{% endif %}">
+                                                        <i class="bi bi-pencil"></i> تحديث المخزون
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                                <button type="button" class="btn-close btn-close-white ms-2"
+                                                    onclick="dismissAlert(this)" aria-label="إخفاء"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions Panel -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning-charge text-warning"></i>
+                    إجراءات سريعة
+                </h5>
+                <small class="text-muted">الوظائف الأكثر استخداماً</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('new_sale') }}"
+                            class="btn btn-success btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-plus-circle mb-2" style="font-size: 2rem;"></i>
+                            <strong>بيع جديد</strong>
+                            <small class="mt-1">إجراء عملية بيع</small>
+                        </a>
+                    </div>
+                    {% if current_user.is_admin() %}
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('add_product') }}"
+                            class="btn btn-primary btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-box-seam mb-2" style="font-size: 2rem;"></i>
+                            <strong>إضافة منتج</strong>
+                            <small class="mt-1">منتج جديد</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('reports') }}"
+                            class="btn btn-info btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-graph-up mb-2" style="font-size: 2rem;"></i>
+                            <strong>التقارير</strong>
+                            <small class="mt-1">إحصائيات ومبيعات</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('customers') }}"
+                            class="btn btn-secondary btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-people mb-2" style="font-size: 2rem;"></i>
+                            <strong>العملاء</strong>
+                            <small class="mt-1">إدارة العملاء والديون</small>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('products') }}"
+                            class="btn btn-primary btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-box mb-2" style="font-size: 2rem;"></i>
+                            <strong>المنتجات</strong>
+                            <small class="mt-1">عرض المنتجات</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('sales') }}"
+                            class="btn btn-info btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-cart mb-2" style="font-size: 2rem;"></i>
+                            <strong>المبيعات</strong>
+                            <small class="mt-1">عرض المبيعات</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{{ url_for('customers') }}"
+                            class="btn btn-secondary btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                            <i class="bi bi-people mb-2" style="font-size: 2rem;"></i>
+                            <strong>العملاء</strong>
+                            <small class="mt-1">عرض العملاء</small>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="row mt-4 mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="text-primary">{{ month_revenue|currency }}</h4>
+                    <p class="text-muted mb-0">إجمالي مبيعات الشهر</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="text-info">{{ total_categories }}</h4>
+                    <p class="text-muted mb-0">عدد الفئات</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    /* Enhanced notification animations */
+    .alert-banner .alert {
+        animation: slideInDown 0.5s ease-out;
+        border-left: 5px solid;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545 !important;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    }
+
+    .alert-warning {
+        border-left-color: #ffc107 !important;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+
+    .notification-icon {
+        animation: pulse 2s infinite;
+    }
+
+    .dashboard-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Real-time stock indicator */
+    .stock-indicator {
+        position: relative;
+        display: inline-block;
+    }
+
+    .stock-indicator::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: stockPulse 1.5s infinite;
+    }
+
+    .stock-critical::after {
+        background-color: #dc3545;
+    }
+
+    .stock-low::after {
+        background-color: #ffc107;
+    }
+
+    .stock-good::after {
+        background-color: #28a745;
+    }
+
+    /* Keyframe animations */
+    @keyframes slideInDown {
+        from {
+            transform: translate3d(0, -100%, 0);
+            opacity: 0;
+        }
+
+        to {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 0.7;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes stockPulse {
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Enhanced card backgrounds */
+    .dashboard-card.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    .dashboard-card.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+    }
+
+    .dashboard-card.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+    }
+
+    /* Toast notifications for real-time updates */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 9999;
+    }
+
+    .stock-toast {
+        min-width: 300px;
+        border-left: 4px solid;
+    }
+
+    .stock-toast.critical {
+        border-left-color: #dc3545;
+    }
+
+    .stock-toast.warning {
+        border-left-color: #ffc107;
+    }
+
+    /* Enhanced Alerts Styling */
+    .alert-dismissible .btn-close {
+        transition: all 0.2s ease;
+    }
+
+    .alert-dismissible .btn-close:hover {
+        transform: scale(1.1);
+    }
+
+    .collapse {
+        transition: height 0.35s ease;
+    }
+
+    .alert {
+        transition: all 0.3s ease;
+    }
+
+    .alert:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge {
+        transition: all 0.2s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.05);
+    }
+
+    /* Quick Summary Badges */
+    .alert-summary .badge {
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .alert-summary .badge:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .alert-summary .badge:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .alert-summary .badge:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Improved toggle button */
+    .btn[data-bs-toggle="collapse"] {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn[data-bs-toggle="collapse"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn[data-bs-toggle="collapse"]:hover::before {
+        left: 100%;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add stock indicators to stat cards
+        const lowStockCard = document.querySelector('.bg-warning .stat-number');
+        const outOfStockCard = document.querySelector('.bg-danger .stat-number');
+
+        if (lowStockCard && parseInt(lowStockCard.textContent) > 0) {
+            lowStockCard.classList.add('stock-indicator', 'stock-low');
+        }
+
+        if (outOfStockCard && parseInt(outOfStockCard.textContent) > 0) {
+            outOfStockCard.classList.add('stock-indicator', 'stock-critical');
+        }
+
+        // Auto-hide alerts after 10 seconds
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                if (alert.style.display !== 'none') {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 10000);
+
+        // Real-time stock monitoring (simulated)
+        setInterval(function () {
+            checkStockLevels();
+        }, 30000); // Check every 30 seconds
+    });
+
+    function checkStockLevels() {
+        // This would normally make an AJAX call to check current stock levels
+        fetch('/api/stock-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.new_alerts && data.new_alerts.length > 0) {
+                    showStockNotification(data.new_alerts);
+                }
+            })
+            .catch(error => {
+                console.log('Stock monitoring temporarily unavailable');
+            });
+    }
+
+    function showStockNotification(alerts) {
+        alerts.forEach(alert => {
+            const toast = createStockToast(alert);
+            document.body.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function () {
+                document.body.removeChild(toast);
+            });
+        });
+    }
+
+    function createStockToast(alert) {
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+
+        const toast = document.createElement('div');
+        toast.className = `toast stock-toast ${alert.type}`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="toast-header">
+                <i class="bi ${alert.type === 'critical' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-exclamation-circle-fill text-warning'} me-2"></i>
+                <strong class="me-auto">تنبيه المخزون</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                <strong>${alert.product_name}</strong><br>
+                المخزون: ${alert.current_stock} | الحد الأدنى: ${alert.min_threshold}
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+        return toastContainer;
+    }
+
+    // Stock Alerts Management
+    function showMoreAlerts(event) {
+        const additionalAlerts = document.getElementById('additionalAlerts');
+        const button = event.target.closest('button');
+
+        if (additionalAlerts.style.display === 'none' || additionalAlerts.style.display === '') {
+            additionalAlerts.style.display = 'block';
+            additionalAlerts.style.animation = 'fadeInUp 0.5s ease-out';
+            button.innerHTML = '<i class="bi bi-chevron-up"></i> إخفاء التنبيهات الإضافية';
+        } else {
+            additionalAlerts.style.display = 'none';
+            const alertsCount = document.querySelectorAll('#additionalAlerts .alert').length;
+            button.innerHTML = `<i class="bi bi-chevron-down"></i> عرض ${alertsCount} تنبيه إضافي`;
+        }
+    }
+
+    function dismissAlert(button) {
+        const alert = button.closest('.alert');
+        alert.style.transition = 'opacity 0.3s ease';
+        alert.style.opacity = '0';
+        setTimeout(() => {
+            alert.remove();
+            updateAlertsCounter();
+        }, 300);
+    }
+
+    function updateAlertsCounter() {
+        const remainingAlerts = document.querySelectorAll('#stockAlertsDetails .alert').length;
+        const counterElement = document.querySelector('.card-header small');
+        if (counterElement) {
+            counterElement.textContent = `${remainingAlerts} منتج يحتاج انتباه`;
+        }
+
+        // Hide the entire alerts section if no alerts remain
+        if (remainingAlerts === 0) {
+            const alertsCard = document.querySelector('.card.border-warning');
+            if (alertsCard) {
+                alertsCard.style.transition = 'opacity 0.5s ease';
+                alertsCard.style.opacity = '0';
+                setTimeout(() => {
+                    alertsCard.remove();
+                }, 500);
+            }
+        }
+    }
+
+    // Toggle alerts details
+    document.addEventListener('DOMContentLoaded', function () {
+        const stockAlertsCollapse = document.getElementById('stockAlertsDetails');
+        const toggleIcon = document.getElementById('alertsToggleIcon');
+        const toggleText = document.getElementById('alertsToggleText');
+
+        if (stockAlertsCollapse) {
+            stockAlertsCollapse.addEventListener('show.bs.collapse', function () {
+                toggleIcon.className = 'bi bi-chevron-up';
+                toggleText.textContent = 'إخفاء التفاصيل';
+            });
+
+            stockAlertsCollapse.addEventListener('hide.bs.collapse', function () {
+                toggleIcon.className = 'bi bi-chevron-down';
+                toggleText.textContent = 'عرض التفاصيل';
+            });
+        }
+    });
+
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function () {
+        location.reload();
+    }, 300000);
+</script>
+{% endblock %}

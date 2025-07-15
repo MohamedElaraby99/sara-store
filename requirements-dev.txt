@@ -1,0 +1,24 @@
+# Core Flask dependencies for development
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-WTF==1.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.5
+WTForms==3.0.1
+Werkzeug==2.3.7
+
+# Environment and configuration
+python-dotenv==1.0.1
+
+# Database
+SQLAlchemy==2.0.27
+
+# Security and validation
+email-validator==2.1.0.post1
+MarkupSafe==2.1.3
+
+# Email support (optional for development)
+Flask-Mail==0.9.1
+
+# CLI management tools
+click==8.1.7 

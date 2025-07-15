@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}تعديل المستخدم - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('users') }}">إدارة المستخدمين</a></li>
+                    <li class="breadcrumb-item active">تعديل {{ user.username }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-3">
+                <i class="bi bi-person-gear"></i>
+                تعديل المستخدم: {{ user.username }}
+            </h1>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-person-gear me-2"></i>
+                        تعديل بيانات المستخدم
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.username.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else
+                                    "")) }}
+                                </div>
+                                {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.username.errors[0] }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    يجب أن يكون اسم المستخدم مكون من 4-20 حرف ولا يحتوي على مسافات
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.role.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-shield-check"></i>
+                                    </span>
+                                    {{ form.role(class="form-select" + (" is-invalid" if form.role.errors else "")) }}
+                                </div>
+                                {% if form.role.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.role.errors[0] }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    المدير: كامل الصلاحيات | البائع: صلاحيات المبيعات فقط
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>تغيير كلمة المرور:</strong> اتركها فارغة إذا لم ترد تغييرها، أو أدخل كلمة مرور جديدة
+                            لتحديثها.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.password.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else
+                                    ""), id="password", placeholder="اتركها فارغة لعدم التغيير") }}
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                        <i class="bi bi-eye" id="passwordIcon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.password.errors[0] }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    كلمة المرور الجديدة يجب أن تكون على الأقل 6 أحرف (اختيارية)
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                        placeholder="أعد كتابة كلمة المرور الجديدة">
+                                    <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword">
+                                        <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback" id="confirmPasswordError" style="display: none;">
+                                    كلمات المرور غير متطابقة
+                                </div>
+                                <small class="form-text text-muted">
+                                    أعد كتابة كلمة المرور الجديدة للتأكيد (اختيارية)
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Password Strength Indicator (only shows when typing) -->
+                        <div class="mb-3" id="passwordStrengthContainer" style="display: none;">
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%">
+                                </div>
+                            </div>
+                            <small class="text-muted" id="passwordStrengthText">قوة كلمة المرور</small>
+                        </div>
+
+                        <!-- User Statistics -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">{{ user.sales|length }}</h5>
+                                        <p class="card-text">إجمالي المبيعات</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-success">{{ user.created_at|arabic_date }}</h5>
+                                        <p class="card-text">تاريخ الإنشاء</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('users') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                إلغاء
+                            </a>
+                            {{ form.submit(class="btn btn-warning", id="submitBtn") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
+
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const confirmPasswordIcon = document.getElementById('confirmPasswordIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            passwordIcon.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+
+        toggleConfirmPassword.addEventListener('click', function () {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            confirmPasswordIcon.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+
+        // Show/hide password strength when typing
+        const strengthContainer = document.getElementById('passwordStrengthContainer');
+
+        // Password strength checker
+        password.addEventListener('input', function () {
+            const pwd = this.value;
+
+            if (pwd.length > 0) {
+                strengthContainer.style.display = 'block';
+
+                const strengthBar = document.getElementById('passwordStrength');
+                const strengthText = document.getElementById('passwordStrengthText');
+
+                let strength = 0;
+                if (pwd.length >= 6) strength += 25;
+                if (pwd.match(/[a-z]/)) strength += 25;
+                if (pwd.match(/[A-Z]/)) strength += 25;
+                if (pwd.match(/[0-9]/)) strength += 25;
+
+                strengthBar.style.width = strength + '%';
+
+                if (strength < 25) {
+                    strengthBar.className = 'progress-bar bg-danger';
+                    strengthText.textContent = 'ضعيفة جداً';
+                } else if (strength < 50) {
+                    strengthBar.className = 'progress-bar bg-warning';
+                    strengthText.textContent = 'ضعيفة';
+                } else if (strength < 75) {
+                    strengthBar.className = 'progress-bar bg-info';
+                    strengthText.textContent = 'متوسطة';
+                } else {
+                    strengthBar.className = 'progress-bar bg-success';
+                    strengthText.textContent = 'قوية';
+                }
+            } else {
+                strengthContainer.style.display = 'none';
+            }
+        });
+
+        // Password confirmation validation
+        function validatePasswordMatch() {
+            const pwd = password.value;
+            const confirmPwd = confirmPassword.value;
+            const errorDiv = document.getElementById('confirmPasswordError');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Only validate if both fields have content
+            if (pwd && confirmPwd && pwd !== confirmPwd) {
+                confirmPassword.classList.add('is-invalid');
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                confirmPassword.classList.remove('is-invalid');
+                errorDiv.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        password.addEventListener('input', validatePasswordMatch);
+        confirmPassword.addEventListener('input', validatePasswordMatch);
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>جاري التحديث...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+
+{% endblock %}

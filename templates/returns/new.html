@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}إنشاء مرتجع - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-arrow-return-left"></i>
+                        إنشاء مرتجع جديد
+                    </h1>
+                    <p class="text-muted">إرجاع أصناف من البيع رقم #{{ sale.id }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('returns') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        العودة للمرتجعات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-receipt"></i>
+                معلومات البيع
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <p><strong>رقم البيع:</strong> #{{ sale.id }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>تاريخ البيع:</strong> {{ sale.sale_date|egypt_date }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>العميل:</strong>
+                        {% if sale.customer %}
+                        {{ sale.customer.name }}
+                        {% else %}
+                        زبون نقدي
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>إجمالي البيع:</strong> <span class="text-success fw-bold">{{ sale.total_amount|currency
+                            }}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Form -->
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="bi bi-clipboard-data"></i>
+                تفاصيل المرتجع
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="returnForm">
+                <input type="hidden" name="sale_id" value="{{ sale.id }}">
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="reason" class="form-label">سبب الإرجاع <span class="text-danger">*</span></label>
+                        <select class="form-select" id="reason" name="reason" required>
+                            <option value="">اختر سبب الإرجاع</option>
+                            <option value="منتج معيب">منتج معيب</option>
+                            <option value="منتج متضرر">منتج متضرر</option>
+                            <option value="غير مطابق للوصف">غير مطابق للوصف</option>
+                            <option value="طلب العميل">طلب العميل</option>
+                            <option value="خطأ في البيع">خطأ في البيع</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="refund_method" class="form-label">طريقة الاسترداد <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="refund_method" name="refund_method" required>
+                            <option value="نقدي">نقدي</option>
+                            <option value="رصيد">رصيد في الحساب</option>
+                            <option value="تبديل">تبديل بمنتج آخر</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="notes" class="form-label">ملاحظات إضافية</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
+                            placeholder="ملاحظات إضافية على المرتجع (اختياري)"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sale Items -->
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-box-seam"></i>
+                أصناف البيع
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="saleItemsTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>المنتج</th>
+                            <th class="text-center">الكمية الإجمالية</th>
+                            <th class="text-center">الكمية المرتجعة سابقاً</th>
+                            <th class="text-center">الكمية المتاحة للإرجاع</th>
+                            <th class="text-center">الكمية المراد إرجاعها</th>
+                            <th class="text-center">حالة المنتج</th>
+                            <th class="text-center">سعر الوحدة</th>
+                            <th class="text-center">الإجمالي</th>
+                            <th>ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <!-- سيتم تحميل البيانات بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>
+                        إجمالي قيمة المرتجع:
+                    </h5>
+                </div>
+                <div class="col-4 text-end">
+                    <h4 class="mb-0 fw-bold text-success" id="totalRefund">0.00 ج.م</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button type="button" class="btn btn-success btn-lg" onclick="submitReturn()">
+                <i class="bi bi-check-lg"></i>
+                إنشاء المرتجع
+            </button>
+            <a href="{{ url_for('returns') }}" class="btn btn-secondary btn-lg ms-2">
+                <i class="bi bi-x-lg"></i>
+                إلغاء
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let saleItems = [];
+    let selectedItems = {};
+
+    // تحميل أصناف البيع عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', function () {
+        loadSaleItems();
+    });
+
+    function loadSaleItems() {
+        fetch(`/api/sale/{{ sale.id }}/items`)
+            .then(response => response.json())
+            .then(data => {
+                saleItems = data;
+                renderSaleItems();
+            })
+            .catch(error => {
+                console.error('Error loading sale items:', error);
+                alert('حدث خطأ في تحميل أصناف البيع');
+            });
+    }
+
+    function renderSaleItems() {
+        const tbody = document.getElementById('itemsTableBody');
+        tbody.innerHTML = '';
+
+        if (saleItems.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle"></i>
+                        لا توجد أصناف متاحة للإرجاع في هذا البيع
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        saleItems.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <input type="checkbox" class="item-checkbox" data-item-id="${item.id}" onchange="toggleItemSelection(${item.id})">
+                </td>
+                <td>
+                    <div class="fw-bold">${item.product_name}</div>
+                    <small class="text-muted">${item.unit_type || 'وحدة'}</small>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-primary">${item.quantity}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-secondary">${item.returned_quantity}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-info">${item.available_quantity}</span>
+                </td>
+                <td class="text-center">
+                    <input type="number" class="form-control form-control-sm quantity-input" 
+                           id="quantity_${item.id}" min="0" max="${item.available_quantity}" 
+                           step="0.01" value="0" onchange="updateItemQuantity(${item.id})" disabled>
+                </td>
+                <td class="text-center">
+                    <select class="form-select form-select-sm condition-select" 
+                            id="condition_${item.id}" onchange="updateItemCondition(${item.id})" disabled>
+                        <option value="جيد">جيد</option>
+                        <option value="متضرر">متضرر</option>
+                        <option value="معيب">معيب</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <span class="text-primary fw-bold">${item.unit_price.toFixed(2)} ج.م</span>
+                </td>
+                <td class="text-center">
+                    <span class="text-success fw-bold" id="total_${item.id}">0.00 ج.م</span>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm notes-input" 
+                           id="notes_${item.id}" placeholder="ملاحظات" onchange="updateItemNotes(${item.id})" disabled>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            const itemId = parseInt(checkbox.dataset.itemId);
+            toggleItemSelection(itemId);
+        });
+    }
+
+    function toggleItemSelection(itemId) {
+        const checkbox = document.querySelector(`input[data-item-id="${itemId}"]`);
+        const quantityInput = document.getElementById(`quantity_${itemId}`);
+        const conditionSelect = document.getElementById(`condition_${itemId}`);
+        const notesInput = document.getElementById(`notes_${itemId}`);
+
+        if (checkbox.checked) {
+            // تفعيل الحقول
+            quantityInput.disabled = false;
+            conditionSelect.disabled = false;
+            notesInput.disabled = false;
+
+            // تعيين الكمية الافتراضية
+            const item = saleItems.find(i => i.id === itemId);
+            quantityInput.value = item.available_quantity;
+
+            // إضافة الصنف للاختيار
+            selectedItems[itemId] = {
+                id: itemId,
+                quantity: item.available_quantity,
+                condition: 'جيد',
+                notes: '',
+                unit_price: item.unit_price
+            };
+        } else {
+            // تعطيل الحقول
+            quantityInput.disabled = true;
+            conditionSelect.disabled = true;
+            notesInput.disabled = true;
+            quantityInput.value = 0;
+
+            // إزالة الصنف من الاختيار
+            delete selectedItems[itemId];
+        }
+
+        updateItemQuantity(itemId);
+        updateTotalRefund();
+    }
+
+    function updateItemQuantity(itemId) {
+        const quantityInput = document.getElementById(`quantity_${itemId}`);
+        const quantity = parseFloat(quantityInput.value) || 0;
+
+        if (selectedItems[itemId]) {
+            selectedItems[itemId].quantity = quantity;
+
+            const item = saleItems.find(i => i.id === itemId);
+            const total = quantity * item.unit_price;
+            document.getElementById(`total_${itemId}`).textContent = `${total.toFixed(2)} ج.م`;
+        }
+
+        updateTotalRefund();
+    }
+
+    function updateItemCondition(itemId) {
+        const conditionSelect = document.getElementById(`condition_${itemId}`);
+
+        if (selectedItems[itemId]) {
+            selectedItems[itemId].condition = conditionSelect.value;
+        }
+    }
+
+    function updateItemNotes(itemId) {
+        const notesInput = document.getElementById(`notes_${itemId}`);
+
+        if (selectedItems[itemId]) {
+            selectedItems[itemId].notes = notesInput.value;
+        }
+    }
+
+    function updateTotalRefund() {
+        let total = 0;
+
+        Object.values(selectedItems).forEach(item => {
+            const saleItem = saleItems.find(i => i.id === item.id);
+            if (saleItem && item.quantity > 0) {
+                total += item.quantity * saleItem.unit_price;
+            }
+        });
+
+        document.getElementById('totalRefund').textContent = `${total.toFixed(2)} ج.م`;
+    }
+
+    function submitReturn() {
+        // التحقق من البيانات الأساسية
+        const reason = document.getElementById('reason').value;
+        const refundMethod = document.getElementById('refund_method').value;
+        const notes = document.getElementById('notes').value;
+
+        if (!reason) {
+            alert('يرجى اختيار سبب الإرجاع');
+            return;
+        }
+
+        if (!refundMethod) {
+            alert('يرجى اختيار طريقة الاسترداد');
+            return;
+        }
+
+        // التحقق من وجود أصناف مختارة
+        const validItems = Object.values(selectedItems).filter(item => item.quantity > 0);
+
+        if (validItems.length === 0) {
+            alert('يرجى اختيار أصناف للإرجاع');
+            return;
+        }
+
+        // إعداد البيانات للإرسال
+        const returnData = {
+            sale_id: {{ sale.id }},
+            reason: reason,
+            refund_method: refundMethod,
+            notes: notes,
+            items: validItems.map(item => ({
+                sale_item_id: item.id,
+                quantity_returned: item.quantity,
+                condition: item.condition,
+                notes: item.notes
+            }))
+        };
+
+        // إرسال البيانات
+        fetch('/api/returns', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(returnData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم إنشاء المرتجع بنجاح');
+                window.location.href = '{{ url_for("returns") }}';
+            } else {
+                alert('خطأ: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ في إنشاء المرتجع');
+        });
+    }
+</script>
+
+<style>
+    .quantity-input {
+        width: 80px;
+    }
+
+    .condition-select {
+        width: 100px;
+    }
+
+    .notes-input {
+        width: 120px;
+    }
+
+    .table th,
+    .table td {
+        vertical-align: middle;
+    }
+
+    .item-checkbox {
+        transform: scale(1.2);
+    }
+</style>
+{% endblock %}

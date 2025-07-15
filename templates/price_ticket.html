@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}تيكت الأسعار{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-tag me-2"></i>تيكت الأسعار
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- قسم إدخال البيانات -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit me-2"></i>إدخال بيانات التيكت
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form id="ticketForm">
+                        <!-- اسم المنتج -->
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">اسم المنتج</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control" id="productName"
+                                    placeholder="ابحث عن منتج أو اكتب اسم جديد..." autocomplete="off">
+                                <div id="productSuggestions"
+                                    class="position-absolute w-100 bg-white border rounded shadow-sm"
+                                    style="top: 100%; z-index: 1000; display: none; max-height: 200px; overflow-y: auto;">
+                                </div>
+                            </div>
+                            <div class="form-text">يمكنك البحث عن منتج موجود أو كتابة اسم منتج جديد</div>
+                        </div>
+
+                        <!-- السعر -->
+                        <div class="mb-3">
+                            <label for="productPrice" class="form-label">السعر (ج.م)</label>
+                            <input type="number" class="form-control" id="productPrice" placeholder="أدخل السعر..."
+                                step="0.01" min="0" required>
+                        </div>
+
+                        <!-- حجم الخط -->
+                        <div class="mb-3">
+                            <label for="fontSize" class="form-label">حجم الخط</label>
+                            <select class="form-select" id="fontSize">
+                                <option value="small">صغير</option>
+                                <option value="medium" selected>متوسط</option>
+                                <option value="large">كبير</option>
+                                <option value="extra-large">كبير جداً</option>
+                            </select>
+                        </div>
+
+                        <!-- أزرار -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt me-2"></i>إنشاء التيكت
+                            </button>
+                            <button type="button" class="btn btn-success" id="printTicket" style="display: none;">
+                                <i class="fas fa-print me-2"></i>طباعة التيكت
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-eraser me-2"></i>مسح البيانات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم معاينة التيكت -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-eye me-2"></i>معاينة التيكت
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="ticketPreview" class="d-flex justify-content-center">
+                        <div class="text-muted text-center">
+                            <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                            <p>املأ البيانات لمعاينة التيكت</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- منطقة الطباعة المخفية -->
+<div id="printArea" style="display: none;">
+    <!-- سيتم إدراج محتوى التيكت هنا للطباعة -->
+</div>
+
+<style>
+    .ticket {
+        border: 2px dashed #333;
+        border-radius: 10px;
+        padding: 15px;
+        background: #fff;
+        max-width: 300px;
+        margin: 0 auto;
+        text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ticket.small {
+        font-size: 12px;
+    }
+
+    .ticket.medium {
+        font-size: 16px;
+    }
+
+    .ticket.large {
+        font-size: 20px;
+    }
+
+    .ticket.extra-large {
+        font-size: 24px;
+    }
+
+    .ticket-header {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .ticket-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .ticket-product {
+        margin: 15px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+
+    .product-name {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+
+    .product-price {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #e74c3c;
+        background: #fff3cd;
+        padding: 8px 12px;
+        border-radius: 20px;
+        border: 2px solid #ffc107;
+        display: inline-block;
+        margin-top: 5px;
+    }
+
+    .ticket-footer {
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+        margin-top: 15px;
+        font-size: 0.8em;
+        color: #666;
+    }
+
+    .suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #printArea,
+        #printArea * {
+            visibility: visible;
+        }
+
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            display: block !important;
+        }
+
+        .ticket {
+            border: 2px dashed #000;
+            background: white;
+            box-shadow: none;
+            max-width: none;
+            margin: 20px auto;
+            page-break-inside: avoid;
+        }
+
+        .product-price {
+            background: #f0f0f0 !important;
+            border: 2px solid #000 !important;
+            color: #000 !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const productNameInput = document.getElementById('productName');
+        const productPriceInput = document.getElementById('productPrice');
+        const fontSizeSelect = document.getElementById('fontSize');
+        const ticketForm = document.getElementById('ticketForm');
+        const ticketPreview = document.getElementById('ticketPreview');
+        const printTicketBtn = document.getElementById('printTicket');
+        const printArea = document.getElementById('printArea');
+        const suggestionsDiv = document.getElementById('productSuggestions');
+
+        let searchTimeout;
+
+        // البحث عن المنتجات
+        productNameInput.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length < 2) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search-products?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(products => {
+                        showSuggestions(products);
+                    })
+                    .catch(error => {
+                        console.error('خطأ في البحث:', error);
+                    });
+            }, 300);
+        });
+
+        // إظهار اقتراحات المنتجات
+        function showSuggestions(products) {
+            if (products.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            products.forEach(product => {
+                html += `
+                <div class="suggestion-item" data-id="${product.id}" data-name="${product.name}" data-price="${product.retail_price}">
+                    <strong>${product.name}</strong>
+                    <br>
+                    <small class="text-muted">سعر التجزئة: ${product.retail_price} ج.م</small>
+                </div>
+            `;
+            });
+
+            suggestionsDiv.innerHTML = html;
+            suggestionsDiv.style.display = 'block';
+
+            // إضافة مستمعات الأحداث للاقتراحات
+            suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const name = this.dataset.name;
+                    const price = this.dataset.price;
+
+                    productNameInput.value = name;
+                    productPriceInput.value = price;
+                    suggestionsDiv.style.display = 'none';
+
+                    updatePreview();
+                });
+            });
+        }
+
+        // إخفاء الاقتراحات عند النقر خارجها
+        document.addEventListener('click', function (e) {
+            if (!productNameInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // تحديث المعاينة
+        function updatePreview() {
+            const productName = productNameInput.value.trim();
+            const productPrice = productPriceInput.value.trim();
+            const fontSize = fontSizeSelect.value;
+
+            if (!productName || !productPrice) {
+                ticketPreview.innerHTML = `
+                <div class="text-muted text-center">
+                    <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                    <p>املأ البيانات لمعاينة التيكت</p>
+                </div>
+            `;
+                printTicketBtn.style.display = 'none';
+                return;
+            }
+
+            const ticketHtml = generateTicketHtml(productName, productPrice, fontSize);
+            ticketPreview.innerHTML = ticketHtml;
+            printTicketBtn.style.display = 'block';
+        }
+
+        // إنشاء HTML للتيكت
+        function generateTicketHtml(productName, productPrice, fontSize) {
+            const currentDate = new Date().toLocaleDateString('ar-EG');
+
+            return `
+            <div class="ticket ${fontSize}">
+                <div class="ticket-header">
+                    <div class="ticket-title">تيكت السعر</div>
+                </div>
+                <div class="ticket-product">
+                    <div class="product-name">${productName}</div>
+                    <div class="product-price">${parseFloat(productPrice).toFixed(2)} ج.م</div>
+                </div>
+            </div>
+        `;
+        }
+
+        // تقديم النموذج
+        ticketForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            updatePreview();
+        });
+
+        // إعادة تعيين النموذج
+        ticketForm.addEventListener('reset', function () {
+            setTimeout(() => {
+                ticketPreview.innerHTML = `
+                <div class="text-muted text-center">
+                    <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                    <p>املأ البيانات لمعاينة التيكت</p>
+                </div>
+            `;
+                printTicketBtn.style.display = 'none';
+                suggestionsDiv.style.display = 'none';
+            }, 10);
+        });
+
+        // تحديث المعاينة عند تغيير المدخلات
+        productNameInput.addEventListener('input', updatePreview);
+        productPriceInput.addEventListener('input', updatePreview);
+        fontSizeSelect.addEventListener('change', updatePreview);
+
+        // طباعة التيكت
+        printTicketBtn.addEventListener('click', function () {
+            const ticketContent = ticketPreview.innerHTML;
+            printArea.innerHTML = ticketContent;
+            window.print();
+        });
+    });
+</script>
+{% endblock %}

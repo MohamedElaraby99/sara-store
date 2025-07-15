@@ -1,0 +1,804 @@
+/* Custom styles for Arabic RTL Bookstore Management System */
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  padding-top: 115px !important;
+}
+
+/* Arabic font for better readability */
+.arabic-text {
+  font-family: "Segoe UI", "Tahoma", "Arial", sans-serif;
+  line-height: 1.6;
+}
+
+/* Card styles */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  margin-top: 1rem;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Dashboard cards */
+.dashboard-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+  min-height: 120px;
+}
+
+.dashboard-card.bg-success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.dashboard-card.bg-warning {
+  background: linear-gradient(135deg, #fcb045 0%, #fd1d1d 100%);
+}
+
+.dashboard-card.bg-danger {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.dashboard-card.bg-info {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+}
+
+/* Stats numbers */
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Stock status badges */
+.stock-status {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+}
+
+.stock-available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.stock-low {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.stock-out {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Table styles */
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-top: 1rem;
+}
+
+.table th {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 1rem;
+}
+
+.table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-color: #f1f3f4;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Form styles */
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Button styles */
+.btn {
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #0e8378 0%, #2ed364 100%);
+}
+
+/* Alert styles */
+.alert {
+  border: none;
+  border-radius: 10px;
+  border-left: 4px solid;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-left-color: #28a745;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-left-color: #ffc107;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-left-color: #17a2b8;
+}
+
+/* Navigation */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* تحسينات القوائم المنسدلة في الهيدر */
+.navbar .dropdown-menu {
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border: none;
+  padding: 0.5rem 0;
+  min-width: 220px;
+  margin-top: 0.5rem;
+}
+
+.navbar .dropdown-item {
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0;
+}
+
+.navbar .dropdown-item:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateX(5px);
+}
+
+.navbar .dropdown-item i {
+  width: 20px;
+  text-align: center;
+  margin-left: 8px;
+}
+
+.navbar .dropdown-header {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1.25rem 0.25rem;
+}
+
+.navbar .dropdown-divider {
+  margin: 0.5rem 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+/* تأثيرات خاصة للروابط المهمة */
+.navbar .dropdown-item .text-danger {
+  color: #dc3545 !important;
+}
+
+.navbar .dropdown-item .text-warning {
+  color: #ffc107 !important;
+}
+
+.navbar .dropdown-item:hover .text-danger,
+.navbar .dropdown-item:hover .text-warning {
+  color: white !important;
+}
+
+/* زر البيع السريع */
+.btn-success.btn-sm {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-success.btn-sm:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+/* تحسين شارة المدير والبائع */
+.navbar-text .badge {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  margin-right: 0.5rem;
+  font-weight: 500;
+}
+
+/* أزرار الإجراءات السريعة المحدثة */
+.btn-lg.d-flex.flex-column {
+  min-height: 120px;
+  transition: all 0.3s ease-in-out;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-lg.d-flex.flex-column:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-lg.d-flex.flex-column i {
+  transition: transform 0.2s ease-in-out;
+}
+
+.btn-lg.d-flex.flex-column:hover i {
+  transform: scale(1.1);
+}
+
+.btn-lg.d-flex.flex-column small {
+  opacity: 0.8;
+  font-size: 0.75rem;
+}
+
+/* Chart container */
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin: 2rem 0;
+}
+
+/* Sale form styles */
+.sale-item {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sale-total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .table-responsive {
+    border-radius: 10px;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .btn,
+  .no-print {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Price and currency formatting */
+.currency {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.price-large {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Search and filter section */
+.search-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* مؤشر الديون */
+.btn-outline-warning.position-relative {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-warning.position-relative:hover {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+  transform: translateY(-1px);
+}
+
+.btn-outline-warning.position-relative .badge {
+  animation: pulse 2s infinite;
+  font-size: 0.6rem;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* حل شامل لجميع الـ modals في النظام */
+/* إزالة الـ backdrop الافتراضي تماماً */
+.modal-backdrop,
+.modal-backdrop.fade,
+.modal-backdrop.show {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* إنشاء backdrop مخصص لجميع الـ modals */
+.modal::before {
+  content: "";
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 9990 !important;
+  opacity: 0;
+  transition: opacity 0.15s linear;
+  pointer-events: auto !important;
+}
+
+.modal.show::before {
+  opacity: 1 !important;
+}
+
+/* إصلاح الـ modal نفسه */
+.modal {
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  outline: 0 !important;
+}
+
+.modal-dialog {
+  z-index: 10000 !important;
+  position: relative !important;
+  margin: 1.75rem auto !important;
+  pointer-events: none !important;
+  width: auto !important;
+  max-width: 500px !important;
+}
+
+.modal-content {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+  z-index: 10001 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  background-color: #fff !important;
+  background-clip: padding-box !important;
+  outline: 0 !important;
+  margin-top: 130px;
+}
+
+/* التأكد من أن الـ modal في المقدمة دائماً */
+.modal.show {
+  z-index: 9999 !important;
+  display: block !important;
+}
+
+.modal.show .modal-dialog {
+  transform: none !important;
+  z-index: 10000 !important;
+}
+
+.modal.show .modal-content {
+  z-index: 10001 !important;
+  margin-top: 130px;
+}
+
+/* إصلاح مشاكل الـ pointer events والتفاعل */
+.modal .modal-header,
+.modal .modal-body,
+.modal .modal-footer {
+  pointer-events: auto !important;
+  z-index: 10002 !important;
+  position: relative !important;
+}
+
+/* تأكيد أن الأزرار قابلة للنقر */
+.modal .btn,
+.modal .form-control,
+.modal .btn-close {
+  pointer-events: auto !important;
+  z-index: 10003 !important;
+  position: relative !important;
+}
+
+/* منع scroll للـ body عند فتح modal */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+/* إصلاح للموبايل */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+
+  .modal-content {
+    border-radius: 8px !important;
+    margin-top: 130px;
+  }
+}
+
+/* إضافة مسافة للمحتوى الرئيسي */
+.container-fluid {
+  padding-top: 1rem;
+}
+
+/* تحسين المسافات للعناوين والمحتوى */
+h1,
+h2,
+h3,
+.h1,
+.h2,
+.h3 {
+  margin-top: 1rem;
+}
+
+/* مسافة إضافية للصفوف */
+.row.mb-4 {
+  margin-top: 1rem;
+}
+
+/* إضافة أنماط لشريط الحالة غير المتصلة */
+.offline-status-bar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 5px 0;
+  position: fixed;
+  top: 70px; /* بعد الهيدر */
+  left: 0;
+  right: 0;
+  z-index: 1035;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  max-height: 45px;
+}
+
+.offline-status-bar.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.offline-status-bar .container-fluid {
+  padding: 0 15px;
+}
+
+.offline-status-bar .row {
+  margin: 0;
+  align-items: center;
+}
+
+.offline-status-bar .col-auto {
+  padding: 0 5px;
+}
+
+.network-status {
+  padding: 3px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.network-status.online {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.network-status.offline {
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.sync-indicator {
+  color: #0d6efd;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  background: rgba(13, 110, 253, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.sync-indicator.syncing {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.last-sync-time {
+  font-size: 0.7rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.offline-status-bar .btn-sm {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.offline-status-bar .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* تعديل padding الجسم */
+body {
+  padding-top: 115px !important;
+}
+
+/* تحسينات الموبايل */
+@media (max-width: 768px) {
+  .offline-status-bar {
+    top: 55px;
+    padding: 3px 0;
+    font-size: 0.7rem;
+    max-height: 35px;
+  }
+
+  .offline-status-bar .container-fluid {
+    padding: 0 10px;
+  }
+
+  .offline-status-bar .col-auto {
+    padding: 0 3px;
+  }
+
+  .network-status {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+  }
+
+  .last-sync-time {
+    font-size: 0.65rem;
+    display: none; /* إخفاء في الموبايل لتوفير المساحة */
+  }
+
+  .offline-status-bar .btn-sm {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  body {
+    padding-top: 95px !important;
+  }
+
+  /* إخفاء الشريط عند التمرير للأسفل على الموبايل */
+  .offline-status-bar.mobile-hidden {
+    transform: translateY(-100%);
+  }
+}
+
+/* تحسينات إضافية للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+  .offline-status-bar {
+    font-size: 0.65rem;
+    padding: 2px 0;
+    top: 50px;
+    max-height: 30px;
+  }
+
+  .offline-status-bar .btn-sm {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+
+  .sync-indicator {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+
+  .network-status {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+
+  body {
+    padding-top: 85px !important;
+  }
+}
+
+/* تحسين التنسيق في الاتجاه الأفقي للموبايل */
+@media (max-width: 768px) and (orientation: landscape) {
+  .offline-status-bar {
+    padding: 2px 0;
+    top: 45px;
+    max-height: 25px;
+    font-size: 0.65rem;
+  }
+
+  .last-sync-time {
+    display: none;
+  }
+
+  body {
+    padding-top: 75px !important;
+  }
+}
+
+/* تحسين النوتيفيكيشن للموبايل */
+.notification-toast {
+  position: fixed;
+  top: 120px;
+  right: 20px;
+  z-index: 1060;
+  min-width: 280px;
+  max-width: 350px;
+  animation: slideInRight 0.3s ease-out;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: none;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .notification-toast {
+    top: 100px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+}

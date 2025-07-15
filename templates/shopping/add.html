@@ -1,0 +1,191 @@
+﻿{% extends "base.html" %}
+
+{% block title %}إضافة منتج لقائمة النواقص - إدارة Norko Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-plus-circle"></i>
+                        إضافة منتج لقائمة النواقص
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.item_name.label(class="form-label") }}
+                                    {{ form.item_name(class="form-control") }}
+                                    {% if form.item_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.item_name.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.quantity_needed.label(class="form-label") }}
+                                    {{ form.quantity_needed(class="form-control", step="0.01", min="0.01") }}
+                                    {% if form.quantity_needed.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.quantity_needed.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.unit_type.label(class="form-label") }}
+                                    {{ form.unit_type(class="form-select") }}
+                                    {% if form.unit_type.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.unit_type.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.estimated_price.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.estimated_price(class="form-control", step="0.01", min="0") }}
+                                        <span class="input-group-text">ج.م</span>
+                                    </div>
+                                    {% if form.estimated_price.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.estimated_price.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">السعر المتوقع للوحدة الواحدة</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.priority.label(class="form-label") }}
+                                    {{ form.priority(class="form-select") }}
+                                    {% if form.priority.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.priority.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-control") }}
+                                    {% if form.category.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.category.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">مثل: كتب، أدوات مكتبية، إلخ</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.supplier.label(class="form-label") }}
+                            {{ form.supplier(class="form-control") }}
+                            {% if form.supplier.errors %}
+                            <div class="text-danger">
+                                {% for error in form.supplier.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">اسم المورد أو المكان المقترح للشراء</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3") }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger">
+                                {% for error in form.notes.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">أي ملاحظات إضافية حول المنتج</small>
+                        </div>
+
+                        <!-- معاينة التكلفة المتوقعة -->
+                        <div class="card bg-light mb-3" style="display: none;" id="costPreview">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-calculator"></i>
+                                    التكلفة المتوقعة
+                                </h6>
+                                <p class="card-text">
+                                    <strong>إجمالي التكلفة المتوقعة: <span id="totalCost">0.00</span> ج.م</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('shopping_list') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i>
+                                العودة للقائمة
+                            </a>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const quantityInput = document.getElementById('quantity_needed');
+        const priceInput = document.getElementById('estimated_price');
+        const costPreview = document.getElementById('costPreview');
+        const totalCostSpan = document.getElementById('totalCost');
+
+        function updateCost() {
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+
+            if (total > 0) {
+                totalCostSpan.textContent = total.toFixed(2);
+                costPreview.style.display = 'block';
+            } else {
+                costPreview.style.display = 'none';
+            }
+        }
+
+        quantityInput.addEventListener('input', updateCost);
+        priceInput.addEventListener('input', updateCost);
+
+        // تحديث التكلفة عند تحميل الصفحة
+        updateCost();
+    });
+</script>
+{% endblock %}

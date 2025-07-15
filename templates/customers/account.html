@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}حساب العميل - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>حساب العميل: {{ customer.name }}</h2>
+    <a href="{{ url_for('customers') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-right me-2"></i>العودة للعملاء
+    </a>
+</div>
+
+<!-- معلومات العميل -->
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات العميل</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>الاسم:</strong> {{ customer.name }}</p>
+                <p><strong>الهاتف:</strong> {{ customer.phone or 'غير محدد' }}</p>
+                <p><strong>العنوان:</strong> {{ customer.address or 'غير محدد' }}</p>
+                {% if customer.notes %}
+                <p><strong>ملاحظات:</strong> {{ customer.notes }}</p>
+                {% endif %}
+                <p><strong>تاريخ التسجيل:</strong> {{ customer.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">ملخص الحساب</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ sales|length }}</h4>
+                        <small class="text-muted">عدد المبيعات</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info">{{ "%.2f"|format(customer.total_sales_amount) }} ج.م</h4>
+                        <small class="text-muted">إجمالي المبيعات</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    {% if customer.total_debt > 0 %}
+                    <h3 class="text-danger">{{ "%.2f"|format(customer.total_debt) }} ج.م</h3>
+                    <small class="text-muted">إجمالي الديون المستحقة</small>
+                    {% else %}
+                    <h3 class="text-success">لا توجد ديون</h3>
+                    <small class="text-muted">الحساب مسدد بالكامل</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- المنتجات غير المدفوعة -->
+{% if customer.total_debt > 0 %}
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            المنتجات غير المدفوعة
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>رقم البيع</th>
+                        <th>تاريخ البيع</th>
+                        <th>المنتج</th>
+                        <th>الكمية</th>
+                        <th>سعر الوحدة</th>
+                        <th>إجمالي المنتج</th>
+                        <th>المبلغ المتبقي من البيع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    {% if not sale.is_fully_paid %}
+                    {% for item in sale.sale_items %}
+                    <tr>
+                        <td>#{{ sale.id }}</td>
+                        <td>{{ sale.sale_date|egypt_date }}</td>
+                        <td>{{ item.product.name_ar }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ "%.2f"|format(item.unit_price) }} ج.م</td>
+                        <td>{{ "%.2f"|format(item.total_price) }} ج.م</td>
+                        <td>
+                            <span class="text-danger fw-bold">
+                                {{ "%.2f"|format(sale.remaining_amount) }} ج.م
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-warning mt-3">
+            <strong>ملاحظة:</strong> هذه المنتجات من مبيعات لم يتم تسديدها بالكامل. المبلغ المتبقي يشمل جميع منتجات
+            البيع الواحد.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- قائمة المبيعات -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">سجل المبيعات والدفعات</h5>
+    </div>
+    <div class="card-body">
+        {% if sales %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>رقم البيع</th>
+                        <th>التاريخ</th>
+                        <th>إجمالي المبلغ</th>
+                        <th>المبلغ المدفوع</th>
+                        <th>المبلغ المتبقي</th>
+                        <th>حالة الدفع</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>#{{ sale.id }}</td>
+                        <td>{{ sale.sale_date|egypt_datetime }}</td>
+                        <td>{{ "%.2f"|format(sale.total_amount) }} ج.م</td>
+                        <td>{{ "%.2f"|format(sale.paid_amount) }} ج.م</td>
+                        <td>
+                            {% if sale.remaining_amount > 0 %}
+                            <span class="text-danger">{{ "%.2f"|format(sale.remaining_amount) }} ج.م</span>
+                            {% else %}
+                            <span class="text-success">مسدد</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sale.payment_status == 'paid' %}
+                            <span class="badge bg-success">مدفوع كاملاً</span>
+                            {% elif sale.payment_status == 'partial' %}
+                            <span class="badge bg-warning">مدفوع جزئياً</span>
+                            {% else %}
+                            <span class="badge bg-danger">غير مدفوع</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not sale.is_fully_paid %}
+                            <a href="{{ url_for('add_payment', customer_id=customer.id, sale_id=sale.id) }}"
+                                class="btn btn-sm btn-primary">
+                                <i class="bi bi-cash me-1"></i>دفع
+                            </a>
+                            {% endif %}
+
+                            <!-- عرض تفاصيل المنتجات -->
+                            <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#products-{{ sale.id }}" aria-expanded="false">
+                                <i class="bi bi-box me-1"></i>المنتجات
+                            </button>
+
+                            <!-- عرض تفاصيل الدفعات -->
+                            {% if sale.payments %}
+                            <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#payments-{{ sale.id }}" aria-expanded="false">
+                                <i class="bi bi-list me-1"></i>الدفعات
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- تفاصيل المنتجات -->
+                    <tr>
+                        <td colspan="7" class="p-0">
+                            <div class="collapse" id="products-{{ sale.id }}">
+                                <div class="card card-body bg-light">
+                                    <h6>منتجات البيع #{{ sale.id }}:</h6>
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>المنتج</th>
+                                                <th>الكمية</th>
+                                                <th>سعر الوحدة</th>
+                                                <th>الإجمالي</th>
+                                                <th>حالة الدفع</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in sale.sale_items %}
+                                            <tr>
+                                                <td>{{ item.product.name_ar }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ "%.2f"|format(item.unit_price) }} ج.م</td>
+                                                <td>{{ "%.2f"|format(item.total_price) }} ج.م</td>
+                                                <td>
+                                                    {% if sale.is_fully_paid %}
+                                                    <span class="badge bg-success">مدفوع</span>
+                                                    {% elif sale.remaining_amount > 0 %}
+                                                    <span class="badge bg-danger">غير مدفوع</span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning">جزئي</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- تفاصيل الدفعات -->
+                    {% if sale.payments %}
+                    <tr>
+                        <td colspan="7" class="p-0">
+                            <div class="collapse" id="payments-{{ sale.id }}">
+                                <div class="card card-body bg-light">
+                                    <h6>دفعات البيع #{{ sale.id }}:</h6>
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>التاريخ</th>
+                                                <th>المبلغ</th>
+                                                <th>طريقة الدفع</th>
+                                                <th>ملاحظات</th>
+                                                <th>المستخدم</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for payment in sale.payments %}
+                                            <tr>
+                                                <td>{{ payment.payment_date|egypt_datetime }}</td>
+                                                <td>{{ "%.2f"|format(payment.amount) }} ج.م</td>
+                                                <td>{{ payment.payment_method }}</td>
+                                                <td>{{ payment.notes or '-' }}</td>
+                                                <td>{{ payment.user.username }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-receipt" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-2 mb-0">لا توجد مبيعات لهذا العميل</p>
+            <small>ستظهر المبيعات هنا عند إجراء بيع للعميل</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- إحصائيات سريعة -->
+{% if sales %}
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5>آخر بيع</h5>
+                <p class="mb-0">{{ sales[0].sale_date.strftime('%Y-%m-%d') }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5>متوسط البيع</h5>
+                <p class="mb-0">{{ "%.2f"|format(customer.total_sales_amount / sales|length) }} ج.م</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h5>مبيعات غير مسددة</h5>
+                <p class="mb-0">{{ sales|selectattr('payment_status', 'ne', 'paid')|list|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h5>إجمالي الديون</h5>
+                <p class="mb-0">{{ "%.2f"|format(customer.total_debt) }} ج.م</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
