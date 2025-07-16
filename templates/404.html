@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}الصفحة غير موجودة - متجر سارة{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Error Icon -->
+                    <div class="mb-4">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Error Number -->
+                    <h1 class="display-1 text-muted mb-3">404</h1>
+
+                    <!-- Error Title -->
+                    <h2 class="h3 text-dark mb-3">الصفحة غير موجودة</h2>
+
+                    <!-- Error Message -->
+                    <p class="text-muted mb-4">
+                        عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها إلى مكان آخر.
+                    </p>
+
+                    <!-- URL Info -->
+                    <div class="alert alert-light border mb-4">
+                        <small class="text-muted">
+                            <strong>الرابط المطلوب:</strong><br>
+                            <code class="text-break">{{ request.url }}</code>
+                        </small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>
+                            العودة للرئيسية
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            العودة للصفحة السابقة
+                        </button>
+                    </div>
+
+                    <!-- Helpful Links -->
+                    <div class="mt-4 pt-4 border-top">
+                        <h6 class="text-muted mb-3">روابط مفيدة:</h6>
+                        <div class="row g-2 justify-content-center">
+                            <div class="col-auto">
+                                <a href="{{ url_for('products') }}" class="btn btn-sm btn-outline-primary">المنتجات</a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ url_for('sales') }}" class="btn btn-sm btn-outline-primary">المبيعات</a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ url_for('customers') }}" class="btn btn-sm btn-outline-primary">العملاء</a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ url_for('reports') }}" class="btn btn-sm btn-outline-primary">التقارير</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-icon {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .card {
+        border-radius: 15px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .display-1 {
+        font-weight: 300;
+        color: #6c757d !important;
+    }
+
+    code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

@@ -855,11 +855,19 @@
                     console.log('⚠️ SyncManager not available');
                 }
 
-                // تهيئة معالج الأوفلاين
+                // تهيئة معالج الأوفلاين (استبعاد صفحات المصادقة)
                 if (typeof OfflineHandler !== 'undefined') {
-                    window.offlineHandler = new OfflineHandler();
-                    await window.offlineHandler.init();
-                    console.log('✅ Offline Handler initialized');
+                    // التحقق من أن الصفحة ليست صفحة مصادقة
+                    const authPages = ['/login', '/logout', '/forgot-password', '/reset-password', '/change-password'];
+                    const currentPath = window.location.pathname;
+
+                    if (!authPages.includes(currentPath)) {
+                        window.offlineHandler = new OfflineHandler();
+                        await window.offlineHandler.init();
+                        console.log('✅ Offline Handler initialized');
+                    } else {
+                        console.log('🚫 Auth page detected - skipping OfflineHandler initialization');
+                    }
                 } else {
                     console.log('⚠️ OfflineHandler not available');
                 }
@@ -887,25 +895,30 @@
                     }, 3000);
                 }
 
-                // مراقبة حالة الشبكة
-                window.addEventListener('online', function () {
-                    console.log('🌐 Network connection restored');
-                    if (window.syncManager) {
-                        setTimeout(() => {
-                            window.syncManager.performSync();
-                        }, 1000);
-                    }
-                    if (window.offlineHandler) {
-                        window.offlineHandler.updateConnectionButton();
-                    }
-                });
+                // مراقبة حالة الشبكة (استبعاد صفحات المصادقة)
+                const authPages = ['/login', '/logout', '/forgot-password', '/reset-password', '/change-password'];
+                const currentPath = window.location.pathname;
 
-                window.addEventListener('offline', function () {
-                    console.log('📴 Network connection lost - switching to offline mode');
-                    if (window.offlineHandler) {
-                        window.offlineHandler.updateConnectionButton();
-                    }
-                });
+                if (!authPages.includes(currentPath)) {
+                    window.addEventListener('online', function () {
+                        console.log('🌐 Network connection restored');
+                        if (window.syncManager) {
+                            setTimeout(() => {
+                                window.syncManager.performSync();
+                            }, 1000);
+                        }
+                        if (window.offlineHandler) {
+                            window.offlineHandler.updateConnectionButton();
+                        }
+                    });
+
+                    window.addEventListener('offline', function () {
+                        console.log('📴 Network connection lost - switching to offline mode');
+                        if (window.offlineHandler) {
+                            window.offlineHandler.updateConnectionButton();
+                        }
+                    });
+                }
 
             } catch (error) {
                 console.error('❌ Error initializing offline features:', error);

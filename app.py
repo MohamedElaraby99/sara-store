@@ -88,7 +88,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role != 'admin':
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -100,7 +100,7 @@ def seller_or_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role not in ['admin', 'seller']:
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -351,7 +351,7 @@ def logout():
     logout_user()
     session.clear()  # Clear all session data
     flash('تم تسجيل الخروج بنجاح', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -379,7 +379,7 @@ def forgot_password():
             # Same message for security (don't reveal if email exists)
             flash('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني', 'success')
         
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     return render_template('auth/forgot_password.html')
 
@@ -399,7 +399,7 @@ def reset_password(token):
     
     if not user:
         flash('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         new_password = request.form.get('password', '').strip()
@@ -414,7 +414,7 @@ def reset_password(token):
             # Reset password
             user.reset_password(new_password)
             flash('تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
     
     return render_template('auth/reset_password.html', token=token)
 
@@ -1036,7 +1036,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role != 'admin':
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -1048,7 +1048,7 @@ def seller_or_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role not in ['admin', 'seller']:
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -1299,7 +1299,7 @@ def logout():
     logout_user()
     session.clear()  # Clear all session data
     flash('تم تسجيل الخروج بنجاح', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -1327,7 +1327,7 @@ def forgot_password():
             # Same message for security (don't reveal if email exists)
             flash('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني', 'success')
         
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     return render_template('auth/forgot_password.html')
 
@@ -1347,7 +1347,7 @@ def reset_password(token):
     
     if not user:
         flash('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         new_password = request.form.get('password', '').strip()
@@ -1362,7 +1362,7 @@ def reset_password(token):
             # Reset password
             user.reset_password(new_password)
             flash('تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
     
     return render_template('auth/reset_password.html', token=token)
 
@@ -4369,13 +4369,13 @@ def debug_auth():
         
         <div class="info">
             <h3>الإجراءات:</h3>
-            <a href="{url_for('login')}" class="btn btn-blue">صفحة تسجيل الدخول</a>
+            <a href="{url_for('index')}" class="btn btn-blue">صفحة تسجيل الدخول</a>
             <a href="{url_for('dashboard')}" class="btn btn-blue">لوحة التحكم</a>
         </div>
         
         <div class="info">
             <h3>اختبار المستخدم الثابت:</h3>
-            <form method="POST" action="{url_for('login')}">
+            <form method="POST" action="{url_for('index')}">
                 <input type="hidden" name="csrf_token" value="{csrf_token}">
                 <input type="hidden" name="username" value="araby">
                 <input type="hidden" name="password" value="92321066">
@@ -4385,7 +4385,7 @@ def debug_auth():
         
         <div class="info">
             <h3>اختبار يدوي:</h3>
-            <form method="POST" action="{url_for('login')}">
+            <form method="POST" action="{url_for('index')}">
                 <input type="hidden" name="csrf_token" value="{csrf_token}">
                 <div style="margin: 10px 0;">
                     <label>اسم المستخدم:</label><br>
@@ -4841,7 +4841,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role != 'admin':
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -4853,7 +4853,7 @@ def seller_or_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
         if current_user.role not in ['admin', 'seller']:
             flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
             return redirect(url_for('dashboard'))
@@ -5098,7 +5098,7 @@ def logout():
     logout_user()
     session.clear()  # Clear all session data
     flash('تم تسجيل الخروج بنجاح', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -5126,7 +5126,7 @@ def forgot_password():
             # Same message for security (don't reveal if email exists)
             flash('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني', 'success')
         
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     return render_template('auth/forgot_password.html')
 
@@ -5146,7 +5146,7 @@ def reset_password(token):
     
     if not user:
         flash('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         new_password = request.form.get('password', '').strip()
@@ -5161,7 +5161,7 @@ def reset_password(token):
             # Reset password
             user.reset_password(new_password)
             flash('تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
     
     return render_template('auth/reset_password.html', token=token)
 
@@ -8168,13 +8168,13 @@ def debug_auth():
         
         <div class="info">
             <h3>الإجراءات:</h3>
-            <a href="{url_for('login')}" class="btn btn-blue">صفحة تسجيل الدخول</a>
+            <a href="{url_for('index')}" class="btn btn-blue">صفحة تسجيل الدخول</a>
             <a href="{url_for('dashboard')}" class="btn btn-blue">لوحة التحكم</a>
         </div>
         
         <div class="info">
             <h3>اختبار المستخدم الثابت:</h3>
-            <form method="POST" action="{url_for('login')}">
+            <form method="POST" action="{url_for('index')}">
                 <input type="hidden" name="csrf_token" value="{csrf_token}">
                 <input type="hidden" name="username" value="araby">
                 <input type="hidden" name="password" value="92321066">
@@ -8184,7 +8184,7 @@ def debug_auth():
         
         <div class="info">
             <h3>اختبار يدوي:</h3>
-            <form method="POST" action="{url_for('login')}">
+            <form method="POST" action="{url_for('index')}">
                 <input type="hidden" name="csrf_token" value="{csrf_token}">
                 <div style="margin: 10px 0;">
                     <label>اسم المستخدم:</label><br>

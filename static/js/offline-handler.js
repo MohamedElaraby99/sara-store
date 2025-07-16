@@ -15,6 +15,12 @@ class OfflineHandler {
     try {
       console.log("🚀 تهيئة OfflineHandler...");
 
+      // التحقق من أن الصفحة ليست صفحة مصادقة
+      if (this.isAuthPage()) {
+        console.log("🚫 صفحة مصادقة - تخطي تهيئة OfflineHandler");
+        return;
+      }
+
       // انتظار تحميل المدراء الأساسية
       await this.waitForManagers();
 
@@ -329,6 +335,11 @@ class OfflineHandler {
   }
 
   updateConnectionButton() {
+    // التحقق من أن الصفحة ليست صفحة مصادقة
+    if (this.isAuthPage()) {
+      return;
+    }
+
     const btn = document.querySelector("#connection-status-btn");
     const icon = document.querySelector("#connection-icon");
     const text = document.querySelector("#connection-text");
@@ -510,6 +521,17 @@ class OfflineHandler {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  }
+
+  isAuthPage() {
+    const authPages = [
+      "/login",
+      "/logout",
+      "/forgot-password",
+      "/reset-password",
+      "/change-password",
+    ];
+    return authPages.includes(window.location.pathname);
   }
 
   // طرق تشخيص وصيانة

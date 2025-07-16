@@ -51,6 +51,15 @@ const STATIC_FILES = [
   "/price-ticket",
 ];
 
+// صفحات يجب استبعادها من التخزين المؤقت (صفحات المصادقة)
+const EXCLUDED_PAGES = [
+  "/login",
+  "/logout",
+  "/forgot-password",
+  "/reset-password",
+  "/change-password",
+];
+
 // API endpoints للتخزين المؤقت
 const API_URLS = [
   "/api/products",
@@ -131,6 +140,12 @@ self.addEventListener("fetch", (event) => {
 
   // تجاهل طلبات POST/PUT/DELETE (سيتم التعامل معها في Sync Manager)
   if (request.method !== "GET") {
+    return;
+  }
+
+  // استبعاد صفحات المصادقة من التخزين المؤقت
+  if (EXCLUDED_PAGES.includes(url.pathname)) {
+    // السماح بالطلب للشبكة مباشرة بدون تخزين مؤقت
     return;
   }
 
