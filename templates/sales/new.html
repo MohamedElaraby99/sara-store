@@ -450,13 +450,196 @@
         }
     }
 
+    /* تصميم الفاتورة الجديد - مناسب لطابعة الكاشير */
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Courier New', monospace;
         margin: 0;
-        padding: 20px;
-        background: white;
-        direction: rtl;
+        padding: 0;
+        background: #fff;
         color: #000;
+        line-height: 1.2;
+        font-size: 12px;
+    }
+
+    .receipt-container {
+        width: 80mm;
+        max-width: 80mm;
+        margin: 0 auto;
+        background: white;
+        padding: 5px;
+        font-size: 12px;
+    }
+
+    .header {
+        text-align: center;
+        border-bottom: 1px dashed #000;
+        padding: 5px 0;
+        margin-bottom: 5px;
+    }
+
+    .store-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .store-address {
+        font-size: 10px;
+        margin: 2px 0;
+    }
+
+    .store-phone {
+        font-size: 10px;
+        margin: 2px 0;
+    }
+
+    .invoice-title {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+
+    .invoice-info {
+        border-bottom: 1px dashed #000;
+        padding: 5px 0;
+        margin-bottom: 5px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+        font-size: 10px;
+    }
+
+    .items-section {
+        margin: 5px 0;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+        font-size: 10px;
+    }
+
+    .item-name {
+        flex: 2;
+        text-align: right;
+    }
+
+    .item-qty {
+        flex: 1;
+        text-align: center;
+    }
+
+    .item-price {
+        flex: 1;
+        text-align: center;
+    }
+
+    .item-total {
+        flex: 1;
+        text-align: left;
+    }
+
+    .items-header {
+        border-bottom: 1px solid #000;
+        padding: 3px 0;
+        margin-bottom: 3px;
+        font-weight: bold;
+        font-size: 10px;
+    }
+
+    .total-section {
+        border-top: 1px dashed #000;
+        padding: 5px 0;
+        margin-top: 5px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+        font-size: 11px;
+    }
+
+    .grand-total {
+        font-size: 14px;
+        font-weight: bold;
+        border-top: 1px solid #000;
+        padding-top: 3px;
+        margin-top: 3px;
+    }
+
+    .footer {
+        text-align: center;
+        border-top: 1px dashed #000;
+        padding: 5px 0;
+        margin-top: 5px;
+        font-size: 9px;
+    }
+
+    .payment-method {
+        margin: 3px 0;
+        font-size: 10px;
+    }
+
+    .thank-you {
+        font-size: 11px;
+        font-weight: bold;
+        margin: 3px 0;
+    }
+
+    .validity {
+        font-size: 8px;
+        margin: 2px 0;
+    }
+
+    .no-print {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .no-print button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .print-btn {
+        background: #000;
+        color: white;
+    }
+
+    .close-btn {
+        background: #333;
+        color: white;
+    }
+
+    @media print {
+        body {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .receipt-container {
+            width: 80mm !important;
+            max-width: 80mm !important;
+            margin: 0 !important;
+            padding: 2px !important;
+        }
     }
 
     .invoice-container {
@@ -1825,15 +2008,141 @@
         }
 
         const invoiceContent = generateInvoiceHTML(lastSaleData);
-        document.getElementById('invoiceContent').innerHTML = invoiceContent;
+
+        // إضافة CSS للتصميم الجديد في المعاينة
+        const modalContent = `
+            <style>
+                .modal-body {
+                    background: #f8f9fa;
+                    padding: 20px;
+                }
+                .receipt-container {
+                    width: 80mm;
+                    max-width: 80mm;
+                    margin: 0 auto;
+                    background: white;
+                    padding: 5px;
+                    font-size: 12px;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                    border-radius: 5px;
+                }
+                .header {
+                    text-align: center;
+                    border-bottom: 1px dashed #000;
+                    padding: 5px 0;
+                    margin-bottom: 5px;
+                }
+                .store-name {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin: 0;
+                }
+                .store-address {
+                    font-size: 10px;
+                    margin: 2px 0;
+                }
+                .store-phone {
+                    font-size: 10px;
+                    margin: 2px 0;
+                }
+                .invoice-title {
+                    font-size: 14px;
+                    font-weight: bold;
+                    margin: 5px 0;
+                }
+                .invoice-info {
+                    border-bottom: 1px dashed #000;
+                    padding: 5px 0;
+                    margin-bottom: 5px;
+                }
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 2px 0;
+                    font-size: 10px;
+                }
+                .items-section {
+                    margin: 5px 0;
+                }
+                .item-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 2px 0;
+                    font-size: 10px;
+                }
+                .item-name {
+                    flex: 2;
+                    text-align: right;
+                }
+                .item-qty {
+                    flex: 1;
+                    text-align: center;
+                }
+                .item-price {
+                    flex: 1;
+                    text-align: center;
+                }
+                .item-total {
+                    flex: 1;
+                    text-align: left;
+                }
+                .items-header {
+                    border-bottom: 1px solid #000;
+                    padding: 3px 0;
+                    margin-bottom: 3px;
+                    font-weight: bold;
+                    font-size: 10px;
+                }
+                .total-section {
+                    border-top: 1px dashed #000;
+                    padding: 5px 0;
+                    margin-top: 5px;
+                }
+                .total-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 2px 0;
+                    font-size: 11px;
+                }
+                .grand-total {
+                    font-size: 14px;
+                    font-weight: bold;
+                    border-top: 1px solid #000;
+                    padding-top: 3px;
+                    margin-top: 3px;
+                }
+                .footer {
+                    text-align: center;
+                    border-top: 1px dashed #000;
+                    padding: 5px 0;
+                    margin-top: 5px;
+                    font-size: 9px;
+                }
+                .payment-method {
+                    margin: 3px 0;
+                    font-size: 10px;
+                }
+                .thank-you {
+                    font-size: 11px;
+                    font-weight: bold;
+                    margin: 3px 0;
+                }
+                .validity {
+                    font-size: 8px;
+                    margin: 2px 0;
+                }
+            </style>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h5>معاينة فاتورة الكاشير</h5>
+                <small class="text-muted">تصميم مناسب لطابعة الكاشير 80mm</small>
+            </div>
+            ${invoiceContent}
+        `;
+
+        document.getElementById('invoiceContent').innerHTML = modalContent;
 
         const invoiceModal = new bootstrap.Modal(document.getElementById('invoiceModal'));
         invoiceModal.show();
-
-        // إنشاء رمز QR بعد عرض الفاتورة
-        setTimeout(() => {
-            generateQRCode(lastSaleData);
-        }, 100);
     }
 
     function printInvoice() {
@@ -1854,177 +2163,201 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>فاتورة البيع #${lastSaleData.sale_id}</title>
                 <style>
-                    @media print {
-                        body { margin: 0; padding: 0; }
-                        .no-print { display: none !important; }
-                    }
-                    body {
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        margin: 0;
-                        padding: 20px;
-                        background: white;
-                        direction: rtl;
+                    * { box-sizing: border-box; }
+                    
+                    body { 
+                        font-family: 'Courier New', monospace; 
+                        margin: 0; 
+                        padding: 0;
+                        background: #fff;
                         color: #000;
+                        line-height: 1.2;
+                        font-size: 12px;
                     }
-                    .invoice-container {
-                        max-width: 800px;
+                    
+                    .receipt-container {
+                        width: 80mm;
+                        max-width: 80mm;
                         margin: 0 auto;
                         background: white;
-                        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-                        border-radius: 10px;
-                        overflow: hidden;
-                        border: 2px solid #000;
+                        padding: 5px;
+                        font-size: 12px;
                     }
-                    .invoice-header {
-                        background: #000;
-                        color: white;
-                        padding: 30px;
+                    
+                    .header {
                         text-align: center;
-                        position: relative;
-                        border-bottom: 3px solid #333;
+                        border-bottom: 1px dashed #000;
+                        padding: 5px 0;
+                        margin-bottom: 5px;
                     }
-                    .invoice-title {
-                        font-size: 2.5rem;
+                    
+                    .store-name {
+                        font-size: 16px;
                         font-weight: bold;
                         margin: 0;
-                        position: relative;
-                        z-index: 1;
-                        text-transform: uppercase;
-                        letter-spacing: 2px;
                     }
-                    .invoice-subtitle {
-                        font-size: 1.2rem;
-                        opacity: 0.9;
-                        margin: 10px 0 0 0;
-                        position: relative;
-                        z-index: 1;
+                    
+                    .store-address {
+                        font-size: 10px;
+                        margin: 2px 0;
                     }
+                    
+                    .store-phone {
+                        font-size: 10px;
+                        margin: 2px 0;
+                    }
+                    
+                    .invoice-title {
+                        font-size: 14px;
+                        font-weight: bold;
+                        margin: 5px 0;
+                    }
+                    
                     .invoice-info {
-                        padding: 30px;
-                        background: #f8f9fa;
-                        border-bottom: 1px solid #ddd;
+                        border-bottom: 1px dashed #000;
+                        padding: 5px 0;
+                        margin-bottom: 5px;
                     }
+                    
                     .info-row {
                         display: flex;
                         justify-content: space-between;
-                        margin-bottom: 15px;
-                        padding: 10px 0;
-                        border-bottom: 1px solid #e9ecef;
+                        margin: 2px 0;
+                        font-size: 10px;
                     }
-                    .info-row:last-child {
-                        border-bottom: none;
+                    
+                    .items-section {
+                        margin: 5px 0;
                     }
-                    .info-label {
-                        font-weight: bold;
-                        color: #000;
+                    
+                    .item-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 2px 0;
+                        font-size: 10px;
                     }
-                    .info-value {
-                        color: #333;
+                    
+                    .item-name {
+                        flex: 2;
+                        text-align: right;
                     }
-                    .invoice-items {
-                        padding: 30px;
-                    }
-                    .items-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-bottom: 30px;
-                        border: 2px solid #000;
-                    }
-                    .items-table th {
-                        background: #000;
-                        color: white;
-                        padding: 15px;
+                    
+                    .item-qty {
+                        flex: 1;
                         text-align: center;
-                        font-weight: bold;
-                        border: 1px solid #333;
                     }
-                    .items-table td {
-                        padding: 12px 15px;
-                        border: 1px solid #ddd;
+                    
+                    .item-price {
+                        flex: 1;
                         text-align: center;
-                        color: #000;
                     }
-                    .items-table tr:nth-child(even) {
-                        background: #f8f9fa;
+                    
+                    .item-total {
+                        flex: 1;
+                        text-align: left;
                     }
-                    .items-table tr:nth-child(odd) {
-                        background: white;
+                    
+                    .items-header {
+                        border-bottom: 1px solid #000;
+                        padding: 3px 0;
+                        margin-bottom: 3px;
+                        font-weight: bold;
+                        font-size: 10px;
                     }
-                    .invoice-totals {
-                        padding: 30px;
-                        background: #000;
-                        color: white;
-                        border-top: 3px solid #333;
+                    
+                    .total-section {
+                        border-top: 1px dashed #000;
+                        padding: 5px 0;
+                        margin-top: 5px;
                     }
+                    
                     .total-row {
                         display: flex;
                         justify-content: space-between;
-                        margin-bottom: 10px;
-                        padding: 8px 0;
-                        border-bottom: 1px solid #333;
+                        margin: 2px 0;
+                        font-size: 11px;
                     }
-                    .total-row:last-child {
-                        border-bottom: none;
-                    }
-                    .total-row.final {
-                        border-top: 2px solid #fff;
-                        padding-top: 15px;
-                        margin-top: 15px;
-                        font-size: 1.2rem;
+                    
+                    .grand-total {
+                        font-size: 14px;
                         font-weight: bold;
+                        border-top: 1px solid #000;
+                        padding-top: 3px;
+                        margin-top: 3px;
                     }
-                    .invoice-footer {
-                        padding: 20px 30px;
-                        background: #333;
-                        color: white;
+                    
+                    .footer {
                         text-align: center;
-                        border-top: 3px solid #000;
+                        border-top: 1px dashed #000;
+                        padding: 5px 0;
+                        margin-top: 5px;
+                        font-size: 9px;
                     }
-                    .qr-code {
-                        text-align: center;
-                        margin: 20px 0;
-                        padding: 20px;
-                        background: #f8f9fa;
-                        border: 1px solid #ddd;
+                    
+                    .payment-method {
+                        margin: 3px 0;
+                        font-size: 10px;
                     }
-                    .qr-code img {
-                        width: 100px;
-                        height: 100px;
-                        border: 2px solid #000;
+                    
+                    .thank-you {
+                        font-size: 11px;
+                        font-weight: bold;
+                        margin: 3px 0;
                     }
-                    .print-btn {
+                    
+                    .validity {
+                        font-size: 8px;
+                        margin: 2px 0;
+                    }
+                    
+                    .no-print {
                         position: fixed;
-                        top: 20px;
+                        bottom: 20px;
                         right: 20px;
-                        background: #000;
-                        color: white;
-                        border: 2px solid #000;
+                        display: flex;
+                        gap: 10px;
+                    }
+                    
+                    .no-print button {
                         padding: 10px 20px;
+                        border: none;
                         border-radius: 5px;
                         cursor: pointer;
-                        font-size: 16px;
-                        font-weight: bold;
+                        font-weight: 600;
+                        font-size: 12px;
                     }
-                    .print-btn:hover {
+                    
+                    .print-btn {
+                        background: #000;
+                        color: white;
+                    }
+                    
+                    .close-btn {
                         background: #333;
+                        color: white;
                     }
+                    
                     @media print {
+                        body { 
+                            background: white !important; 
+                            padding: 0 !important; 
+                            margin: 0 !important;
+                        }
                         .no-print { display: none !important; }
-                        body { margin: 0; padding: 0; }
-                        .invoice-container { box-shadow: none; border: 1px solid #000; }
-                        .invoice-header { background: #000 !important; }
-                        .invoice-totals { background: #000 !important; }
-                        .invoice-footer { background: #333 !important; }
-                        .items-table { border: 1px solid #000; }
-                        .items-table th { background: #000 !important; }
-                        .items-table td { border: 1px solid #000; }
+                        .receipt-container { 
+                            width: 80mm !important;
+                            max-width: 80mm !important;
+                            margin: 0 !important;
+                            padding: 2px !important;
+                        }
                     }
                 </style>
             </head>
             <body>
-                <button class="print-btn no-print" onclick="window.print()">
-                    🖨️ طباعة الفاتورة
-                </button>
+                <div class="no-print">
+                    <button class="print-btn" onclick="window.print()">طباعة</button>
+                    <button class="close-btn" onclick="window.close()">إغلاق</button>
+                </div>
                 ${invoiceContent}
             </body>
             </html>
@@ -2047,12 +2380,12 @@
         let itemsHTML = '';
         saleData.items.forEach(item => {
             itemsHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.unit_price.toFixed(2)} ج.م</td>
-                    <td>${item.total_price.toFixed(2)} ج.م</td>
-                </tr>
+                <div class="item-row">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-qty">${item.quantity}</div>
+                    <div class="item-price">${item.unit_price.toFixed(2)}</div>
+                    <div class="item-total">${item.total_price.toFixed(2)}</div>
+                </div>
             `;
         });
 
@@ -2060,7 +2393,7 @@
         if (saleData.discount_amount > 0) {
             discountHTML = `
                 <div class="total-row">
-                    <span>الخصم (${saleData.discount_type === 'percentage' ? saleData.discount_value + '%' : saleData.discount_value + ' ج.م'}):</span>
+                    <span>الخصم:</span>
                     <span>-${saleData.discount_amount.toFixed(2)} ج.م</span>
                 </div>
             `;
@@ -2081,75 +2414,64 @@
         }
 
         return `
-            <div class="invoice-container">
-                <div class="invoice-header">
-                    <div style="text-align: center; position: relative; z-index: 1;">
-                        <h1 class="invoice-title">فاتورة البيع</h1>
-                        <h2 style="margin: 10px 0; font-size: 1.8rem; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 1px;">Sara Store</h2>
-                        <p style="margin: 5px 0; font-size: 1rem; opacity: 0.9; font-weight: 500;">منية النصر منتصف شارع المهندس</p>
-                        <p style="margin: 5px 0; font-size: 1rem; opacity: 0.9; font-weight: 500;">01093126299</p>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
-                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">فاتورة ضريبية مبسطة</p>
-                        </div>
-                    </div>
+            <div class="receipt-container">
+                <div class="header">
+                    <div class="store-name">Sara Store</div>
+                    <div class="store-address">منية النصر منتصف شارع المهندس</div>
+                    <div class="store-phone">01093126299</div>
+                    <div class="invoice-title">فاتورة ضريبية مبسطة</div>
                 </div>
-                
+
                 <div class="invoice-info">
                     <div class="info-row">
-                        <span class="info-label">رقم الفاتورة:</span>
-                        <span class="info-value">#${saleData.sale_id}</span>
+                        <span>رقم البيع:</span>
+                        <span>#${saleData.sale_id}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">تاريخ البيع:</span>
-                        <span class="info-value">${saleData.sale_date}</span>
+                        <span>التاريخ:</span>
+                        <span>${saleData.sale_date}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">العميل:</span>
-                        <span class="info-value">${customerName}</span>
+                        <span>العميل:</span>
+                        <span>${customerName}</span>
                     </div>
                     ${customerPhone ? `
                     <div class="info-row">
-                        <span class="info-label">رقم الهاتف:</span>
-                        <span class="info-value">${customerPhone}</span>
+                        <span>الهاتف:</span>
+                        <span>${customerPhone}</span>
                     </div>
                     ` : ''}
                     <div class="info-row">
-                        <span class="info-label">طريقة الدفع:</span>
-                        <span class="info-value">${paymentTypeText}</span>
+                        <span>طريقة الدفع:</span>
+                        <span>${paymentTypeText}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">البائع:</span>
-                        <span class="info-value">${saleData.seller}</span>
+                        <span>البائع:</span>
+                        <span>${saleData.seller}</span>
                     </div>
                 </div>
 
-                <div class="invoice-items">
-                    <h3 style="margin-bottom: 20px; color: #000; font-weight: bold; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px;">تفاصيل المنتجات</h3>
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 40%;">المنتج</th>
-                                <th style="width: 20%;">الكمية</th>
-                                <th style="width: 20%;">سعر الوحدة</th>
-                                <th style="width: 20%;">الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHTML}
-                        </tbody>
-                    </table>
+                <div class="items-section">
+                    <div class="items-header">
+                        <div class="item-row">
+                            <div class="item-name">المنتج</div>
+                            <div class="item-qty">الكمية</div>
+                            <div class="item-price">السعر</div>
+                            <div class="item-total">الإجمالي</div>
+                        </div>
+                    </div>
+                    ${itemsHTML}
                 </div>
 
-                <div class="invoice-totals">
-                    <h3 style="margin-bottom: 20px; color: white; font-weight: bold; text-align: center; border-bottom: 2px solid #fff; padding-bottom: 10px;">ملخص الحساب</h3>
+                <div class="total-section">
                     <div class="total-row">
                         <span>المجموع الفرعي:</span>
                         <span>${saleData.subtotal.toFixed(2)} ج.م</span>
                     </div>
                     ${discountHTML}
                     ${paidAmountHTML}
-                    <div class="total-row final">
-                        <span>الإجمالي النهائي:</span>
+                    <div class="total-row grand-total">
+                        <span>المجموع الكلي:</span>
                         <span>${saleData.total_amount.toFixed(2)} ج.م</span>
                     </div>
                 </div>
@@ -2157,38 +2479,17 @@
                 ${saleData.notes ? `
                 <div class="invoice-info">
                     <div class="info-row">
-                        <span class="info-label">ملاحظات:</span>
-                        <span class="info-value">${saleData.notes}</span>
+                        <span>ملاحظات:</span>
+                        <span>${saleData.notes}</span>
                     </div>
                 </div>
                 ` : ''}
 
-                <div class="invoice-info" style="margin-top: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div style="text-align: center; flex: 1;">
-                            <div style="border-top: 2px solid #dee2e6; padding-top: 10px; margin-top: 20px;">
-                                <p style="margin: 0; font-weight: bold;">توقيع العميل</p>
-                                <small style="color: #6c757d;">Customer Signature</small>
-                            </div>
-                        </div>
-                        <div style="text-align: center; flex: 1;">
-                            <div style="border-top: 2px solid #dee2e6; padding-top: 10px; margin-top: 20px;">
-                                <p style="margin: 0; font-weight: bold;">توقيع البائع</p>
-                                <small style="color: #6c757d;">Seller Signature</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="qr-code">
-                    <div id="qrCode"></div>
-                </div>
-
-                <div class="invoice-footer">
-                    <p style="margin: 0 0 10px 0; font-size: 1.1rem; font-weight: bold;">شكراً لثقتكم بنا</p>
-                    <p style="margin: 0 0 5px 0;">Sara Store - جميع الحقوق محفوظة © 2025</p>
-                    <p style="margin: 0 0 5px 0; font-size: 0.8rem; opacity: 0.8;">هذه الفاتورة صالحة لمدة 30 يوماً من تاريخ الإصدار</p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">للاستفسارات: 01093126299</p>
+                <div class="footer">
+                    <div class="payment-method">تم الدفع ${paymentTypeText === 'نقدي' ? 'نقداً' : 'آجل'}</div>
+                    <div class="thank-you">شكراً لثقتكم بنا</div>
+                    <div class="validity">هذه الفاتورة صالحة لمدة 30 يوماً</div>
+                    <div class="validity">للاستفسارات: 01093126299</div>
                 </div>
             </div>
         `;
