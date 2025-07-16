@@ -54,7 +54,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///library_dev.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///sara.db'
     SQLALCHEMY_ECHO = True
     
     # Disable CSRF for easier development
@@ -109,7 +109,7 @@ class VPSConfig(Config):
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
     else:
         # SQLite fallback for VPS
-        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.abspath('library_production.db')}"
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.abspath('sara.db')}"
     
     # Security settings
     SESSION_COOKIE_SECURE = os.environ.get('HTTPS_ENABLED', 'false').lower() == 'true'
