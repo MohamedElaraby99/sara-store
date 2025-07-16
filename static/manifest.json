@@ -1,6 +1,6 @@
 {
-  "name": "Norko Store - نظام إدارة المكتبة",
-  "short_name": "Norko Store",
+  "name": "Sara Store - نظام إدارة المكتبة",
+  "short_name": "Sara Store",
   "description": "نظام إدارة شامل للمكتبة مع دعم الوضع غير المتصل",
   "start_url": "/",
   "display": "standalone",

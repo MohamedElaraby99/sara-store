@@ -565,64 +565,42 @@ h3,
   margin-top: 1rem;
 }
 
-/* إضافة أنماط لشريط الحالة غير المتصلة */
-.offline-status-bar {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 5px 0;
-  position: fixed;
-  top: 70px; /* بعد الهيدر */
-  left: 0;
-  right: 0;
-  z-index: 1035;
-  font-size: 0.8rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* تم إزالة أنماط شريط الحالة الأوفلاين */
+
+/* أنماط زر حالة الاتصال */
+#connection-status-btn {
   transition: all 0.3s ease;
-  max-height: 45px;
-}
-
-.offline-status-bar.hidden {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-
-.offline-status-bar .container-fluid {
-  padding: 0 15px;
-}
-
-.offline-status-bar .row {
-  margin: 0;
-  align-items: center;
-}
-
-.offline-status-bar .col-auto {
-  padding: 0 5px;
-}
-
-.network-status {
-  padding: 3px 8px;
-  border-radius: 15px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  min-width: 80px;
 }
 
-.network-status.online {
+#connection-status-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#connection-status-btn.online {
   background: linear-gradient(135deg, #d4edda, #c3e6cb);
   color: #155724;
-  border: 1px solid #c3e6cb;
+  border-color: #c3e6cb;
 }
 
-.network-status.offline {
+#connection-status-btn.online:hover {
+  background: linear-gradient(135deg, #c3e6cb, #b1dfbb);
+  color: #155724;
+}
+
+#connection-status-btn.offline {
   background: linear-gradient(135deg, #f8d7da, #f5c6cb);
   color: #721c24;
-  border: 1px solid #f5c6cb;
+  border-color: #f5c6cb;
   animation: pulse-warning 2s infinite;
+}
+
+#connection-status-btn.offline:hover {
+  background: linear-gradient(135deg, #f5c6cb, #f1b0b7);
+  color: #721c24;
 }
 
 @keyframes pulse-warning {
@@ -635,16 +613,13 @@ h3,
   }
 }
 
-.sync-indicator {
+#connection-status-btn.syncing {
+  background: linear-gradient(135deg, #cce7ff, #b3d9ff);
   color: #0d6efd;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  background: rgba(13, 110, 253, 0.1);
-  border-radius: 10px;
-  border: 1px solid rgba(13, 110, 253, 0.2);
+  border-color: #b3d9ff;
 }
 
-.sync-indicator.syncing {
+#connection-status-btn.syncing #connection-icon {
   animation: spin 1s linear infinite;
 }
 
@@ -657,114 +632,39 @@ h3,
   }
 }
 
-.last-sync-time {
-  font-size: 0.7rem;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.offline-status-bar .btn-sm {
-  font-size: 0.75rem;
-  padding: 3px 8px;
-  border-radius: 12px;
-}
-
-.offline-status-bar .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
 /* تعديل padding الجسم */
 body {
-  padding-top: 115px !important;
+  padding-top: 100px !important;
 }
 
 /* تحسينات الموبايل */
 @media (max-width: 768px) {
-  .offline-status-bar {
-    top: 55px;
-    padding: 3px 0;
-    font-size: 0.7rem;
-    max-height: 35px;
+  #connection-status-btn {
+    min-width: 70px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 
-  .offline-status-bar .container-fluid {
-    padding: 0 10px;
-  }
-
-  .offline-status-bar .col-auto {
-    padding: 0 3px;
-  }
-
-  .network-status {
-    padding: 2px 6px;
-    font-size: 0.7rem;
-  }
-
-  .last-sync-time {
-    font-size: 0.65rem;
-    display: none; /* إخفاء في الموبايل لتوفير المساحة */
-  }
-
-  .offline-status-bar .btn-sm {
-    font-size: 0.7rem;
-    padding: 2px 6px;
+  #connection-status-btn #connection-text {
+    display: none; /* إخفاء النص في الموبايل لتوفير المساحة */
   }
 
   body {
-    padding-top: 95px !important;
-  }
-
-  /* إخفاء الشريط عند التمرير للأسفل على الموبايل */
-  .offline-status-bar.mobile-hidden {
-    transform: translateY(-100%);
+    padding-top: 100px !important;
   }
 }
 
 /* تحسينات إضافية للشاشات الصغيرة جداً */
 @media (max-width: 480px) {
-  .offline-status-bar {
-    font-size: 0.65rem;
-    padding: 2px 0;
-    top: 50px;
-    max-height: 30px;
-  }
-
-  .offline-status-bar .btn-sm {
-    font-size: 0.65rem;
-    padding: 1px 4px;
-  }
-
-  .sync-indicator {
-    font-size: 0.65rem;
-    padding: 1px 4px;
-  }
-
-  .network-status {
-    font-size: 0.65rem;
-    padding: 1px 4px;
-  }
-
   body {
-    padding-top: 85px !important;
+    padding-top: 100px !important;
   }
 }
 
 /* تحسين التنسيق في الاتجاه الأفقي للموبايل */
 @media (max-width: 768px) and (orientation: landscape) {
-  .offline-status-bar {
-    padding: 2px 0;
-    top: 45px;
-    max-height: 25px;
-    font-size: 0.65rem;
-  }
-
-  .last-sync-time {
-    display: none;
-  }
-
   body {
-    padding-top: 75px !important;
+    padding-top: 100px !important;
   }
 }
 

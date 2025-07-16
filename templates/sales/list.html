@@ -492,8 +492,21 @@
 </style>
 
 <script>
+    // تعريف المتغيرات العامة
     let currentSaleId = null;
     let debounceTimer = null;
+
+    // التأكد من تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('صفحة المبيعات محملة بنجاح');
+    });
+
+    // تعريف وظيفة الطباعة في النطاق العام
+    window.printSale = function (saleId) {
+        console.log('طباعة البيع رقم:', saleId);
+        currentSaleId = saleId;
+        printCurrentSale();
+    };
 
     // تفعيل tooltips
     document.addEventListener('DOMContentLoaded', function () {
@@ -761,8 +774,8 @@
                     font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
                     margin: 0; 
                     padding: 20px;
-                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                    color: #333;
+                    background: #fff;
+                    color: #000;
                     line-height: 1.6;
                 }
                 
@@ -771,16 +784,17 @@
                     margin: 0 auto;
                     background: white;
                     box-shadow: 0 0 20px rgba(0,0,0,0.1);
-                    border-radius: 10px;
+                    border: 2px solid #000;
                     overflow: hidden;
                 }
                 
                 .header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: #000;
                     color: white;
                     padding: 30px;
                     text-align: center;
                     position: relative;
+                    border-bottom: 3px solid #333;
                 }
                 
                 .header::before {
@@ -824,14 +838,14 @@
                     padding: 20px;
                     background: #f8f9fa;
                     border-radius: 8px;
-                    border-left: 4px solid #667eea;
+                    border-left: 4px solid #000;
                 }
                 
                 .invoice-details h3 {
-                    color: #667eea;
+                    color: #000;
                     margin: 0 0 15px 0;
                     font-size: 1.1rem;
-                    border-bottom: 2px solid #e9ecef;
+                    border-bottom: 2px solid #000;
                     padding-bottom: 5px;
                 }
                 
@@ -847,7 +861,8 @@
                 }
                 
                 .invoice-details .value {
-                    color: #6c757d;
+                    color: #000;
+                    font-weight: 600;
                 }
                 
                 .items-section {
@@ -855,10 +870,11 @@
                 }
                 
                 .items-header {
-                    background: #667eea;
+                    background: #000;
                     color: white;
                     padding: 15px 20px;
                     margin: 0 -30px 20px -30px;
+                    border-bottom: 2px solid #333;
                 }
                 
                 .items-header h3 {
@@ -871,12 +887,12 @@
                     border-collapse: collapse;
                     margin-bottom: 20px;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    border-radius: 8px;
+                    border: 2px solid #000;
                     overflow: hidden;
                 }
                 
                 th {
-                    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                    background: #000;
                     color: white;
                     padding: 15px;
                     text-align: center;
@@ -884,13 +900,15 @@
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                     font-size: 0.9rem;
+                    border: 1px solid #333;
                 }
                 
                 td {
                     padding: 12px 15px;
                     text-align: center;
-                    border-bottom: 1px solid #e9ecef;
+                    border: 1px solid #ddd;
                     transition: background-color 0.3s ease;
+                    color: #000;
                 }
                 
                 tr:nth-child(even) td {
@@ -904,12 +922,12 @@
                 .product-name {
                     text-align: right !important;
                     font-weight: 600;
-                    color: #495057;
+                    color: #000;
                 }
                 
                 .quantity {
-                    background: #e3f2fd;
-                    color: #1976d2;
+                    background: #000;
+                    color: white;
                     font-weight: 600;
                     border-radius: 20px;
                     padding: 5px 12px;
@@ -917,16 +935,17 @@
                 }
                 
                 .price {
-                    color: #2e7d32;
+                    color: #000;
                     font-weight: 600;
                 }
                 
                 .total-section {
-                    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+                    background: #000;
                     color: white;
                     padding: 20px;
                     margin: 20px -30px -30px -30px;
                     text-align: center;
+                    border-top: 3px solid #333;
                 }
                 
                 .total-amount {
@@ -940,8 +959,9 @@
                     text-align: center;
                     margin-top: 30px;
                     padding: 20px;
-                    border-top: 2px dashed #dee2e6;
-                    color: #6c757d;
+                    border-top: 2px solid #000;
+                    color: #000;
+                    background: #f8f9fa;
                 }
                 
                 .no-print {
@@ -964,12 +984,12 @@
                 }
                 
                 .print-btn {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: #000;
                     color: white;
                 }
                 
                 .close-btn {
-                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    background: #333;
                     color: white;
                 }
                 
@@ -981,8 +1001,12 @@
                 @media print {
                     body { background: white !important; padding: 0 !important; }
                     .no-print { display: none !important; }
-                    .invoice-container { box-shadow: none !important; }
-                    .total-section { margin-bottom: 0 !important; }
+                    .invoice-container { box-shadow: none !important; border: 1px solid #000 !important; }
+                    .header { background: #000 !important; }
+                    .total-section { background: #000 !important; margin-bottom: 0 !important; }
+                    .items-table { border: 1px solid #000 !important; }
+                    .items-table th { background: #000 !important; }
+                    .items-table td { border: 1px solid #000 !important; }
                 }
                 
                 .company-info {
@@ -995,11 +1019,12 @@
         <body>
             <div class="invoice-container">
                 <div class="header">
-                    <h1>📚 Norko Store</h1>
-                    <h2>فاتورة بيع</h2>
+                    <h1>فاتورة البيع</h1>
+                    <h2>Sara Store</h2>
                     <div class="company-info">
-                        <p> 01097374712 | البرامون شارع السوق بجوار المدرسة الاعدادية | 01507000704 </p>
-                        <p> إدارة : محمد نور أحمد</p>
+                        <p>منية النصر منتصف شارع المهندس</p>
+                        <p>01093126299</p>
+                        <p>فاتورة ضريبية مبسطة</p>
                     </div>
                 </div>
                 <div class="invoice-body">
@@ -1014,8 +1039,8 @@
                 </div>
             </div>
             <div class="no-print">
-                <button class="print-btn" onclick="window.print()">🖨️ طباعة</button>
-                <button class="close-btn" onclick="window.close()">❌ إغلاق</button>
+                <button class="print-btn" onclick="window.print()">طباعة</button>
+                <button class="close-btn" onclick="window.close()">إغلاق</button>
             </div>
             
             <style>
@@ -1024,120 +1049,151 @@
                     100% { transform: rotate(360deg); }
                 }
             </style>
-        </body>
-        </html>
-    `);
+            <script>
+                // وظيفة الطباعة للنافذة المنبثقة
+                function printInvoice() {
+                    window.print();
+                }
+                
+                // طباعة تلقائية عند تحميل الصفحة (اختياري)
+                window.onload = function() {
+                    console.log('نافذة الفاتورة محملة بنجاح');
+                };
+</script>
+</body>
 
-        // Fetch and display invoice content
-        fetch(`/api/sales/${currentSaleId}`)
-            .then(response => response.json())
-            .then(sale => {
-                const content = generatePrintableInvoice(sale);
-                printWindow.document.getElementById('invoice-content').innerHTML = content;
-            })
-            .catch(error => {
-                printWindow.document.getElementById('invoice-content').innerHTML = `
-                    <div style="text-align: center; padding: 50px; color: #dc3545;">
-                        <h3>❌ حدث خطأ في تحميل الفاتورة</h3>
-                        <p>يرجى المحاولة مرة أخرى</p>
-                    </div>
-                `;
-            });
-    }
+</html>
+`);
 
-    function generatePrintableInvoice(sale) {
-        let itemsHTML = '';
-        let total = 0;
+// Fetch and display invoice content
+fetch(`/api/sales/${currentSaleId}`)
+.then(response => response.json())
+.then(sale => {
+const content = generatePrintableInvoice(sale);
+printWindow.document.getElementById('invoice-content').innerHTML = content;
+})
+.catch(error => {
+printWindow.document.getElementById('invoice-content').innerHTML = `
+<div style="text-align: center; padding: 50px; color: #dc3545;">
+    <h3>❌ حدث خطأ في تحميل الفاتورة</h3>
+    <p>يرجى المحاولة مرة أخرى</p>
+</div>
+`;
+});
+}
 
-        sale.items.forEach((item, index) => {
-            itemsHTML += `
+function printInvoice() {
+// محاولة الطباعة المباشرة
+try {
+window.print();
+} catch (error) {
+console.error('خطأ في الطباعة المباشرة:', error);
+alert('حدث خطأ في الطباعة. يرجى المحاولة مرة أخرى.');
+}
+}
+
+function generatePrintableInvoice(sale) {
+let itemsHTML = '';
+let total = 0;
+
+sale.items.forEach((item, index) => {
+itemsHTML += `
+<tr>
+    <td class="product-name">
+        <div style="display: flex; align-items: center;">
+            <span
+                style="background: #000; color: white; padding: 5px 10px; border-radius: 50%; margin-left: 10px; font-size: 0.8rem;">${index
+                + 1}</span>
+            <div>
+                <div style="font-weight: 600;">${item.product_name}</div>
+                <small style="color: #000;">${item.unit_type || 'وحدة'}</small>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="quantity">${item.quantity}</span>
+    </td>
+    <td class="price">${item.unit_price.toFixed(2)} ج.م</td>
+    <td class="price" style="font-weight: 700;">${item.total_price.toFixed(2)} ج.م</td>
+</tr>
+`;
+total += item.total_price;
+});
+
+// استخدام التاريخ والوقت المرسل من الخادم مباشرة
+const saleDate = sale.sale_date;
+const saleTime = sale.sale_time;
+const userBadge = sale.user_role === 'admin' ?
+'<span
+    style="background: #ffc107; color: #212529; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">مدير</span>'
+:
+'<span
+    style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">بائع</span>';
+
+return `
+<div class="invoice-info">
+    <div class="invoice-details">
+        <h3>معلومات الفاتورة</h3>
+        <p><span class="label">رقم البيع:</span> <span class="value"
+                style="color: #000; font-weight: 700;">#${sale.id}</span></p>
+        <p><span class="label">التاريخ:</span> <span class="value">${saleDate}</span></p>
+        <p><span class="label">الوقت:</span> <span class="value">${saleTime}</span></p>
+        <p><span class="label">البائع:</span> <span class="value">${sale.user_name} ${userBadge}</span></p>
+    </div>
+    <div class="invoice-details">
+        <h3>الملاحظات</h3>
+        <p style="color: #000; font-style: italic;">
+            ${sale.notes || 'لا توجد ملاحظات'}
+        </p>
+    </div>
+</div>
+
+<div class="items-section">
+    <div class="items-header">
+        <h3>تفاصيل المشتريات (${sale.items.length} صنف)</h3>
+    </div>
+
+    <table>
+        <thead>
             <tr>
-                <td class="product-name">
-                    <div style="display: flex; align-items: center;">
-                        <span style="background: #667eea; color: white; padding: 5px 10px; border-radius: 50%; margin-left: 10px; font-size: 0.8rem;">${index + 1}</span>
-                        <div>
-                            <div style="font-weight: 600;">${item.product_name}</div>
-                            <small style="color: #6c757d;">${item.unit_type || 'وحدة'}</small>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="quantity">${item.quantity}</span>
-                </td>
-                <td class="price">${item.unit_price.toFixed(2)} ج.م</td>
-                <td class="price" style="font-weight: 700;">${item.total_price.toFixed(2)} ج.م</td>
+                <th style="text-align: right;">المنتج</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الإجمالي</th>
             </tr>
-        `;
-            total += item.total_price;
-        });
+        </thead>
+        <tbody>
+            ${itemsHTML}
+        </tbody>
+    </table>
+</div>
 
-        // استخدام التاريخ والوقت المرسل من الخادم مباشرة
-        const saleDate = sale.sale_date;
-        const saleTime = sale.sale_time;
-        const userBadge = sale.user_role === 'admin' ?
-            '<span style="background: #ffc107; color: #212529; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">مدير</span>' :
-            '<span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">بائع</span>';
+<div class="total-section">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+        <span>المجموع الفرعي:</span>
+        <span>${sale.subtotal.toFixed(2)} ج.م</span>
+    </div>
+    ${sale.discount_amount > 0 ? `
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: #000;">
+        <span>الخصم (${sale.discount_type === 'percentage' ? sale.discount_value + '%' : sale.discount_value + '
+            ج.م'}):</span>
+        <span>-${sale.discount_amount.toFixed(2)} ج.م</span>
+    </div>
+    <hr style="margin: 15px 0; border: 1px solid rgba(255,255,255,0.3);">
+    ` : ''}
+    <h3 style="margin: 0; font-size: 1.5rem;">المجموع الكلي</h3>
+    <div class="total-amount">${total.toFixed(2)} ج.م</div>
+    <p style="margin: 10px 0 0 0; opacity: 0.9;">تم الدفع نقداً</p>
+</div>
 
-        return `
-        <div class="invoice-info">
-            <div class="invoice-details">
-                <h3>📋 معلومات الفاتورة</h3>
-                <p><span class="label">رقم البيع:</span> <span class="value" style="color: #667eea; font-weight: 700;">#${sale.id}</span></p>
-                <p><span class="label">التاريخ:</span> <span class="value">${saleDate}</span></p>
-                <p><span class="label">الوقت:</span> <span class="value">${saleTime}</span></p>
-                <p><span class="label">البائع:</span> <span class="value">${sale.user_name} ${userBadge}</span></p>
-            </div>
-            <div class="invoice-details">
-                <h3>📝 الملاحظات</h3>
-                <p style="color: #6c757d; font-style: italic;">
-                    ${sale.notes || 'لا توجد ملاحظات'}
-                </p>
-            </div>
-        </div>
-        
-        <div class="items-section">
-            <div class="items-header">
-                <h3>🛒 تفاصيل المشتريات (${sale.items.length} صنف)</h3>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th style="text-align: right;">📦 المنتج</th>
-                        <th>🔢 الكمية</th>
-                        <th>💰 سعر الوحدة</th>
-                        <th>💵 الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itemsHTML}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="total-section">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span>المجموع الفرعي:</span>
-                <span>${sale.subtotal.toFixed(2)} ج.م</span>
-            </div>
-            ${sale.discount_amount > 0 ? `
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: #f57c00;">
-                <span>الخصم (${sale.discount_type === 'percentage' ? sale.discount_value + '%' : sale.discount_value + ' ج.م'}):</span>
-                <span>-${sale.discount_amount.toFixed(2)} ج.م</span>
-            </div>
-            <hr style="margin: 15px 0; border: 1px solid rgba(255,255,255,0.3);">
-            ` : ''}
-            <h3 style="margin: 0; font-size: 1.5rem;">💰 المجموع الكلي</h3>
-            <div class="total-amount">${total.toFixed(2)} ج.م</div>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">تم الدفع نقداً</p>
-        </div>
-        
-        <div class="footer">
-            <p style="font-size: 1.1rem; margin: 0; color: #667eea;">🙏 شكراً لتعاملكم معنا</p>
-            <p style="margin: 10px 0 0 0;">نتمنى لكم يوماً سعيداً ومليئاً بالمعرفة</p>
-            <p style="margin: 10px 0 0 0; font-size: 0.9rem;">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')} - ${new Date().toLocaleTimeString('ar-EG')}</p>
-        </div>
-    `;
-    }
+<div class="footer">
+    <p style="font-size: 1.1rem; margin: 0; color: #000; font-weight: bold;">شكراً لثقتكم بنا</p>
+    <p style="margin: 10px 0 0 0;">Sara Store - جميع الحقوق محفوظة © 2025</p>
+    <p style="margin: 10px 0 0 0; font-size: 0.8rem; opacity: 0.8;">هذه الفاتورة صالحة لمدة 30 يوماً من تاريخ الإصدار
+    </p>
+    <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">للاستفسارات: 01093126299</p>
+</div>
+`;
+}
 </script>
 {% endblock %}

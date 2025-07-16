@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}إنشاء مرتجع - إدارة Norko Store{% endblock %}
+{% block title %}إنشاء مرتجع - إدارة Sara Store{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -374,26 +374,27 @@
 
         // إعداد البيانات للإرسال
         const returnData = {
-            sale_id: {{ sale.id }},
-            reason: reason,
-            refund_method: refundMethod,
+            sale_id: {{ sale.id }
+    },
+    reason: reason,
+        refund_method: refundMethod,
             notes: notes,
-            items: validItems.map(item => ({
-                sale_item_id: item.id,
-                quantity_returned: item.quantity,
-                condition: item.condition,
-                notes: item.notes
-            }))
+                items: validItems.map(item => ({
+                    sale_item_id: item.id,
+                    quantity_returned: item.quantity,
+                    condition: item.condition,
+                    notes: item.notes
+                }))
         };
 
-        // إرسال البيانات
-        fetch('/api/returns', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(returnData)
-        })
+    // إرسال البيانات
+    fetch('/api/returns', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(returnData)
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

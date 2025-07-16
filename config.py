@@ -23,7 +23,7 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
     
     # Application settings
-    APP_NAME = os.environ.get('APP_NAME', 'إدارة Norko Store')
+    APP_NAME = os.environ.get('APP_NAME', 'إدارة Sara Store')
     APP_VERSION = os.environ.get('APP_VERSION', '1.0.0')
     
     # Upload settings

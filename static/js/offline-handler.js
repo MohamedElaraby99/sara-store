@@ -18,8 +18,7 @@ class OfflineHandler {
       // انتظار تحميل المدراء الأساسية
       await this.waitForManagers();
 
-      // إنشاء شريط الحالة
-      this.setupOfflineStatusBar();
+      // تم إزالة إنشاء شريط الحالة - سيتم استبداله بزر في الهيدر
 
       // تحسين واجهة المستخدم للعمل الأوفلاين
       this.enhanceForOffline();
@@ -52,62 +51,6 @@ class OfflineHandler {
     if (!window.dbManager || !window.syncManager) {
       console.warn("⚠️ مدراء البيانات غير متاحة بالكامل - سيعمل بوظائف محدودة");
     }
-  }
-
-  setupOfflineStatusBar() {
-    // تحقق من وجود شريط الحالة
-    if (document.querySelector(".offline-status-bar")) {
-      console.log("📊 شريط الحالة موجود مسبقاً");
-      return;
-    }
-
-    // إنشاء شريط الحالة
-    const statusBar = document.createElement("div");
-    statusBar.className = "offline-status-bar";
-    statusBar.innerHTML = `
-      <div class="container-fluid">
-        <div class="row align-items-center justify-content-between">
-          <div class="col-auto">
-            <span id="network-status" class="network-status offline">
-              <i class="bi bi-wifi-off"></i>
-              غير متصل
-            </span>
-          </div>
-          <div class="col-auto">
-            <span id="sync-indicator" class="sync-indicator">
-              <i class="bi bi-arrow-repeat"></i>
-              مزامنة
-            </span>
-          </div>
-          <div class="col-auto">
-            <span id="last-sync-time" class="last-sync-time">
-              آخر مزامنة: لم تتم
-            </span>
-          </div>
-          <div class="col-auto">
-            <button id="manual-sync-btn" class="btn btn-outline-primary btn-sm" onclick="window.offlineHandler?.performManualSync()">
-              <i class="bi bi-arrow-clockwise"></i>
-              مزامنة
-            </button>
-          </div>
-          <div class="col-auto d-md-none">
-            <button id="hide-status-bar" class="btn btn-outline-secondary btn-sm" onclick="window.offlineHandler?.toggleStatusBar()">
-              <i class="bi bi-chevron-up"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // إدراج في أعلى الصفحة بعد الNavbar
-    const navbar = document.querySelector(".navbar");
-    if (navbar) {
-      navbar.parentNode.insertBefore(statusBar, navbar.nextSibling);
-    } else {
-      document.body.insertBefore(statusBar, document.body.firstChild);
-    }
-
-    console.log("📊 تم إنشاء شريط الحالة الأوفلاين");
   }
 
   enhanceForOffline() {
@@ -380,6 +323,52 @@ class OfflineHandler {
         statusIndicator.innerHTML = '<i class="bi bi-wifi-off"></i> غير متصل';
       }
     }
+
+    // تحديث زر الحالة في الهيدر
+    this.updateConnectionButton();
+  }
+
+  updateConnectionButton() {
+    const btn = document.querySelector("#connection-status-btn");
+    const icon = document.querySelector("#connection-icon");
+    const text = document.querySelector("#connection-text");
+
+    if (btn && icon && text) {
+      if (navigator.onLine) {
+        btn.className = "btn btn-outline-info btn-sm me-2 online";
+        icon.className = "bi bi-wifi";
+        text.textContent = "متصل";
+      } else {
+        btn.className = "btn btn-outline-info btn-sm me-2 offline";
+        icon.className = "bi bi-wifi-off";
+        text.textContent = "غير متصل";
+      }
+    }
+  }
+
+  showConnectionInfo() {
+    const isOnline = navigator.onLine;
+    const lastSync = window.syncManager
+      ? window.syncManager.getLastSyncTime()
+      : null;
+
+    let message = `حالة الاتصال: ${isOnline ? "متصل" : "غير متصل"}\n`;
+    message += `آخر مزامنة: ${lastSync || "لم تتم"}\n`;
+
+    if (window.syncManager) {
+      const pendingItems = window.syncManager.getPendingItemsCount();
+      message += `العناصر المعلقة: ${pendingItems}\n`;
+    }
+
+    if (window.dbManager) {
+      const cachedData = window.dbManager.getCachedDataSize();
+      message += `البيانات المحفوظة: ${cachedData} عنصر`;
+    }
+
+    // عرض المعلومات في نافذة منبثقة
+    if (confirm(`${message}\n\nهل تريد مزامنة البيانات الآن؟`)) {
+      this.performManualSync();
+    }
   }
 
   async preloadOfflineData() {
@@ -410,37 +399,44 @@ class OfflineHandler {
   // طرق مساعدة للتفاعل مع المستخدم
 
   async performManualSync() {
-    if (!navigator.onLine) {
-      this.showWarningMessage("لا يمكن المزامنة بدون اتصال بالإنترنت");
+    if (!window.syncManager) {
+      this.showErrorMessage("مدير المزامنة غير متاح");
       return;
     }
 
-    if (window.syncManager) {
-      try {
-        this.showInfoMessage("جاري المزامنة...");
-        await window.syncManager.performSync();
-        this.showSuccessMessage("تمت المزامنة بنجاح");
-      } catch (error) {
-        this.showErrorMessage("فشلت المزامنة");
-        console.error("خطأ في المزامنة اليدوية:", error);
-      }
+    try {
+      // تحديث حالة الزر إلى "مزامنة"
+      this.setButtonSyncing(true);
+
+      await window.syncManager.performSync();
+      this.showSuccessMessage("تمت المزامنة بنجاح");
+    } catch (error) {
+      console.error("خطأ في المزامنة اليدوية:", error);
+      this.showErrorMessage("فشلت المزامنة: " + error.message);
+    } finally {
+      // إعادة حالة الزر إلى الحالة العادية
+      this.setButtonSyncing(false);
     }
   }
 
-  toggleStatusBar() {
-    const statusBar = document.querySelector(".offline-status-bar");
-    const hideBtn = document.querySelector("#hide-status-bar");
+  setButtonSyncing(syncing) {
+    const btn = document.querySelector("#connection-status-btn");
+    const icon = document.querySelector("#connection-icon");
+    const text = document.querySelector("#connection-text");
 
-    if (statusBar && hideBtn) {
-      if (statusBar.classList.contains("hidden")) {
-        statusBar.classList.remove("hidden");
-        hideBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+    if (btn && icon && text) {
+      if (syncing) {
+        btn.className = "btn btn-outline-info btn-sm me-2 syncing";
+        icon.className = "bi bi-arrow-clockwise";
+        text.textContent = "مزامنة...";
       } else {
-        statusBar.classList.add("hidden");
-        hideBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
+        // إعادة الحالة العادية
+        this.updateConnectionButton();
       }
     }
   }
+
+  // تم إزالة دالة toggleStatusBar
 
   // طرق عرض الرسائل
 

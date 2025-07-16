@@ -10,12 +10,12 @@
     <meta name="theme-color" content="#2a5298">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Norko Store">
+    <meta name="apple-mobile-web-app-title" content="Sara Store">
     <meta name="msapplication-TileColor" content="#1e3c72">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
 
-    <title>{% block title %}إدارة Norko Store{% endblock %}</title>
+    <title>{% block title %}إدارة Sara Store{% endblock %}</title>
 
     <!-- Bootstrap 5 RTL CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -23,6 +23,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
     <!-- Offline Support Scripts -->
     <script>
@@ -287,7 +289,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('dashboard') }}">
                 <i class="bi bi-book"></i>
-                إدارة Norko Store
+                إدارة Sara Store
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -465,6 +467,13 @@
                         </span>
                     </a>
                     {% endif %}
+
+                    <!-- زر حالة الاتصال -->
+                    <button id="connection-status-btn" class="btn btn-outline-info btn-sm me-2"
+                        onclick="window.offlineHandler?.showConnectionInfo()" title="حالة الاتصال">
+                        <i class="bi bi-wifi" id="connection-icon"></i>
+                        <span id="connection-text">متصل</span>
+                    </button>
 
                     <!-- زر البيع السريع -->
                     <a href="{{ url_for('new_sale') }}" class="btn btn-success btn-sm me-2" title="بيع جديد">
@@ -860,6 +869,11 @@
                     window.syncManager.updateOnlineStatus();
                 }
 
+                // تحديث حالة زر الاتصال
+                if (window.offlineHandler) {
+                    window.offlineHandler.updateConnectionButton();
+                }
+
                 // تحميل البيانات المحلية
                 if (window.syncManager) {
                     // تحميل البيانات الأساسية في الخلفية
@@ -881,10 +895,16 @@
                             window.syncManager.performSync();
                         }, 1000);
                     }
+                    if (window.offlineHandler) {
+                        window.offlineHandler.updateConnectionButton();
+                    }
                 });
 
                 window.addEventListener('offline', function () {
                     console.log('📴 Network connection lost - switching to offline mode');
+                    if (window.offlineHandler) {
+                        window.offlineHandler.updateConnectionButton();
+                    }
                 });
 
             } catch (error) {

@@ -91,15 +91,9 @@ class SyncManager {
   }
 
   updateOnlineStatus() {
-    const statusIndicator = document.querySelector("#network-status");
-    if (statusIndicator) {
-      if (this.isOnline) {
-        statusIndicator.className = "network-status online";
-        statusIndicator.innerHTML = '<i class="bi bi-wifi"></i> متصل';
-      } else {
-        statusIndicator.className = "network-status offline";
-        statusIndicator.innerHTML = '<i class="bi bi-wifi-off"></i> غير متصل';
-      }
+    // تحديث حالة الاتصال في OfflineHandler إذا كان متاحاً
+    if (window.offlineHandler) {
+      window.offlineHandler.updateConnectionButton();
     }
 
     // تحديث عرض آخر مزامنة فوراً

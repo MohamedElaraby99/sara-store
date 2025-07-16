@@ -451,7 +451,7 @@ def send_password_reset_email(user, token):
     if not app.config.get('MAIL_USERNAME'):
         raise Exception("Email not configured")
     
-    subject = 'إعادة تعيين كلمة المرور - إدارة Norko Store'
+    subject = 'إعادة تعيين كلمة المرور - إدارة Sara Store'
     reset_url = url_for('reset_password', token=token, _external=True)
     
     body = f"""
@@ -467,7 +467,7 @@ def send_password_reset_email(user, token):
     إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذه الرسالة.
     
     تحياتنا،
-    فريق إدارة Norko Store
+    فريق إدارة Sara Store
     """
     
     msg = Message(
@@ -1399,7 +1399,7 @@ def send_password_reset_email(user, token):
     if not app.config.get('MAIL_USERNAME'):
         raise Exception("Email not configured")
     
-    subject = 'إعادة تعيين كلمة المرور - إدارة Norko Store'
+    subject = 'إعادة تعيين كلمة المرور - إدارة Sara Store'
     reset_url = url_for('reset_password', token=token, _external=True)
     
     body = f"""
@@ -1415,7 +1415,7 @@ def send_password_reset_email(user, token):
     إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذه الرسالة.
     
     تحياتنا،
-    فريق إدارة Norko Store
+    فريق إدارة Sara Store
     """
     
     msg = Message(
@@ -5198,7 +5198,7 @@ def send_password_reset_email(user, token):
     if not app.config.get('MAIL_USERNAME'):
         raise Exception("Email not configured")
     
-    subject = 'إعادة تعيين كلمة المرور - إدارة Norko Store'
+    subject = 'إعادة تعيين كلمة المرور - إدارة Sara Store'
     reset_url = url_for('reset_password', token=token, _external=True)
     
     body = f"""
@@ -5214,7 +5214,7 @@ def send_password_reset_email(user, token):
     إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذه الرسالة.
     
     تحياتنا،
-    فريق إدارة Norko Store
+    فريق إدارة Sara Store
     """
     
     msg = Message(

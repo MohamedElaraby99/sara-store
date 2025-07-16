@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}اختبار الوضع غير المتصل - Norko Store{% endblock %}
+{% block title %}اختبار الوضع غير المتصل - Sara Store{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -33,13 +33,14 @@
                         <div class="col-md-6">
                             <h5>اختبار البحث في المنتجات</h5>
                             <div class="input-group mb-3">
-                                <input type="text" id="productSearchTest" class="form-control" 
-                                       placeholder="ابحث عن منتج...">
+                                <input type="text" id="productSearchTest" class="form-control"
+                                    placeholder="ابحث عن منتج...">
                                 <button class="btn btn-primary" onclick="testProductSearch()">
                                     <i class="bi bi-search"></i> بحث
                                 </button>
                             </div>
-                            <div id="productSearchResults" class="border rounded p-3 bg-light" style="min-height: 100px;">
+                            <div id="productSearchResults" class="border rounded p-3 bg-light"
+                                style="min-height: 100px;">
                                 <small class="text-muted">نتائج البحث ستظهر هنا...</small>
                             </div>
                         </div>
@@ -47,13 +48,14 @@
                         <div class="col-md-6">
                             <h5>اختبار البحث في العملاء</h5>
                             <div class="input-group mb-3">
-                                <input type="text" id="customerSearchTest" class="form-control" 
-                                       placeholder="ابحث عن عميل...">
+                                <input type="text" id="customerSearchTest" class="form-control"
+                                    placeholder="ابحث عن عميل...">
                                 <button class="btn btn-primary" onclick="testCustomerSearch()">
                                     <i class="bi bi-search"></i> بحث
                                 </button>
                             </div>
-                            <div id="customerSearchResults" class="border rounded p-3 bg-light" style="min-height: 100px;">
+                            <div id="customerSearchResults" class="border rounded p-3 bg-light"
+                                style="min-height: 100px;">
                                 <small class="text-muted">نتائج البحث ستظهر هنا...</small>
                             </div>
                         </div>
@@ -75,20 +77,21 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">الكمية</label>
-                                                <input type="number" id="testQuantity" class="form-control" 
-                                                       value="1" min="1">
+                                                <input type="number" id="testQuantity" class="form-control" value="1"
+                                                    min="1">
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">السعر</label>
-                                                <input type="number" id="testPrice" class="form-control" 
-                                                       step="0.01" readonly>
+                                                <input type="number" id="testPrice" class="form-control" step="0.01"
+                                                    readonly>
                                             </div>
                                         </div>
                                         <div class="mt-3">
                                             <button type="submit" class="btn btn-success">
                                                 <i class="bi bi-cart-plus"></i> حفظ بيع تجريبي محلياً
                                             </button>
-                                            <button type="button" class="btn btn-info ms-2" onclick="viewPendingOperations()">
+                                            <button type="button" class="btn btn-info ms-2"
+                                                onclick="viewPendingOperations()">
                                                 <i class="bi bi-list"></i> عرض العمليات المعلقة
                                             </button>
                                         </div>
@@ -120,8 +123,8 @@
                     <div class="row">
                         <div class="col-12">
                             <h5>سجل الأنشطة</h5>
-                            <div id="activityLog" class="border rounded p-3 bg-dark text-light" 
-                                 style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.875rem;">
+                            <div id="activityLog" class="border rounded p-3 bg-dark text-light"
+                                style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.875rem;">
                                 <div class="text-muted">جاري تحميل النظام...</div>
                             </div>
                             <div class="mt-2">
@@ -224,356 +227,356 @@
 </div>
 
 <script>
-let logElement;
-let initialized = false;
+    let logElement;
+    let initialized = false;
 
-document.addEventListener('DOMContentLoaded', async function() {
-    logElement = document.getElementById('activityLog');
-    
-    // انتظار تحميل المديرين
-    await waitForManagers();
-    
-    // تهيئة الصفحة
-    await initializePage();
-    
-    log('✅ تم تحميل صفحة الاختبار بنجاح');
-    initialized = true;
-});
+    document.addEventListener('DOMContentLoaded', async function () {
+        logElement = document.getElementById('activityLog');
 
-async function waitForManagers() {
-    log('⏳ انتظار تحميل مديري قاعدة البيانات والمزامنة...');
-    
-    let attempts = 0;
-    while ((!window.dbManager || !window.syncManager) && attempts < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
+        // انتظار تحميل المديرين
+        await waitForManagers();
+
+        // تهيئة الصفحة
+        await initializePage();
+
+        log('✅ تم تحميل صفحة الاختبار بنجاح');
+        initialized = true;
+    });
+
+    async function waitForManagers() {
+        log('⏳ انتظار تحميل مديري قاعدة البيانات والمزامنة...');
+
+        let attempts = 0;
+        while ((!window.dbManager || !window.syncManager) && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (!window.dbManager || !window.syncManager) {
+            log('❌ فشل في تحميل المديرين');
+            return false;
+        }
+
+        log('✅ تم تحميل المديرين بنجاح');
+        return true;
     }
-    
-    if (!window.dbManager || !window.syncManager) {
-        log('❌ فشل في تحميل المديرين');
-        return false;
+
+    async function initializePage() {
+        // فحص دعم المتصفح
+        checkBrowserSupport();
+
+        // تحديث حالة الاتصال
+        updateConnectionStatus();
+
+        // تحميل قائمة المنتجات للاختبار
+        await loadTestProducts();
+
+        // تحديث الإحصائيات
+        await refreshLocalStats();
+
+        // مراقبة تغييرات الاتصال
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
     }
-    
-    log('✅ تم تحميل المديرين بنجاح');
-    return true;
-}
 
-async function initializePage() {
-    // فحص دعم المتصفح
-    checkBrowserSupport();
-    
-    // تحديث حالة الاتصال
-    updateConnectionStatus();
-    
-    // تحميل قائمة المنتجات للاختبار
-    await loadTestProducts();
-    
-    // تحديث الإحصائيات
-    await refreshLocalStats();
-    
-    // مراقبة تغييرات الاتصال
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
-}
+    function checkBrowserSupport() {
+        const swSupported = 'serviceWorker' in navigator;
+        const idbSupported = 'indexedDB' in window;
 
-function checkBrowserSupport() {
-    const swSupported = 'serviceWorker' in navigator;
-    const idbSupported = 'indexedDB' in window;
-    
-    document.getElementById('swStatus').innerHTML = swSupported ? 
-        '<span class="text-success">مدعوم</span>' : 
-        '<span class="text-danger">غير مدعوم</span>';
-        
-    document.getElementById('idbStatus').innerHTML = idbSupported ? 
-        '<span class="text-success">مدعوم</span>' : 
-        '<span class="text-danger">غير مدعوم</span>';
-    
-    log(`🔍 فحص دعم المتصفح: SW=${swSupported}, IDB=${idbSupported}`);
-}
+        document.getElementById('swStatus').innerHTML = swSupported ?
+            '<span class="text-success">مدعوم</span>' :
+            '<span class="text-danger">غير مدعوم</span>';
 
-function updateConnectionStatus() {
-    const isOnline = navigator.onLine;
-    const indicator = document.getElementById('connectionIndicator');
-    const message = document.getElementById('connectionMessage');
-    const status = document.getElementById('onlineStatus');
-    
-    if (isOnline) {
-        indicator.className = 'badge bg-success';
-        indicator.innerHTML = '<i class="bi bi-wifi"></i> متصل';
-        message.textContent = 'التطبيق متصل بالإنترنت - جميع الوظائف متاحة';
-        status.innerHTML = '<span class="text-success">متصل</span>';
-    } else {
-        indicator.className = 'badge bg-warning';
-        indicator.innerHTML = '<i class="bi bi-wifi-off"></i> غير متصل';
-        message.textContent = 'التطبيق غير متصل - العمل بالبيانات المحلية';
-        status.innerHTML = '<span class="text-warning">غير متصل</span>';
+        document.getElementById('idbStatus').innerHTML = idbSupported ?
+            '<span class="text-success">مدعوم</span>' :
+            '<span class="text-danger">غير مدعوم</span>';
+
+        log(`🔍 فحص دعم المتصفح: SW=${swSupported}, IDB=${idbSupported}`);
     }
-    
-    log(`🌐 حالة الاتصال: ${isOnline ? 'متصل' : 'غير متصل'}`);
-}
 
-async function loadTestProducts() {
-    try {
-        const products = await window.dbManager.getProducts();
-        const selectElement = document.getElementById('testProductSelect');
-        
-        selectElement.innerHTML = '<option value="">اختر منتج...</option>';
-        
-        products.forEach(product => {
-            const option = document.createElement('option');
-            option.value = product.id;
-            option.textContent = `${product.name_ar} - ${product.retail_price} ج.م`;
-            option.dataset.price = product.retail_price;
-            selectElement.appendChild(option);
-        });
-        
-        selectElement.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            document.getElementById('testPrice').value = selectedOption.dataset.price || '';
-        });
-        
-        log(`📦 تم تحميل ${products.length} منتج للاختبار`);
-    } catch (error) {
-        log(`❌ خطأ في تحميل المنتجات: ${error.message}`);
-    }
-}
+    function updateConnectionStatus() {
+        const isOnline = navigator.onLine;
+        const indicator = document.getElementById('connectionIndicator');
+        const message = document.getElementById('connectionMessage');
+        const status = document.getElementById('onlineStatus');
 
-async function testProductSearch() {
-    const searchTerm = document.getElementById('productSearchTest').value.trim();
-    const resultsDiv = document.getElementById('productSearchResults');
-    
-    if (!searchTerm) {
-        resultsDiv.innerHTML = '<small class="text-muted">أدخل كلمة للبحث</small>';
-        return;
-    }
-    
-    try {
-        log(`🔍 البحث في المنتجات: "${searchTerm}"`);
-        const products = await window.dbManager.getProducts({ search: searchTerm });
-        
-        if (products.length === 0) {
-            resultsDiv.innerHTML = '<small class="text-muted">لا توجد نتائج</small>';
+        if (isOnline) {
+            indicator.className = 'badge bg-success';
+            indicator.innerHTML = '<i class="bi bi-wifi"></i> متصل';
+            message.textContent = 'التطبيق متصل بالإنترنت - جميع الوظائف متاحة';
+            status.innerHTML = '<span class="text-success">متصل</span>';
         } else {
-            resultsDiv.innerHTML = products.map(product => `
+            indicator.className = 'badge bg-warning';
+            indicator.innerHTML = '<i class="bi bi-wifi-off"></i> غير متصل';
+            message.textContent = 'التطبيق غير متصل - العمل بالبيانات المحلية';
+            status.innerHTML = '<span class="text-warning">غير متصل</span>';
+        }
+
+        log(`🌐 حالة الاتصال: ${isOnline ? 'متصل' : 'غير متصل'}`);
+    }
+
+    async function loadTestProducts() {
+        try {
+            const products = await window.dbManager.getProducts();
+            const selectElement = document.getElementById('testProductSelect');
+
+            selectElement.innerHTML = '<option value="">اختر منتج...</option>';
+
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name_ar} - ${product.retail_price} ج.م`;
+                option.dataset.price = product.retail_price;
+                selectElement.appendChild(option);
+            });
+
+            selectElement.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                document.getElementById('testPrice').value = selectedOption.dataset.price || '';
+            });
+
+            log(`📦 تم تحميل ${products.length} منتج للاختبار`);
+        } catch (error) {
+            log(`❌ خطأ في تحميل المنتجات: ${error.message}`);
+        }
+    }
+
+    async function testProductSearch() {
+        const searchTerm = document.getElementById('productSearchTest').value.trim();
+        const resultsDiv = document.getElementById('productSearchResults');
+
+        if (!searchTerm) {
+            resultsDiv.innerHTML = '<small class="text-muted">أدخل كلمة للبحث</small>';
+            return;
+        }
+
+        try {
+            log(`🔍 البحث في المنتجات: "${searchTerm}"`);
+            const products = await window.dbManager.getProducts({ search: searchTerm });
+
+            if (products.length === 0) {
+                resultsDiv.innerHTML = '<small class="text-muted">لا توجد نتائج</small>';
+            } else {
+                resultsDiv.innerHTML = products.map(product => `
                 <div class="border-bottom py-2">
                     <strong>${product.name_ar}</strong><br>
                     <small class="text-muted">السعر: ${product.retail_price} ج.م | المخزون: ${product.stock_quantity}</small>
                 </div>
             `).join('');
-        }
-        
-        log(`✅ تم العثور على ${products.length} منتج`);
-    } catch (error) {
-        log(`❌ خطأ في البحث: ${error.message}`);
-        resultsDiv.innerHTML = `<small class="text-danger">خطأ: ${error.message}</small>`;
-    }
-}
+            }
 
-async function testCustomerSearch() {
-    const searchTerm = document.getElementById('customerSearchTest').value.trim();
-    const resultsDiv = document.getElementById('customerSearchResults');
-    
-    if (!searchTerm) {
-        resultsDiv.innerHTML = '<small class="text-muted">أدخل كلمة للبحث</small>';
-        return;
+            log(`✅ تم العثور على ${products.length} منتج`);
+        } catch (error) {
+            log(`❌ خطأ في البحث: ${error.message}`);
+            resultsDiv.innerHTML = `<small class="text-danger">خطأ: ${error.message}</small>`;
+        }
     }
-    
-    try {
-        log(`🔍 البحث في العملاء: "${searchTerm}"`);
-        const customers = await window.dbManager.getCustomers(searchTerm);
-        
-        if (customers.length === 0) {
-            resultsDiv.innerHTML = '<small class="text-muted">لا توجد نتائج</small>';
-        } else {
-            resultsDiv.innerHTML = customers.map(customer => `
+
+    async function testCustomerSearch() {
+        const searchTerm = document.getElementById('customerSearchTest').value.trim();
+        const resultsDiv = document.getElementById('customerSearchResults');
+
+        if (!searchTerm) {
+            resultsDiv.innerHTML = '<small class="text-muted">أدخل كلمة للبحث</small>';
+            return;
+        }
+
+        try {
+            log(`🔍 البحث في العملاء: "${searchTerm}"`);
+            const customers = await window.dbManager.getCustomers(searchTerm);
+
+            if (customers.length === 0) {
+                resultsDiv.innerHTML = '<small class="text-muted">لا توجد نتائج</small>';
+            } else {
+                resultsDiv.innerHTML = customers.map(customer => `
                 <div class="border-bottom py-2">
                     <strong>${customer.name}</strong><br>
                     <small class="text-muted">الهاتف: ${customer.phone || 'غير محدد'}</small>
                 </div>
             `).join('');
+            }
+
+            log(`✅ تم العثور على ${customers.length} عميل`);
+        } catch (error) {
+            log(`❌ خطأ في البحث: ${error.message}`);
+            resultsDiv.innerHTML = `<small class="text-danger">خطأ: ${error.message}</small>`;
         }
-        
-        log(`✅ تم العثور على ${customers.length} عميل`);
-    } catch (error) {
-        log(`❌ خطأ في البحث: ${error.message}`);
-        resultsDiv.innerHTML = `<small class="text-danger">خطأ: ${error.message}</small>`;
     }
-}
 
-async function testLocalSale(event) {
-    event.preventDefault();
-    
-    const productId = document.getElementById('testProductSelect').value;
-    const quantity = parseFloat(document.getElementById('testQuantity').value);
-    const price = parseFloat(document.getElementById('testPrice').value);
-    
-    if (!productId || !quantity || !price) {
-        showNotification('يرجى ملء جميع الحقول', 'warning');
-        return;
-    }
-    
-    try {
-        log(`💰 إنشاء بيع تجريبي: منتج ${productId}, كمية ${quantity}, سعر ${price}`);
-        
-        const saleData = {
-            items: [{
-                product_id: parseInt(productId),
-                quantity: quantity,
-                unit_price: price,
-                total_price: quantity * price
-            }],
-            total_amount: quantity * price,
-            payment_status: 'paid',
-            payment_type: 'cash',
-            notes: 'بيع تجريبي من صفحة الاختبار'
-        };
-        
-        const saleId = await window.syncManager.saveSaleLocal(saleData);
-        
-        log(`✅ تم حفظ البيع برقم: ${saleId}`);
-        showNotification(`تم حفظ البيع رقم ${saleId} محلياً`, 'success');
-        
-        // تحديث الإحصائيات
-        await refreshLocalStats();
-        
-    } catch (error) {
-        log(`❌ خطأ في حفظ البيع: ${error.message}`);
-        showNotification(`خطأ في حفظ البيع: ${error.message}`, 'error');
-    }
-}
+    async function testLocalSale(event) {
+        event.preventDefault();
 
-async function viewPendingOperations() {
-    try {
-        const pendingOps = await window.dbManager.getPendingOperations();
-        
-        if (pendingOps.length === 0) {
-            showNotification('لا توجد عمليات معلقة', 'info');
+        const productId = document.getElementById('testProductSelect').value;
+        const quantity = parseFloat(document.getElementById('testQuantity').value);
+        const price = parseFloat(document.getElementById('testPrice').value);
+
+        if (!productId || !quantity || !price) {
+            showNotification('يرجى ملء جميع الحقول', 'warning');
             return;
         }
-        
-        log(`📋 العمليات المعلقة: ${pendingOps.length}`);
-        pendingOps.forEach((op, index) => {
-            log(`   ${index + 1}. ${op.operation_type} - ${new Date(op.timestamp).toLocaleString('ar-EG')}`);
-        });
-        
-        showNotification(`يوجد ${pendingOps.length} عمليات في انتظار المزامنة`, 'info');
-    } catch (error) {
-        log(`❌ خطأ في عرض العمليات المعلقة: ${error.message}`);
-    }
-}
 
-async function manualSync() {
-    if (!navigator.onLine) {
-        showNotification('لا يمكن المزامنة بدون اتصال بالإنترنت', 'warning');
-        return;
-    }
-    
-    try {
-        log('🔄 بدء المزامنة اليدوية...');
-        await window.syncManager.performSync();
-        showNotification('تمت المزامنة بنجاح', 'success');
-    } catch (error) {
-        log(`❌ خطأ في المزامنة: ${error.message}`);
-        showNotification(`فشلت المزامنة: ${error.message}`, 'error');
-    }
-}
-
-async function clearLocalData() {
-    if (confirm('هل أنت متأكد من مسح جميع البيانات المحلية؟')) {
         try {
-            log('🗑️ مسح البيانات المحلية...');
-            await window.dbManager.clearAllData();
+            log(`💰 إنشاء بيع تجريبي: منتج ${productId}, كمية ${quantity}, سعر ${price}`);
+
+            const saleData = {
+                items: [{
+                    product_id: parseInt(productId),
+                    quantity: quantity,
+                    unit_price: price,
+                    total_price: quantity * price
+                }],
+                total_amount: quantity * price,
+                payment_status: 'paid',
+                payment_type: 'cash',
+                notes: 'بيع تجريبي من صفحة الاختبار'
+            };
+
+            const saleId = await window.syncManager.saveSaleLocal(saleData);
+
+            log(`✅ تم حفظ البيع برقم: ${saleId}`);
+            showNotification(`تم حفظ البيع رقم ${saleId} محلياً`, 'success');
+
+            // تحديث الإحصائيات
             await refreshLocalStats();
-            log('✅ تم مسح البيانات المحلية');
-            showNotification('تم مسح البيانات المحلية', 'success');
+
         } catch (error) {
-            log(`❌ خطأ في مسح البيانات: ${error.message}`);
-            showNotification(`فشل مسح البيانات: ${error.message}`, 'error');
+            log(`❌ خطأ في حفظ البيع: ${error.message}`);
+            showNotification(`خطأ في حفظ البيع: ${error.message}`, 'error');
         }
     }
-}
 
-async function showStatus() {
-    try {
-        const status = await window.syncManager.getStatus();
-        log('📊 حالة النظام:');
-        log(`   الاتصال: ${status.isOnline ? 'متصل' : 'غير متصل'}`);
-        log(`   المزامنة جارية: ${status.syncInProgress ? 'نعم' : 'لا'}`);
-        log(`   آخر مزامنة: ${status.lastSyncTime ? status.lastSyncTime.toLocaleString('ar-EG') : 'غير محددة'}`);
-        log(`   العمليات المعلقة: ${status.pendingOperations}`);
-        
-        // تحديث العرض
-        document.getElementById('lastSyncStatus').textContent = 
-            status.lastSyncTime ? status.lastSyncTime.toLocaleString('ar-EG') : 'غير محددة';
-            
-    } catch (error) {
-        log(`❌ خطأ في عرض الحالة: ${error.message}`);
+    async function viewPendingOperations() {
+        try {
+            const pendingOps = await window.dbManager.getPendingOperations();
+
+            if (pendingOps.length === 0) {
+                showNotification('لا توجد عمليات معلقة', 'info');
+                return;
+            }
+
+            log(`📋 العمليات المعلقة: ${pendingOps.length}`);
+            pendingOps.forEach((op, index) => {
+                log(`   ${index + 1}. ${op.operation_type} - ${new Date(op.timestamp).toLocaleString('ar-EG')}`);
+            });
+
+            showNotification(`يوجد ${pendingOps.length} عمليات في انتظار المزامنة`, 'info');
+        } catch (error) {
+            log(`❌ خطأ في عرض العمليات المعلقة: ${error.message}`);
+        }
     }
-}
 
-async function refreshLocalStats() {
-    try {
-        const [products, customers, categories, pendingOps] = await Promise.all([
-            window.dbManager.getProducts(),
-            window.dbManager.getCustomers(),
-            window.dbManager.getCategories(),
-            window.dbManager.getPendingOperations()
-        ]);
-        
-        document.getElementById('localProductsCount').textContent = products.length;
-        document.getElementById('localCustomersCount').textContent = customers.length;
-        document.getElementById('localCategoriesCount').textContent = categories.length;
-        document.getElementById('pendingOpsCount').textContent = pendingOps.length;
-        
-        log(`📊 إحصائيات محدّثة: ${products.length} منتج, ${customers.length} عميل, ${categories.length} فئة, ${pendingOps.length} عملية معلقة`);
-    } catch (error) {
-        log(`❌ خطأ في تحديث الإحصائيات: ${error.message}`);
+    async function manualSync() {
+        if (!navigator.onLine) {
+            showNotification('لا يمكن المزامنة بدون اتصال بالإنترنت', 'warning');
+            return;
+        }
+
+        try {
+            log('🔄 بدء المزامنة اليدوية...');
+            await window.syncManager.performSync();
+            showNotification('تمت المزامنة بنجاح', 'success');
+        } catch (error) {
+            log(`❌ خطأ في المزامنة: ${error.message}`);
+            showNotification(`فشلت المزامنة: ${error.message}`, 'error');
+        }
     }
-}
 
-function log(message) {
-    if (!logElement) return;
-    
-    const timestamp = new Date().toLocaleTimeString('ar-EG');
-    const logEntry = document.createElement('div');
-    logEntry.innerHTML = `<span class="text-muted">[${timestamp}]</span> ${message}`;
-    
-    logElement.appendChild(logEntry);
-    logElement.scrollTop = logElement.scrollHeight;
-}
-
-function clearLog() {
-    if (logElement) {
-        logElement.innerHTML = '<div class="text-muted">تم مسح السجل</div>';
+    async function clearLocalData() {
+        if (confirm('هل أنت متأكد من مسح جميع البيانات المحلية؟')) {
+            try {
+                log('🗑️ مسح البيانات المحلية...');
+                await window.dbManager.clearAllData();
+                await refreshLocalStats();
+                log('✅ تم مسح البيانات المحلية');
+                showNotification('تم مسح البيانات المحلية', 'success');
+            } catch (error) {
+                log(`❌ خطأ في مسح البيانات: ${error.message}`);
+                showNotification(`فشل مسح البيانات: ${error.message}`, 'error');
+            }
+        }
     }
-}
 
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('testNotifications');
-    const notification = document.createElement('div');
-    
-    const typeClasses = {
-        success: 'alert-success',
-        error: 'alert-danger',
-        warning: 'alert-warning',
-        info: 'alert-info'
-    };
-    
-    notification.className = `alert ${typeClasses[type]} alert-dismissible fade show`;
-    notification.innerHTML = `
+    async function showStatus() {
+        try {
+            const status = await window.syncManager.getStatus();
+            log('📊 حالة النظام:');
+            log(`   الاتصال: ${status.isOnline ? 'متصل' : 'غير متصل'}`);
+            log(`   المزامنة جارية: ${status.syncInProgress ? 'نعم' : 'لا'}`);
+            log(`   آخر مزامنة: ${status.lastSyncTime ? status.lastSyncTime.toLocaleString('ar-EG') : 'غير محددة'}`);
+            log(`   العمليات المعلقة: ${status.pendingOperations}`);
+
+            // تحديث العرض
+            document.getElementById('lastSyncStatus').textContent =
+                status.lastSyncTime ? status.lastSyncTime.toLocaleString('ar-EG') : 'غير محددة';
+
+        } catch (error) {
+            log(`❌ خطأ في عرض الحالة: ${error.message}`);
+        }
+    }
+
+    async function refreshLocalStats() {
+        try {
+            const [products, customers, categories, pendingOps] = await Promise.all([
+                window.dbManager.getProducts(),
+                window.dbManager.getCustomers(),
+                window.dbManager.getCategories(),
+                window.dbManager.getPendingOperations()
+            ]);
+
+            document.getElementById('localProductsCount').textContent = products.length;
+            document.getElementById('localCustomersCount').textContent = customers.length;
+            document.getElementById('localCategoriesCount').textContent = categories.length;
+            document.getElementById('pendingOpsCount').textContent = pendingOps.length;
+
+            log(`📊 إحصائيات محدّثة: ${products.length} منتج, ${customers.length} عميل, ${categories.length} فئة, ${pendingOps.length} عملية معلقة`);
+        } catch (error) {
+            log(`❌ خطأ في تحديث الإحصائيات: ${error.message}`);
+        }
+    }
+
+    function log(message) {
+        if (!logElement) return;
+
+        const timestamp = new Date().toLocaleTimeString('ar-EG');
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `<span class="text-muted">[${timestamp}]</span> ${message}`;
+
+        logElement.appendChild(logEntry);
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    function clearLog() {
+        if (logElement) {
+            logElement.innerHTML = '<div class="text-muted">تم مسح السجل</div>';
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const container = document.getElementById('testNotifications');
+        const notification = document.createElement('div');
+
+        const typeClasses = {
+            success: 'alert-success',
+            error: 'alert-danger',
+            warning: 'alert-warning',
+            info: 'alert-info'
+        };
+
+        notification.className = `alert ${typeClasses[type]} alert-dismissible fade show`;
+        notification.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
-    container.appendChild(notification);
-    
-    // إزالة تلقائية بعد 5 ثوان
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
+
+        container.appendChild(notification);
+
+        // إزالة تلقائية بعد 5 ثوان
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
 </script>
 
-{% endblock %} 
+{% endblock %}
