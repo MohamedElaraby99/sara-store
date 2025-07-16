@@ -1785,7 +1785,7 @@ def users():
 def add_user():
     """إضافة مستخدم جديد"""
     if not current_user.is_admin():
-        flash('ليس لديك صلاحية لإضافة المستخدمين', 'error')
+        flash('ليس لديك صلاحية للوصول إلى هذه الصفحة', 'error')
         return redirect(url_for('dashboard'))
     
     form = UserForm()
@@ -4747,6 +4747,11 @@ def serve_manifest():
         return response
     except FileNotFoundError:
         return jsonify({'error': 'Manifest not found'}), 404
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """Custom 404 error page"""
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     with app.app_context():
@@ -8550,8 +8555,8 @@ def serve_manifest():
 
 # Error Handlers
 @app.errorhandler(404)
-def not_found_error(error):
-    """معالج خطأ 404 - الصفحة غير موجودة"""
+def page_not_found(e):
+    """Custom 404 error page"""
     return render_template('404.html'), 404
 
 @app.errorhandler(500)
@@ -8572,4 +8577,4 @@ if __name__ == '__main__':
         # إنشاء المستخدم الثابت عند بدء التطبيق
         from models import create_static_user
         create_static_user()
-    app.run(debug=True) 
+    app.run(debug=True, port=8006) 

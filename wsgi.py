@@ -69,4 +69,4 @@ except Exception as e:
 
 if __name__ == "__main__":
     # Development server (not for production)
-    app.run(debug=False, host='0.0.0.0', port=5000) 
+    app.run(debug=False, host='0.0.0.0', port=8006) 
