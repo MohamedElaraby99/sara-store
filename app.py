@@ -2239,6 +2239,13 @@ def api_create_sale():
     discount_amount = float(data.get('discount_amount', 0))
     total_amount = float(data['total_amount'])
     
+    # منع البائع من إضافة خصم إلا إذا كان مديراً
+    if not current_user.is_admin():
+        if discount_type != 'none' and discount_value > 0:
+            return jsonify({'error': 'غير مسموح للبائع بإضافة خصم. فقط المدير يمكنه ذلك.'}), 403
+        if discount_amount > 0:
+            return jsonify({'error': 'غير مسموح للبائع بإضافة خصم. فقط المدير يمكنه ذلك.'}), 403
+    
     # Validate customer for credit sales
     if payment_type == 'credit' and not customer_id:
         return jsonify({'error': 'يجب اختيار عميل للبيع الآجل'}), 400
@@ -6042,6 +6049,13 @@ def api_create_sale():
     discount_value = float(data.get('discount_value', 0))
     discount_amount = float(data.get('discount_amount', 0))
     total_amount = float(data['total_amount'])
+    
+    # منع البائع من إضافة خصم إلا إذا كان مديراً
+    if not current_user.is_admin():
+        if discount_type != 'none' and discount_value > 0:
+            return jsonify({'error': 'غير مسموح للبائع بإضافة خصم. فقط المدير يمكنه ذلك.'}), 403
+        if discount_amount > 0:
+            return jsonify({'error': 'غير مسموح للبائع بإضافة خصم. فقط المدير يمكنه ذلك.'}), 403
     
     # Validate customer for credit sales
     if payment_type == 'credit' and not customer_id:
