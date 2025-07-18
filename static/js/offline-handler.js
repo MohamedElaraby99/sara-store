@@ -524,6 +524,9 @@ class OfflineHandler {
   }
 
   isAuthPage() {
+    const currentPath = window.location.pathname;
+
+    // صفحات المصادقة
     const authPages = [
       "/login",
       "/logout",
@@ -531,7 +534,21 @@ class OfflineHandler {
       "/reset-password",
       "/change-password",
     ];
-    return authPages.includes(window.location.pathname);
+
+    // صفحات المرتجعات (تتطلب مصادقة خاصة)
+    const returnsPages = ["/returns/new", "/api/returns"];
+
+    // التحقق من صفحات المصادقة
+    if (authPages.includes(currentPath)) {
+      return true;
+    }
+
+    // التحقق من صفحات المرتجعات
+    if (returnsPages.some((page) => currentPath.startsWith(page))) {
+      return true;
+    }
+
+    return false;
   }
 
   // طرق تشخيص وصيانة

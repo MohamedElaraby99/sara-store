@@ -506,11 +506,53 @@
 <!-- Include external sales functions -->
 <script src="{{ url_for('static', filename='js/sales-functions.js') }}?v={{ range(1, 1000) | random }}"></script>
 
+<!-- Service Worker Fix -->
+<script src="{{ url_for('static', filename='js/fix-service-worker.js') }}"></script>
+
 <script>
+    // Quick fix for service worker issue
+    function quickFixServiceWorker() {
+        if (confirm('هل تريد إصلاح مشكلة Service Worker الآن؟ سيتم إعادة تحميل الصفحة.')) {
+            console.log('🔧 Applying quick Service Worker fix...');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg) {
+                        reg.unregister().then(() => {
+                            console.log('✅ Old SW unregistered');
+                            return caches.keys();
+                        }).then(names => {
+                            return Promise.all(names.map(name => caches.delete(name)));
+                        }).then(() => {
+                            console.log('✅ Caches cleared');
+                            return navigator.serviceWorker.register('/static/js/service-worker.js');
+                        }).then(() => {
+                            console.log('✅ New SW registered');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        });
+                    }
+                });
+            }
+        }
+    }
+
     // Test functions after page loads
     document.addEventListener('DOMContentLoaded', function () {
         console.log('=== SALES PAGE LOADED ===');
         console.log('Testing function availability...');
+
+        // Add quick fix button
+        const headerDiv = document.querySelector('.d-flex.justify-content-between.align-items-center');
+        if (headerDiv) {
+            const quickFixBtn = document.createElement('button');
+            quickFixBtn.className = 'btn btn-warning btn-sm ms-2';
+            quickFixBtn.innerHTML = '<i class="bi bi-tools"></i> إصلاح سريع';
+            quickFixBtn.onclick = quickFixServiceWorker;
+            quickFixBtn.title = 'إصلاح مشكلة Service Worker';
+            headerDiv.querySelector('div:last-child').appendChild(quickFixBtn);
+        }
 
         // Test if functions are available
         if (typeof window.viewSaleDetails === 'function') {

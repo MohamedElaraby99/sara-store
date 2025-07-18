@@ -857,16 +857,23 @@
 
                 // تهيئة معالج الأوفلاين (استبعاد صفحات المصادقة)
                 if (typeof OfflineHandler !== 'undefined') {
-                    // التحقق من أن الصفحة ليست صفحة مصادقة
-                    const authPages = ['/login', '/logout', '/forgot-password', '/reset-password', '/change-password'];
+                    // التحقق من أن الصفحة ليست صفحة مصادقة أو مرتجعات
+                    const excludedPages = [
+                        '/login',
+                        '/logout',
+                        '/forgot-password',
+                        '/reset-password',
+                        '/change-password',
+                        '/returns/new'
+                    ];
                     const currentPath = window.location.pathname;
 
-                    if (!authPages.includes(currentPath)) {
+                    if (!excludedPages.some(page => currentPath.startsWith(page))) {
                         window.offlineHandler = new OfflineHandler();
                         await window.offlineHandler.init();
                         console.log('✅ Offline Handler initialized');
                     } else {
-                        console.log('🚫 Auth page detected - skipping OfflineHandler initialization');
+                        console.log('🚫 Excluded page detected - skipping OfflineHandler initialization');
                     }
                 } else {
                     console.log('⚠️ OfflineHandler not available');
@@ -895,11 +902,18 @@
                     }, 3000);
                 }
 
-                // مراقبة حالة الشبكة (استبعاد صفحات المصادقة)
-                const authPages = ['/login', '/logout', '/forgot-password', '/reset-password', '/change-password'];
+                // مراقبة حالة الشبكة (استبعاد صفحات المصادقة والمرتجعات)
+                const excludedPages = [
+                    '/login',
+                    '/logout',
+                    '/forgot-password',
+                    '/reset-password',
+                    '/change-password',
+                    '/returns/new'
+                ];
                 const currentPath = window.location.pathname;
 
-                if (!authPages.includes(currentPath)) {
+                if (!excludedPages.some(page => currentPath.startsWith(page))) {
                     window.addEventListener('online', function () {
                         console.log('🌐 Network connection restored');
                         if (window.syncManager) {

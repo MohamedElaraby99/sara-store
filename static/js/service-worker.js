@@ -1,6 +1,6 @@
-const CACHE_NAME = "norko-store-v1.2.0";
-const STATIC_CACHE = "norko-static-v1.2.0";
-const API_CACHE = "norko-api-v1.2.0";
+const CACHE_NAME = "norko-store-v1.2.1";
+const STATIC_CACHE = "norko-static-v1.2.1";
+const API_CACHE = "norko-api-v1.2.1";
 
 // قائمة الملفات المهمة للتخزين المؤقت
 const STATIC_FILES = [
@@ -51,13 +51,15 @@ const STATIC_FILES = [
   "/price-ticket",
 ];
 
-// صفحات يجب استبعادها من التخزين المؤقت (صفحات المصادقة)
+// صفحات يجب استبعادها من التخزين المؤقت (صفحات المصادقة والمرتجعات)
 const EXCLUDED_PAGES = [
   "/login",
   "/logout",
   "/forgot-password",
   "/reset-password",
   "/change-password",
+  "/returns/new",
+  "/api/returns",
 ];
 
 // API endpoints للتخزين المؤقت
@@ -143,8 +145,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // استبعاد صفحات المصادقة من التخزين المؤقت
-  if (EXCLUDED_PAGES.includes(url.pathname)) {
+  // استبعاد صفحات المصادقة والمرتجعات من التخزين المؤقت
+  if (this.isExcludedPage(url.pathname)) {
+    console.log(
+      "Service Worker: Excluded page - allowing network request:",
+      url.pathname
+    );
     // السماح بالطلب للشبكة مباشرة بدون تخزين مؤقت
     return;
   }
@@ -158,6 +164,26 @@ self.addEventListener("fetch", (event) => {
   // التعامل مع الملفات الثابتة والصفحات
   event.respondWith(handleStaticRequest(request));
 });
+
+// التحقق من كون الصفحة مستبعدة
+function isExcludedPage(pathname) {
+  // استبعاد صفحات المصادقة
+  if (EXCLUDED_PAGES.includes(pathname)) {
+    return true;
+  }
+
+  // استبعاد صفحات المرتجعات
+  if (pathname.startsWith("/returns/new/")) {
+    return true;
+  }
+
+  // استبعاد صفحات API المرتجعات
+  if (pathname.startsWith("/api/returns")) {
+    return true;
+  }
+
+  return false;
+}
 
 // معالجة طلبات API
 async function handleApiRequest(request) {
@@ -221,11 +247,14 @@ async function handleStaticRequest(request) {
     return cachedResponse;
   }
 
-  // إذا كانت صفحة HTML وغير متوفرة، أرسل صفحة offline
+  // إذا كانت صفحة HTML وغير متوفرة، أرسل صفحة offline فقط إذا لم تكن صفحة مصادقة
   if (request.headers.get("accept").includes("text/html")) {
-    const offlineResponse = await caches.match("/offline.html");
-    if (offlineResponse) {
-      return offlineResponse;
+    const url = new URL(request.url);
+    if (!isExcludedPage(url.pathname)) {
+      const offlineResponse = await caches.match("/offline.html");
+      if (offlineResponse) {
+        return offlineResponse;
+      }
     }
   }
 
