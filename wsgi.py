@@ -60,7 +60,9 @@ try:
         """Health check endpoint for monitoring"""
         return {'status': 'healthy', 'service': 'library_management'}, 200
     
+    # Export both app and application for compatibility
     application = app
+    app = application
     
 except Exception as e:
     # Log startup errors
