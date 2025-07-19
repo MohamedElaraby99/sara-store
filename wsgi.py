@@ -13,6 +13,11 @@ from logging.handlers import RotatingFileHandler
 project_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_dir)
 
+# Also add the parent directory in case we're in a subdirectory
+parent_dir = os.path.dirname(project_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
 # Set production environment
 os.environ.setdefault('FLASK_CONFIG', 'vps')
 
