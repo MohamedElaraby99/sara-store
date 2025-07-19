@@ -81,16 +81,18 @@
 
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: white !important;
         }
 
         .nav-link {
             color: rgba(255, 255, 255, 0.9) !important;
             font-weight: 500;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
-            border-radius: 8px;
-            margin: 0 2px;
+            border-radius: 6px;
+            margin: 0 1px;
+            padding: 0.4rem 0.6rem !important;
         }
 
         .nav-link:hover,
@@ -103,11 +105,38 @@
 
         .dropdown-menu {
             border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
             backdrop-filter: blur(10px);
             z-index: 1050 !important;
             position: absolute !important;
+            min-width: 180px;
+        }
+
+        /* تخصيص قائمة الكاش */
+        .dropdown-menu .dropdown-header {
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-menu .dropdown-item {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+            transform: translateX(3px);
+        }
+
+        .dropdown-menu .dropdown-item i {
+            width: 16px;
+            margin-right: 8px;
         }
 
         .navbar-nav .dropdown {
@@ -132,8 +161,10 @@
         .btn-outline-warning,
         .btn-success,
         .btn-outline-light {
-            border-radius: 20px;
+            border-radius: 15px;
             font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
             transition: all 0.3s ease;
         }
 
@@ -209,20 +240,32 @@
         }
 
         @media (max-width: 768px) {
-            .navbar-nav {
-                text-align: center;
+            body {
+                padding-top: 80px;
             }
 
             .navbar-brand {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
 
-            /* Fix mobile dropdown behavior */
+            .navbar-nav {
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.8rem !important;
+                margin: 2px 0;
+            }
+
+            /* تحسين القائمة المنسدلة في الموبايل */
             .navbar-collapse {
-                background-color: rgba(30, 60, 114, 0.95);
+                background-color: rgba(30, 60, 114, 0.98);
                 margin: 0 -15px;
-                padding: 10px 15px;
-                border-radius: 0 0 15px 15px;
+                padding: 15px;
+                border-radius: 0 0 20px 20px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             }
 
             .navbar-collapse .dropdown-menu {
@@ -230,41 +273,95 @@
                 transform: none !important;
                 border: none;
                 box-shadow: none;
-                background-color: rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
-                border-radius: 8px;
-                margin: 8px 0;
-                padding: 8px 0;
+                background-color: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(15px);
+                border-radius: 12px;
+                margin: 10px 0;
+                padding: 10px 0;
+                min-width: auto;
             }
 
             .navbar-collapse .dropdown-item {
-                color: rgba(255, 255, 255, 0.9) !important;
+                color: rgba(255, 255, 255, 0.95) !important;
                 padding: 10px 20px;
-                border-radius: 6px;
-                margin: 2px 10px;
-                transition: all 0.2s ease;
+                border-radius: 8px;
+                margin: 3px 10px;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+                font-weight: 500;
             }
 
             .navbar-collapse .dropdown-item:hover,
             .navbar-collapse .dropdown-item:focus {
-                background-color: rgba(255, 255, 255, 0.2) !important;
+                background-color: rgba(255, 255, 255, 0.25) !important;
                 color: white !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             }
 
             .navbar-collapse .dropdown-header {
-                color: rgba(255, 255, 255, 0.7) !important;
-                font-size: 0.8rem;
-                padding: 8px 20px 4px;
+                color: rgba(255, 255, 255, 0.8) !important;
+                font-size: 0.85rem;
+                font-weight: 700;
+                padding: 12px 20px 8px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .navbar-collapse .dropdown-divider {
-                border-top-color: rgba(255, 255, 255, 0.2);
-                margin: 8px 15px;
+                border-top-color: rgba(255, 255, 255, 0.3);
+                margin: 10px 20px;
+            }
+
+            /* تحسين الأزرار في الموبايل */
+            .d-flex {
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 15px;
+                align-items: center;
+            }
+
+            .btn {
+                width: auto;
+                min-width: 120px;
+                margin: 2px 0;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+                border-radius: 20px;
+            }
+
+            .navbar-text {
+                text-align: center;
+                margin: 10px 0;
+                font-size: 0.85rem;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 8px 15px;
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+            }
+
+            /* تحسين قائمة الكاش في الموبايل */
+            .dropdown-menu {
+                min-width: 200px;
+                max-width: 280px;
+                margin: 0 auto;
+            }
+
+            .dropdown-menu .dropdown-item {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+                border-radius: 8px;
+                margin: 2px 10px;
+            }
+
+            .dropdown-menu .dropdown-header {
+                padding: 10px 20px 6px;
+                font-size: 0.8rem;
             }
 
             /* تعديل المسافات للموبايل */
             body {
-                padding-top: 120px;
+                padding-top: 100px;
             }
 
             main {
@@ -289,7 +386,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('dashboard') }}">
                 <i class="bi bi-book"></i>
-                إدارة Sara Store
+                Sara Store
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -299,17 +396,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> لوحة التحكم
+                        <a class="nav-link" href="{{ url_for('dashboard') }}" title="لوحة التحكم">
+                            <i class="bi bi-speedometer2"></i>
                         </a>
                     </li>
+
 
                     <!-- قائمة المنتجات - للأدمن فقط -->
                     {% if current_user.is_admin() %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-box"></i> المنتجات
+                            aria-expanded="false" title="المنتجات">
+                            <i class="bi bi-box"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('products') }}">
@@ -334,8 +432,8 @@
                     <!-- قائمة المبيعات -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-cart"></i> المبيعات
+                            aria-expanded="false" title="المبيعات">
+                            <i class="bi bi-cart"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('new_sale') }}">
@@ -358,8 +456,8 @@
 
                     <!-- مولد QR -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('qr_generator') }}">
-                            <i class="bi bi-qr-code"></i> مولد QR
+                        <a class="nav-link" href="{{ url_for('qr_generator') }}" title="مولد QR">
+                            <i class="bi bi-qr-code"></i>
                         </a>
                     </li>
 
@@ -367,8 +465,8 @@
                     {% if current_user.is_admin() %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-people"></i> العملاء
+                            aria-expanded="false" title="العملاء">
+                            <i class="bi bi-people"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('customers') }}">
@@ -391,8 +489,8 @@
                     {% if current_user.is_admin() %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-graph-up"></i> التقارير
+                            aria-expanded="false" title="التقارير">
+                            <i class="bi bi-graph-up"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('reports') }}">
@@ -416,8 +514,8 @@
                     <!-- قائمة الإدارة -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-gear"></i> الإدارة
+                            aria-expanded="false" title="الإدارة">
+                            <i class="bi bi-gear"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
@@ -438,6 +536,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('qr_generator') }}">
                                     <i class="bi bi-qr-code"></i> مولد رموز QR
                                 </a></li>
+
                             <!-- <li><a class="dropdown-item" href="{{ url_for('offline_demo') }}">
                                     <i class="bi bi-wifi-off"></i> اختبار الوضع غير المتصل
                                 </a></li> -->
@@ -456,40 +555,82 @@
                 </ul>
 
                 <div class="d-flex">
+                    <!-- قائمة الكاش الموحدة -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle position-relative" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="إدارة الكاش والبيانات">
+                            <i class="bi bi-database"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+                                style="font-size: 0.5em; transform: translate(-50%, -50%);">
+                                ⚡
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">إدارة الكاش</h6>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="clearCacheQuick(); return false;">
+                                    <i class="bi bi-lightning text-warning"></i> إزالة الكاش السريع
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('clear_cache') }}">
+                                    <i class="bi bi-gear text-info"></i> خيارات الكاش المتقدمة
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('cache_settings') }}">
+                                    <i class="bi bi-sliders text-warning"></i> إعدادات الكاش
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">حالة النظام</h6>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="window.offlineHandler?.showConnectionInfo()">
+                                    <i class="bi bi-wifi text-info" id="connection-icon"></i> حالة الاتصال
+                                </button>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="showCacheInfo(); return false;">
+                                    <i class="bi bi-info-circle text-primary"></i> معلومات الكاش
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                     <!-- مؤشر الديون - للأدمن فقط -->
                     {% if current_user.is_admin() and global_total_debt > 0 %}
                     <a href="{{ url_for('debts_report') }}"
-                        class="btn btn-outline-warning btn-sm me-2 position-relative" title="الديون المستحقة">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-                        ديون
+                        class="btn btn-outline-warning btn-sm me-1 position-relative" title="الديون المستحقة">
+                        <i class="bi bi-exclamation-triangle"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             {{ global_customers_with_debt }}
                         </span>
                     </a>
                     {% endif %}
 
-                    <!-- زر حالة الاتصال -->
-                    <button id="connection-status-btn" class="btn btn-outline-info btn-sm me-2"
-                        onclick="window.offlineHandler?.showConnectionInfo()" title="حالة الاتصال">
-                        <i class="bi bi-wifi" id="connection-icon"></i>
-                        <span id="connection-text">متصل</span>
-                    </button>
 
                     <!-- زر البيع السريع -->
-                    <a href="{{ url_for('new_sale') }}" class="btn btn-success btn-sm me-2" title="بيع جديد">
-                        <i class="bi bi-plus-circle me-1"></i>بيع سريع
+                    <a href="{{ url_for('new_sale') }}" class="btn btn-success btn-sm me-1" title="بيع جديد">
+                        <i class="bi bi-plus-circle"></i>
                     </a>
 
-                    <span class="navbar-text me-3">
-                        مرحباً، {{ current_user.username }}
+                    <span class="navbar-text me-2" style="font-size: 0.8rem;">
+                        {{ current_user.username }}
                         {% if current_user.is_admin() %}
-                        <span class="badge bg-warning">مدير</span>
+                        <span class="badge bg-warning" style="font-size: 0.7rem;">مدير</span>
                         {% else %}
-                        <span class="badge bg-info">بائع</span>
+                        <span class="badge bg-info" style="font-size: 0.7rem;">بائع</span>
                         {% endif %}
                     </span>
                     <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
-                        <i class="bi bi-box-arrow-right"></i> خروج
+                        <i class="bi bi-box-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -534,235 +675,96 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS (with offline fallback) -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+    <!-- Navigation Fix -->
     <script>
-        // تحميل Bootstrap JS مع fallback للعمل غير المتصل
-        (function () {
-            const bootstrapScript = document.createElement('script');
-            bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
-            bootstrapScript.async = true;
+        // دالة عرض معلومات الكاش
+        function showCacheInfo() {
+            let info = '📊 معلومات الكاش:\n\n';
 
-            // معالج النجاح
-            bootstrapScript.onload = function () {
-                console.log('✅ Bootstrap JS loaded successfully from CDN');
-                window.bootstrapAvailable = true;
-            };
+            // معلومات localStorage
+            const localStorageSize = JSON.stringify(localStorage).length;
+            info += `📦 LocalStorage: ${(localStorageSize / 1024).toFixed(2)} KB\n`;
 
-            // معالج الخطأ
-            bootstrapScript.onerror = function () {
-                console.log('⚠️ Bootstrap JS CDN failed, creating basic fallback');
-                window.bootstrapAvailable = false;
+            // معلومات sessionStorage
+            const sessionStorageSize = JSON.stringify(sessionStorage).length;
+            info += `📋 SessionStorage: ${(sessionStorageSize / 1024).toFixed(2)} KB\n`;
 
-                // إنشاء Bootstrap fallback أساسي
-                window.bootstrap = {
-                    Modal: function () {
-                        return {
-                            show: function () { console.log('Modal show - Bootstrap fallback'); },
-                            hide: function () { console.log('Modal hide - Bootstrap fallback'); },
-                            dispose: function () { console.log('Modal dispose - Bootstrap fallback'); }
-                        };
-                    },
-                    Dropdown: function () {
-                        return {
-                            show: function () { console.log('Dropdown show - Bootstrap fallback'); },
-                            hide: function () { console.log('Dropdown hide - Bootstrap fallback'); }
-                        };
-                    },
-                    Alert: function () {
-                        return {
-                            close: function () { console.log('Alert close - Bootstrap fallback'); }
-                        };
+            // معلومات Cookies
+            const cookiesSize = document.cookie.length;
+            info += `🍪 Cookies: ${(cookiesSize / 1024).toFixed(2)} KB\n`;
+
+            // معلومات Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    info += `🔧 Service Workers: ${registrations.length} نشط\n`;
+
+                    // معلومات Cache Storage
+                    if ('caches' in window) {
+                        caches.keys().then(cacheNames => {
+                            info += `🗂️ Cache Storage: ${cacheNames.length} مجلد\n`;
+
+                            // حساب حجم الكاش الإجمالي
+                            let totalSize = localStorageSize + sessionStorageSize + cookiesSize;
+                            info += `\n💾 الحجم الإجمالي: ${(totalSize / 1024).toFixed(2)} KB`;
+
+                            alert(info);
+                        });
+                    } else {
+                        info += `\n💾 الحجم الإجمالي: ${(localStorageSize + sessionStorageSize + cookiesSize) / 1024} KB`;
+                        alert(info);
                     }
-                };
-
-                // إضافة طرق ثابتة
-                window.bootstrap.Modal.getInstance = function () { return null; };
-                window.bootstrap.Dropdown.getInstance = function () { return null; };
-            };
-
-            // إضافة timeout للتحقق من التحميل
-            setTimeout(function () {
-                if (!window.bootstrap && !window.bootstrapAvailable) {
-                    console.log('⏰ Bootstrap JS timeout - initializing fallback');
-                    bootstrapScript.onerror();
-                }
-            }, 5000);
-
-            document.head.appendChild(bootstrapScript);
-        })();
-    </script>
-    <!-- Chart.js for charts (with offline fallback) -->
-    <script>
-        // تحميل Chart.js مع fallback للعمل غير المتصل
-        (function () {
-            const chartScript = document.createElement('script');
-            chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-            chartScript.async = true;
-
-            // معالج النجاح
-            chartScript.onload = function () {
-                console.log('✅ Chart.js loaded successfully from CDN');
-                window.chartJsAvailable = true;
-            };
-
-            // معالج الخطأ
-            chartScript.onerror = function () {
-                console.log('⚠️ Chart.js CDN failed, creating fallback');
-                window.chartJsAvailable = false;
-
-                // إنشاء Chart fallback بسيط
-                window.Chart = function () {
-                    console.log('📊 Chart.js not available - using fallback');
-                    return {
-                        destroy: function () { },
-                        update: function () { },
-                        render: function () { }
-                    };
-                };
-
-                // إضافة طرق أساسية
-                window.Chart.register = function () { };
-                window.Chart.defaults = { responsive: true };
-            };
-
-            // إضافة timeout للتحقق من التحميل
-            setTimeout(function () {
-                if (!window.Chart && !window.chartJsAvailable) {
-                    console.log('⏰ Chart.js timeout - initializing fallback');
-                    chartScript.onerror();
-                }
-            }, 5000);
-
-            document.head.appendChild(chartScript);
-        })();
-    </script>
-
-    <!-- Mobile dropdown fix -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize all dropdowns
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl, {
-                    autoClose: true
                 });
-            });
+            } else {
+                info += `\n💾 الحجم الإجمالي: ${(localStorageSize + sessionStorageSize + cookiesSize) / 1024} KB`;
+                alert(info);
+            }
+        }
 
-            // Add extra mobile support
-            if (window.innerWidth <= 768) {
-                dropdownElementList.forEach(function (element) {
-                    element.addEventListener('click', function (e) {
-                        // Ensure the dropdown works on mobile
-                        var dropdown = bootstrap.Dropdown.getInstance(element);
-                        if (!dropdown) {
-                            dropdown = new bootstrap.Dropdown(element);
-                        }
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 تهيئة التنقل...');
+
+            // التأكد من تحميل Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                console.log('✅ Bootstrap متاح');
+
+                // تهيئة جميع القوائم المنسدلة
+                var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+                dropdownElementList.forEach(function (dropdownToggleEl) {
+                    new bootstrap.Dropdown(dropdownToggleEl, {
+                        autoClose: true
                     });
                 });
+
+                console.log('✅ تم تهيئة ' + dropdownElementList.length + ' قائمة منسدلة');
+            } else {
+                console.error('❌ Bootstrap غير متاح');
             }
+
+            // إصلاح الروابط - إزالة المعالجات التي تمنع التنقل
+            document.querySelectorAll('a[href]').forEach(function (link) {
+                // إزالة أي معالجات click موجودة
+                link.removeEventListener('click', function () { });
+
+                // التأكد من أن الروابط تعمل
+                if (link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+                    link.style.cursor = 'pointer';
+                    link.style.pointerEvents = 'auto';
+                }
+            });
+
+            console.log('✅ تم إصلاح الروابط');
         });
     </script>
 
-    <!-- Universal Modal Fix -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // حل شامل لجميع الـ modals في النظام
-            function initializeModals() {
-                const modals = document.querySelectorAll('.modal');
 
-                modals.forEach(function (modal) {
-                    // إزالة أي backdrop قديم
-                    function cleanupBackdrops() {
-                        const backdrops = document.querySelectorAll('.modal-backdrop');
-                        backdrops.forEach(backdrop => backdrop.remove());
-                    }
-
-                    // إصلاح الـ modal عند الفتح
-                    modal.addEventListener('show.bs.modal', function () {
-                        cleanupBackdrops();
-
-                        // إخفاء أي dropdowns مفتوحة
-                        const openDropdowns = document.querySelectorAll('.navbar .dropdown-menu.show');
-                        openDropdowns.forEach(dropdown => {
-                            dropdown.classList.remove('show');
-                        });
-                    });
-
-                    // إصلاح نهائي بعد الظهور
-                    modal.addEventListener('shown.bs.modal', function () {
-                        cleanupBackdrops();
-
-                        // تطبيق الأنماط مباشرة
-                        this.style.zIndex = '9999';
-                        this.style.display = 'block';
-
-                        const dialog = this.querySelector('.modal-dialog');
-                        if (dialog) {
-                            dialog.style.zIndex = '10000';
-                            dialog.style.position = 'relative';
-                        }
-
-                        const content = this.querySelector('.modal-content');
-                        if (content) {
-                            content.style.zIndex = '10001';
-                            content.style.position = 'relative';
-                            content.style.pointerEvents = 'auto';
-                        }
-                    });
-
-                    // تنظيف بعد الإخفاء
-                    modal.addEventListener('hidden.bs.modal', function () {
-                        cleanupBackdrops();
-                    });
-
-                    // إضافة وظيفة الإغلاق بالنقر خارج المحتوى
-                    modal.addEventListener('click', function (e) {
-                        if (e.target === this) {
-                            const modalInstance = bootstrap.Modal.getInstance(this);
-                            if (modalInstance) {
-                                modalInstance.hide();
-                            }
-                        }
-                    });
-                });
-
-                // مراقبة أي backdrop جديد وحذفه فوراً
-                const observer = new MutationObserver(function (mutations) {
-                    mutations.forEach(function (mutation) {
-                        mutation.addedNodes.forEach(function (node) {
-                            if (node.nodeType === 1 && node.classList && node.classList.contains('modal-backdrop')) {
-                                node.remove();
-                            }
-                        });
-                    });
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: false
-                });
-            }
-
-            // تطبيق الإصلاحات
-            initializeModals();
-
-            // إعادة تطبيق الإصلاحات عند إضافة modals جديدة
-            const modalObserver = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    mutation.addedNodes.forEach(function (node) {
-                        if (node.nodeType === 1 && (node.classList.contains('modal') || node.querySelector('.modal'))) {
-                            initializeModals();
-                        }
-                    });
-                });
-            });
-
-            modalObserver.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        });
-    </script>
 
     <!-- Offline Support Scripts -->
     <script src="{{ url_for('static', filename='js/db-manager.js') }}"></script>
@@ -774,292 +776,188 @@
         // تسجيل Service Worker للعمل في وضع الأوفلاين
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                // قائمة المسارات المختلفة لتجربتها
-                const serviceWorkerPaths = [
-                    '/service-worker.js',
-                    '/static/js/service-worker.js'
-                ];
-
-                async function registerServiceWorker() {
-                    for (const path of serviceWorkerPaths) {
-                        try {
-                            console.log(`🔄 Trying to register Service Worker from: ${path}`);
-
-                            const registration = await navigator.serviceWorker.register(path, {
-                                scope: '/'
-                            });
-
-                            console.log('✅ Service Worker registered successfully:', registration.scope);
-
-                            // تفعيل background sync
-                            if ('sync' in window.ServiceWorkerRegistration.prototype) {
-                                console.log('✅ Background Sync supported');
-                            }
-
-                            // التحديث التلقائي
-                            registration.addEventListener('updatefound', () => {
-                                const newWorker = registration.installing;
-                                newWorker.addEventListener('statechange', () => {
-                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        console.log('🔄 Service Worker updated');
-                                        if (confirm('تم تحديث التطبيق. هل تريد إعادة تحميل الصفحة؟')) {
-                                            window.location.reload();
-                                        }
-                                    }
-                                });
-                            });
-
-                            // نجح التسجيل، اخرج من الحلقة
-                            return registration;
-
-                        } catch (error) {
-                            console.log(`❌ Failed to register from ${path}:`, error.message);
-                            continue;
-                        }
-                    }
-
-                    // إذا فشل جميع المسارات
-                    console.log('❌ All Service Worker registration attempts failed');
-                    console.log('ℹ️ App will work without offline capabilities');
-                }
-
-                registerServiceWorker().catch(error => {
-                    console.log('❌ Service Worker registration completely failed:', error);
-                });
+                navigator.serviceWorker.register('/static/js/service-worker.js')
+                    .then(function (registration) {
+                        console.log('✅ ServiceWorker registered successfully');
+                    })
+                    .catch(function (err) {
+                        console.log('❌ ServiceWorker registration failed: ', err);
+                    });
             });
-        } else {
-            console.log('❌ Service Worker not supported in this browser');
+        }
+    </script>
+
+    <!-- Clear Cache System -->
+    <script src="{{ url_for('static', filename='js/clear-cache.js') }}"></script>
+
+    <!-- Cache Control System -->
+    <script src="{{ url_for('static', filename='js/cache-control.js') }}"></script>
+
+    <!-- Navigation Fix -->
+    <script>
+        // إصلاح نهائي للتنقل
+        window.addEventListener('load', function () {
+            console.log('🔧 إصلاح نهائي للتنقل...');
+
+            // إزالة أي معالجات click تمنع التنقل
+            document.querySelectorAll('a[href]').forEach(function (link) {
+                // إزالة جميع معالجات الأحداث
+                const newLink = link.cloneNode(true);
+                link.parentNode.replaceChild(newLink, link);
+
+                // التأكد من أن الروابط تعمل
+                if (newLink.getAttribute('href') && !newLink.getAttribute('href').startsWith('#')) {
+                    newLink.style.cursor = 'pointer';
+                    newLink.style.pointerEvents = 'auto';
+                }
+            });
+
+            console.log('✅ تم إصلاح التنقل نهائياً');
+        });
+    </script>
+
+    <!-- دالة إزالة الكاش السريع -->
+    <script>
+        function clearCacheQuick() {
+            // استخدام تأكيد بسيط بدلاً من Bootstrap Modal
+            if (confirm('⚠️ تحذير: سيتم إزالة جميع البيانات المحفوظة في المتصفح!\n\nهذا يشمل:\n• Service Worker\n• Cache Storage\n• IndexedDB\n• localStorage\n• sessionStorage\n• Cookies\n\nهذا الإجراء لا يمكن التراجع عنه!\n\nهل أنت متأكد من إزالة جميع أنواع الكاش؟')) {
+                executeClearCache();
+            }
         }
 
-        // تهيئة نظام الأوفلاين عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', async function () {
-            try {
-                // تأخير قصير للسماح للصفحة بالتحميل
-                await new Promise(resolve => setTimeout(resolve, 1000));
+        function executeClearCache() {
+            // إنشاء مؤشر تحميل بسيط
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'cache-loading';
+            loadingDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 9999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                `;
+            loadingDiv.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🔄</div>
+                    <div>جاري إزالة الكاش...</div>
+                    <div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">يرجى الانتظار</div>
+                </div>
+                `;
 
-                // تهيئة مدير قاعدة البيانات المحلية
-                if (typeof DBManager !== 'undefined') {
-                    window.dbManager = new DBManager();
-                    await window.dbManager.init();
-                    console.log('✅ Database Manager initialized');
-                } else {
-                    console.log('⚠️ DBManager not available');
-                }
+            document.body.appendChild(loadingDiv);
 
-                // تهيئة مدير المزامنة
-                if (typeof SyncManager !== 'undefined') {
-                    window.syncManager = new SyncManager();
-                    await window.syncManager.init();
-                    console.log('✅ Sync Manager initialized');
-                } else {
-                    console.log('⚠️ SyncManager not available');
-                }
-
-                // تهيئة معالج الأوفلاين (استبعاد صفحات المصادقة)
-                if (typeof OfflineHandler !== 'undefined') {
-                    // التحقق من أن الصفحة ليست صفحة مصادقة أو مرتجعات
-                    const excludedPages = [
-                        '/login',
-                        '/logout',
-                        '/forgot-password',
-                        '/reset-password',
-                        '/change-password',
-                        '/returns/new'
-                    ];
-                    const currentPath = window.location.pathname;
-
-                    if (!excludedPages.some(page => currentPath.startsWith(page))) {
-                        window.offlineHandler = new OfflineHandler();
-                        await window.offlineHandler.init();
-                        console.log('✅ Offline Handler initialized');
-                    } else {
-                        console.log('🚫 Excluded page detected - skipping OfflineHandler initialization');
-                    }
-                } else {
-                    console.log('⚠️ OfflineHandler not available');
-                }
-
-                // تحديث فوري لحالة الشبكة بعد التهيئة
-                if (window.syncManager) {
-                    window.syncManager.updateOnlineStatus();
-                }
-
-                // تحديث حالة زر الاتصال
-                if (window.offlineHandler) {
-                    window.offlineHandler.updateConnectionButton();
-                }
-
-                // تحميل البيانات المحلية
-                if (window.syncManager) {
-                    // تحميل البيانات الأساسية في الخلفية
-                    setTimeout(async () => {
-                        try {
-                            await window.syncManager.performSync();
-                            console.log('🔄 Initial data sync completed');
-                        } catch (error) {
-                            console.log('⚠️ Initial sync failed - will work offline with cached data:', error.message);
+            // تنفيذ إزالة الكاش
+            if (window.clearCacheUtils && window.clearCacheUtils.clearAllCache) {
+                window.clearCacheUtils.clearAllCache()
+                    .then(() => {
+                        // إزالة مؤشر التحميل
+                        if (loadingDiv.parentNode) {
+                            loadingDiv.remove();
                         }
-                    }, 3000);
-                }
 
-                // مراقبة حالة الشبكة (استبعاد صفحات المصادقة والمرتجعات)
-                const excludedPages = [
-                    '/login',
-                    '/logout',
-                    '/forgot-password',
-                    '/reset-password',
-                    '/change-password',
-                    '/returns/new'
-                ];
-                const currentPath = window.location.pathname;
+                        // عرض رسالة نجاح
+                        showSuccessMessage('تم إزالة الكاش بنجاح! سيتم إعادة تحميل الصفحة...');
 
-                if (!excludedPages.some(page => currentPath.startsWith(page))) {
-                    window.addEventListener('online', function () {
-                        console.log('🌐 Network connection restored');
-                        if (window.syncManager) {
-                            setTimeout(() => {
-                                window.syncManager.performSync();
-                            }, 1000);
+                        // إعادة تحميل الصفحة بعد ثانيتين
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 2000);
+                    })
+                    .catch((error) => {
+                        // إزالة مؤشر التحميل
+                        if (loadingDiv.parentNode) {
+                            loadingDiv.remove();
                         }
-                        if (window.offlineHandler) {
-                            window.offlineHandler.updateConnectionButton();
-                        }
+
+                        // عرض رسالة خطأ
+                        showErrorMessage('حدث خطأ في إزالة الكاش: ' + error.message);
                     });
-
-                    window.addEventListener('offline', function () {
-                        console.log('📴 Network connection lost - switching to offline mode');
-                        if (window.offlineHandler) {
-                            window.offlineHandler.updateConnectionButton();
-                        }
-                    });
+            } else {
+                // إزالة مؤشر التحميل
+                if (loadingDiv.parentNode) {
+                    loadingDiv.remove();
                 }
 
-            } catch (error) {
-                console.error('❌ Error initializing offline features:', error);
+                // عرض رسالة خطأ
+                showErrorMessage('نظام إزالة الكاش غير متاح');
             }
-        });
+        }
 
-        // إضافة طرق مساعدة للمطورين
-        window.offlineUtils = {
-            // فحص حالة الأوفلاين
-            checkOfflineStatus: async function () {
-                if (window.syncManager) {
-                    const status = await window.syncManager.getStatus();
-                    console.log('📊 Offline Status:', status);
-                    return status;
-                } else {
-                    console.log('❌ SyncManager not available');
+        function showSuccessMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                max-width: 400px;
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                font-family: Arial, sans-serif;
+                `;
+            alertDiv.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span style="font-size: 20px; margin-left: 10px;">✅</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button type="button" style="background: none; border: none; margin-right: auto; font-size: 18px; cursor: pointer; color: #155724;" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+                `;
+
+            document.body.appendChild(alertDiv);
+
+            // إزالة الرسالة بعد 5 ثواني
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
                 }
-            },
+            }, 5000);
+        }
 
-            // مزامنة يدوية
-            forceSync: async function () {
-                if (window.syncManager) {
-                    await window.syncManager.performSync();
-                    console.log('🔄 Manual sync completed');
-                } else {
-                    console.log('❌ SyncManager not available');
+        function showErrorMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                max-width: 400px;
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                font-family: Arial, sans-serif;
+                `;
+            alertDiv.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span style="font-size: 20px; margin-left: 10px;">❌</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button type="button" style="background: none; border: none; margin-right: auto; font-size: 18px; cursor: pointer; color: #721c24;" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            // إزالة الرسالة بعد 8 ثواني
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
                 }
-            },
-
-            // مسح البيانات المحلية
-            clearOfflineData: async function () {
-                if (window.dbManager && confirm('هل أنت متأكد من حذف جميع البيانات المحلية؟')) {
-                    await window.dbManager.clearAllData();
-                    console.log('🗑️ All offline data cleared');
-                } else {
-                    console.log('❌ DBManager not available');
-                }
-            },
-
-            // إعادة تحميل البيانات
-            reloadData: async function () {
-                if (window.syncManager) {
-                    await window.syncManager.syncDataFromServer();
-                    console.log('⬇️ Data reloaded from server');
-                } else {
-                    console.log('❌ SyncManager not available');
-                }
-            },
-
-            // فحص Service Worker
-            checkServiceWorker: async function () {
-                if ('serviceWorker' in navigator) {
-                    const registration = await navigator.serviceWorker.getRegistration();
-                    console.log('🔧 Service Worker Registration:', registration);
-                    return registration;
-                } else {
-                    console.log('❌ Service Worker not supported');
-                }
-            },
-
-            // تشخيص سلامة قاعدة البيانات
-            diagnoseDatabaseIntegrity: async function () {
-                if (window.dbManager) {
-                    const results = await window.dbManager.diagnoseDatabaseIntegrity();
-                    console.log('🔍 Database Integrity Diagnosis completed');
-                    return results;
-                } else {
-                    console.log('❌ DBManager not available');
-                }
-            },
-
-            // إصلاح البيانات التالفة
-            fixCorruptedData: async function () {
-                if (window.dbManager && window.syncManager) {
-                    console.log('🔧 Starting data repair...');
-
-                    // إعادة تحميل البيانات من الخادم
-                    await window.syncManager.syncDataFromServer();
-
-                    // فحص سلامة البيانات بعد الإصلاح
-                    const results = await window.dbManager.diagnoseDatabaseIntegrity();
-
-                    console.log('✅ Data repair completed');
-                    return results;
-                } else {
-                    console.log('❌ Required managers not available');
-                }
-            },
-
-            // فحص حالة المكتبات الخارجية
-            checkExternalLibraries: function () {
-                const status = {
-                    bootstrap: {
-                        available: !!window.bootstrap,
-                        fromCDN: !!window.bootstrapAvailable,
-                        fallback: !!window.bootstrap && !window.bootstrapAvailable
-                    },
-                    chartJs: {
-                        available: !!window.Chart,
-                        fromCDN: !!window.chartJsAvailable,
-                        fallback: !!window.Chart && !window.chartJsAvailable
-                    }
-                };
-
-                console.log('📚 External Libraries Status:', status);
-
-                // إظهار تحذيرات إذا كانت المكتبات تعمل على fallback
-                if (status.bootstrap.fallback) {
-                    console.warn('⚠️ Bootstrap is using fallback - some UI features may be limited');
-                }
-                if (status.chartJs.fallback) {
-                    console.warn('⚠️ Chart.js is using fallback - charts will not be displayed');
-                }
-
-                return status;
-            },
-
-            // إعادة تحميل المكتبات الخارجية
-            reloadExternalLibraries: async function () {
-                console.log('🔄 Attempting to reload external libraries...');
-
-                // إعادة تحميل الصفحة لإعادة تحميل جميع المكتبات
-                if (confirm('سيتم إعادة تحميل الصفحة لإعادة تحميل المكتبات الخارجية. هل تريد المتابعة؟')) {
-                    location.reload();
-                }
-            }
-        };
+            }, 8000);
+        }
     </script>
 
     {% block extra_js %}{% endblock %}

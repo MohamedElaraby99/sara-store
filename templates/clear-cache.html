@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}إزالة الكاش - Sara Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-trash"></i>
+                        إزالة الكاش
+                    </h1>
+                    <p class="text-muted">إزالة جميع أنواع الكاش من المتصفح لحل مشاكل التحميل</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        العودة للداشبورد
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        إزالة الكاش الشامل
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-info-circle"></i> تحذير:</h6>
+                        <p>سيتم إزالة جميع البيانات المحفوظة في المتصفح بما في ذلك:</p>
+                        <ul>
+                            <li>Service Worker</li>
+                            <li>Cache Storage</li>
+                            <li>IndexedDB</li>
+                            <li>localStorage</li>
+                            <li>sessionStorage</li>
+                            <li>Cookies</li>
+                        </ul>
+                        <p><strong>هذا الإجراء لا يمكن التراجع عنه!</strong></p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">المشاكل التي سيتم حلها:</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul>
+                                        <li>عدم تحميل المنتجات</li>
+                                        <li>أخطاء JavaScript</li>
+                                        <li>مشاكل في التخزين المحلي</li>
+                                        <li>Service Worker معطل</li>
+                                        <li>بيانات قديمة أو تالفة</li>
+                                        <li>مشاكل في المزامنة</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">بعد إزالة الكاش:</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul>
+                                        <li>تحميل أسرع للصفحات</li>
+                                        <li>عمل المنتجات بشكل صحيح</li>
+                                        <li>إزالة الأخطاء</li>
+                                        <li>بيانات جديدة من الخادم</li>
+                                        <li>أداء محسن</li>
+                                        <li>استقرار أفضل</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-danger btn-lg" onclick="clearAllCache()">
+                            <i class="bi bi-trash"></i>
+                            إزالة جميع أنواع الكاش
+                        </button>
+                        <button type="button" class="btn btn-info btn-lg ms-2" onclick="checkCacheStatus()">
+                            <i class="bi bi-info-circle"></i>
+                            فحص حالة الكاش
+                        </button>
+                    </div>
+
+                    <div id="status-container" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">حالة الكاش:</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="status-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-gear"></i>
+                    جاري إزالة الكاش...
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p id="progress-text">جاري إزالة Service Worker...</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // دالة إزالة الكاش مع عرض التقدم
+    async function clearAllCache() {
+        if (!confirm('هل أنت متأكد من إزالة جميع أنواع الكاش؟ هذا الإجراء لا يمكن التراجع عنه!')) {
+            return;
+        }
+
+        const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        progressModal.show();
+        
+        try {
+            // 1. إزالة Service Worker
+            progressText.textContent = 'جاري إزالة Service Worker...';
+            progressBar.style.width = '10%';
+            
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            
+            // 2. مسح Cache Storage
+            progressText.textContent = 'جاري مسح Cache Storage...';
+            progressBar.style.width = '30%';
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+            }
+            
+            // 3. مسح IndexedDB
+            progressText.textContent = 'جاري مسح IndexedDB...';
+            progressBar.style.width = '50%');
+            
+            if ('indexedDB' in window) {
+                const databases = ['NorkoStoreDB', 'norko-store-db', 'offline-store'];
+                for (let dbName of databases) {
+                    try {
+                        await indexedDB.deleteDatabase(dbName);
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            }
+            
+            // 4. مسح localStorage و sessionStorage
+            progressText.textContent = 'جاري مسح التخزين المحلي...';
+            progressBar.style.width = '70%');
+            
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                // تجاهل الأخطاء
+            }
+            
+            // 5. مسح Cookies
+            progressText.textContent = 'جاري مسح Cookies...';
+            progressBar.style.width = '90%');
+            
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            // 6. إزالة مراجع المديرين
+            progressText.textContent = 'جاري إزالة المراجع...';
+            progressBar.style.width = '100%');
+            
+            window.dbManager = null;
+            window.syncManager = null;
+            window.offlineHandler = null;
+            
+            progressModal.hide();
+            
+            // عرض رسالة النجاح
+            showAlert('تم إزالة جميع أنواع الكاش بنجاح! سيتم إعادة تحميل الصفحة...', 'success');
+            
+            // إعادة تحميل الصفحة بعد 3 ثواني
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 3000);
+            
+        } catch (error) {
+            progressModal.hide();
+            console.error('خطأ في إزالة الكاش:', error);
+            showAlert('حدث خطأ في إزالة الكاش: ' + error.message, 'danger');
+        }
+    }
+    
+    // دالة فحص حالة الكاش
+    async function checkCacheStatus() {
+        const statusContainer = document.getElementById('status-container');
+        const statusContent = document.getElementById('status-content');
+        
+        statusContainer.style.display = 'block';
+        statusContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p class="mt-2">جاري فحص حالة الكاش...</p></div>';
+        
+        try {
+            let status = '';
+            
+            // فحص Service Worker
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                status += `<div class="alert alert-${registrations.length > 0 ? 'warning' : 'success'}">
+                    <i class="bi bi-${registrations.length > 0 ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    Service Worker: ${registrations.length > 0 ? 'موجود (' + registrations.length + ' تسجيل)' : 'غير موجود'}
+                </div>`;
+            } else {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Service Worker غير مدعوم</div>';
+            }
+            
+            // فحص Cache Storage
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                status += `<div class="alert alert-${cacheNames.length > 0 ? 'warning' : 'success'}">
+                    <i class="bi bi-${cacheNames.length > 0 ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    Cache Storage: ${cacheNames.length > 0 ? 'موجود (' + cacheNames.length + ' كاش)' : 'غير موجود'}
+                </div>`;
+            } else {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Cache Storage غير مدعوم</div>';
+            }
+            
+            // فحص localStorage
+            try {
+                const localStorageSize = localStorage.length;
+                status += `<div class="alert alert-${localStorageSize > 0 ? 'warning' : 'success'}">
+                    <i class="bi bi-${localStorageSize > 0 ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    localStorage: ${localStorageSize > 0 ? 'موجود (' + localStorageSize + ' عنصر)' : 'غير موجود'}
+                </div>`;
+            } catch (e) {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> localStorage غير متاح</div>';
+            }
+            
+            // فحص sessionStorage
+            try {
+                const sessionStorageSize = sessionStorage.length;
+                status += `<div class="alert alert-${sessionStorageSize > 0 ? 'warning' : 'success'}">
+                    <i class="bi bi-${sessionStorageSize > 0 ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    sessionStorage: ${sessionStorageSize > 0 ? 'موجود (' + sessionStorageSize + ' عنصر)' : 'غير موجود'}
+                </div>`;
+            } catch (e) {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> sessionStorage غير متاح</div>';
+            }
+            
+            // فحص IndexedDB
+            if ('indexedDB' in window) {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> IndexedDB مدعوم</div>';
+            } else {
+                status += '<div class="alert alert-info"><i class="bi bi-info-circle"></i> IndexedDB غير مدعوم</div>';
+            }
+            
+            statusContent.innerHTML = status;
+            
+        } catch (error) {
+            statusContent.innerHTML = `<div class="alert alert-danger">❌ خطأ في فحص حالة الكاش: ${error.message}</div>`;
+        }
+    }
+    
+    // دالة عرض التنبيهات
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // إضافة التنبيه في أعلى الصفحة
+        const container = document.querySelector('.container-fluid');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // إزالة التنبيه تلقائياً بعد 10 ثواني
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 10000);
+    }
+</script>
+{% endblock %} 

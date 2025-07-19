@@ -8584,6 +8584,17 @@ def forbidden_error(error):
     """معالج خطأ 403 - ممنوع الوصول"""
     return render_template('403.html'), 403
 
+@app.route('/clear-cache')
+@login_required
+def clear_cache():
+    """صفحة إزالة الكاش"""
+    return render_template('clear-cache.html')
+
+@app.route('/cache-settings')
+@login_required
+def cache_settings():
+    """صفحة إعدادات الكاش"""
+    return render_template('cache_settings.html')
 
 if __name__ == '__main__':
     with app.app_context():

@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block title %}إعدادات الكاش - {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-gear-fill me-2"></i>
+                        إعدادات التحكم في الكاش
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle me-2"></i>معلومات مهمة:</h6>
+                        <p>هذه الإعدادات تتحكم في كيفية استخدام التطبيق للبيانات المخزنة محلياً في المتصفح.</p>
+                        <p><strong>الإعدادات الافتراضية:</strong> تعطيل الكاش وإجبار التحديث من الخادم لضمان الحصول على
+                            أحدث البيانات.</p>
+                    </div>
+
+                    <form id="cacheSettingsForm">
+                        <!-- إعدادات أساسية -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-toggle-on me-2"></i>إعدادات أساسية</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="useCache"
+                                                name="useCache">
+                                            <label class="form-check-label" for="useCache">
+                                                <strong>استخدام الكاش المحلي</strong>
+                                            </label>
+                                            <div class="form-text">السماح بتخزين البيانات محلياً للوصول السريع</div>
+                                        </div>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="forceRefresh"
+                                                name="forceRefresh" checked>
+                                            <label class="form-check-label" for="forceRefresh">
+                                                <strong>إجبار التحديث من الخادم</strong>
+                                            </label>
+                                            <div class="form-text">تجاهل الكاش وتحميل البيانات الجديدة دائماً</div>
+                                        </div>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="enableOffline"
+                                                name="enableOffline">
+                                            <label class="form-check-label" for="enableOffline">
+                                                <strong>تفعيل الوضع غير المتصل</strong>
+                                            </label>
+                                            <div class="form-text">السماح باستخدام التطبيق بدون إنترنت</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-clock me-2"></i>إعدادات التوقيت</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="cacheTimeout" class="form-label">
+                                                <strong>وقت صلاحية الكاش (بالدقائق)</strong>
+                                            </label>
+                                            <input type="number" class="form-control" id="cacheTimeout"
+                                                name="cacheTimeout" value="0" min="0" max="1440">
+                                            <div class="form-text">0 = لا يوجد وقت صلاحية (يتم التحديث دائماً)</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="autoRefresh" class="form-label">
+                                                <strong>التحديث التلقائي (بالثواني)</strong>
+                                            </label>
+                                            <input type="number" class="form-control" id="autoRefresh"
+                                                name="autoRefresh" value="0" min="0" max="3600">
+                                            <div class="form-text">0 = لا يوجد تحديث تلقائي</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات متقدمة -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-gear-wide-connected me-2"></i>إعدادات متقدمة
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="enableServiceWorker" name="enableServiceWorker">
+                                                    <label class="form-check-label" for="enableServiceWorker">
+                                                        <strong>تفعيل Service Worker</strong>
+                                                    </label>
+                                                    <div class="form-text">لتحسين الأداء والوضع غير المتصل</div>
+                                                </div>
+
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="enableIndexedDB"
+                                                        name="enableIndexedDB">
+                                                    <label class="form-check-label" for="enableIndexedDB">
+                                                        <strong>تفعيل IndexedDB</strong>
+                                                    </label>
+                                                    <div class="form-text">لتخزين البيانات المعقدة محلياً</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="enableLocalStorage" name="enableLocalStorage">
+                                                    <label class="form-check-label" for="enableLocalStorage">
+                                                        <strong>تفعيل localStorage</strong>
+                                                    </label>
+                                                    <div class="form-text">لتخزين الإعدادات والبيانات البسيطة</div>
+                                                </div>
+
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="enableSessionStorage" name="enableSessionStorage">
+                                                    <label class="form-check-label" for="enableSessionStorage">
+                                                        <strong>تفعيل sessionStorage</strong>
+                                                    </label>
+                                                    <div class="form-text">لتخزين البيانات المؤقتة للجلسة</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- حالة الكاش الحالية -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>حالة الكاش الحالية</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="cacheStatus" class="row">
+                                            <div class="col-md-3 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-secondary me-2" id="swStatus">Service
+                                                        Worker</span>
+                                                    <span id="swInfo">جاري الفحص...</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-secondary me-2" id="csStatus">Cache
+                                                        Storage</span>
+                                                    <span id="csInfo">جاري الفحص...</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-secondary me-2"
+                                                        id="idbStatus">IndexedDB</span>
+                                                    <span id="idbInfo">جاري الفحص...</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-secondary me-2"
+                                                        id="lsStatus">localStorage</span>
+                                                    <span id="lsInfo">جاري الفحص...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-outline-info btn-sm"
+                                                onclick="refreshCacheStatus()">
+                                                <i class="bi bi-arrow-clockwise me-1"></i>تحديث الحالة
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار التحكم -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        حفظ الإعدادات
+                                    </button>
+                                    <button type="button" class="btn btn-warning" onclick="resetToDefaults()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        إعادة تعيين
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="clearAllCache()">
+                                        <i class="bi bi-trash me-1"></i>
+                                        مسح الكاش
+                                    </button>
+                                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        العودة
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة التأكيد -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد الإجراء</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmMessage">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="confirmAction">تأكيد</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تحميل الإعدادات الحالية
+    document.addEventListener('DOMContentLoaded', function () {
+        loadCurrentSettings();
+        refreshCacheStatus();
+    });
+
+    // تحميل الإعدادات الحالية
+    function loadCurrentSettings() {
+        if (window.cacheControl && window.cacheControl.settings) {
+            const settings = window.cacheControl.settings;
+
+            document.getElementById('useCache').checked = settings.useCache || false;
+            document.getElementById('forceRefresh').checked = settings.forceRefresh !== false;
+            document.getElementById('enableOffline').checked = settings.enableOffline || false;
+            document.getElementById('cacheTimeout').value = settings.cacheTimeout || 0;
+            document.getElementById('autoRefresh').value = settings.autoRefresh || 0;
+            document.getElementById('enableServiceWorker').checked = settings.enableServiceWorker || false;
+            document.getElementById('enableIndexedDB').checked = settings.enableIndexedDB || false;
+            document.getElementById('enableLocalStorage').checked = settings.enableLocalStorage || false;
+            document.getElementById('enableSessionStorage').checked = settings.enableSessionStorage || false;
+        }
+    }
+
+    // حفظ الإعدادات
+    document.getElementById('cacheSettingsForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const settings = {
+            useCache: document.getElementById('useCache').checked,
+            forceRefresh: document.getElementById('forceRefresh').checked,
+            enableOffline: document.getElementById('enableOffline').checked,
+            cacheTimeout: parseInt(document.getElementById('cacheTimeout').value) || 0,
+            autoRefresh: parseInt(document.getElementById('autoRefresh').value) || 0,
+            enableServiceWorker: document.getElementById('enableServiceWorker').checked,
+            enableIndexedDB: document.getElementById('enableIndexedDB').checked,
+            enableLocalStorage: document.getElementById('enableLocalStorage').checked,
+            enableSessionStorage: document.getElementById('enableSessionStorage').checked
+        };
+
+        if (window.cacheControl) {
+            window.cacheControl.settings = settings;
+            window.cacheControl.saveSettings();
+            window.cacheControl.applySettings();
+
+            showAlert('تم حفظ الإعدادات بنجاح!', 'success');
+        } else {
+            showAlert('نظام التحكم في الكاش غير متاح', 'error');
+        }
+    });
+
+    // إعادة تعيين الإعدادات
+    function resetToDefaults() {
+        showConfirmModal(
+            'هل تريد إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟',
+            function () {
+                document.getElementById('useCache').checked = false;
+                document.getElementById('forceRefresh').checked = true;
+                document.getElementById('enableOffline').checked = false;
+                document.getElementById('cacheTimeout').value = 0;
+                document.getElementById('autoRefresh').value = 0;
+                document.getElementById('enableServiceWorker').checked = false;
+                document.getElementById('enableIndexedDB').checked = false;
+                document.getElementById('enableLocalStorage').checked = false;
+                document.getElementById('enableSessionStorage').checked = false;
+
+                showAlert('تم إعادة تعيين الإعدادات', 'info');
+            }
+        );
+    }
+
+    // مسح الكاش
+    function clearAllCache() {
+        showConfirmModal(
+            'هل تريد مسح جميع أنواع الكاش؟\n\nهذا سيزيل:\n• Service Worker\n• Cache Storage\n• IndexedDB\n• localStorage\n• sessionStorage\n• Cookies',
+            function () {
+                if (window.clearCacheUtils && window.clearCacheUtils.clearAllCache) {
+                    window.clearCacheUtils.clearAllCache()
+                        .then(() => {
+                            showAlert('تم مسح الكاش بنجاح!', 'success');
+                            refreshCacheStatus();
+                        })
+                        .catch((error) => {
+                            showAlert('حدث خطأ في مسح الكاش: ' + error.message, 'error');
+                        });
+                } else {
+                    showAlert('نظام إزالة الكاش غير متاح', 'error');
+                }
+            }
+        );
+    }
+
+    // تحديث حالة الكاش
+    function refreshCacheStatus() {
+        if (window.cacheControl && window.cacheControl.checkCacheStatus) {
+            const status = window.cacheControl.checkCacheStatus();
+
+            // تحديث Service Worker
+            updateStatusElement('swStatus', 'swInfo', status.serviceWorker, 'Service Worker');
+
+            // تحديث Cache Storage
+            updateStatusElement('csStatus', 'csInfo', status.cacheStorage, 'Cache Storage');
+
+            // تحديث IndexedDB
+            updateStatusElement('idbStatus', 'idbInfo', status.indexedDB, 'IndexedDB');
+
+            // تحديث localStorage
+            updateStatusElement('lsStatus', 'lsInfo', status.localStorage, 'localStorage');
+        }
+    }
+
+    // تحديث عنصر الحالة
+    function updateStatusElement(badgeId, infoId, status, name) {
+        const badge = document.getElementById(badgeId);
+        const info = document.getElementById(infoId);
+
+        if (status) {
+            badge.className = 'badge bg-success me-2';
+            badge.textContent = name;
+            info.textContent = 'مفعل';
+        } else {
+            badge.className = 'badge bg-danger me-2';
+            badge.textContent = name;
+            info.textContent = 'معطل';
+        }
+    }
+
+    // عرض نافذة التأكيد
+    function showConfirmModal(message, callback) {
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmAction').onclick = function () {
+            callback();
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        };
+        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+
+    // عرض تنبيه
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+        alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}
