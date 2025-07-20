@@ -146,7 +146,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // استبعاد صفحات المصادقة والمرتجعات من التخزين المؤقت
-  if (this.isExcludedPage(url.pathname)) {
+  if (isExcludedPage(url.pathname)) {
     console.log(
       "Service Worker: Excluded page - allowing network request:",
       url.pathname

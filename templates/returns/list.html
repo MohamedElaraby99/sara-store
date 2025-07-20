@@ -62,6 +62,7 @@
                             <th>العميل</th>
                             <th>التاريخ والوقت</th>
                             <th>إجمالي الاسترداد</th>
+                            <th>قيمة المرتجعات</th>
                             <th>سبب الإرجاع</th>
                             <th>الحالة</th>
                             <th>طريقة الاسترداد</th>
@@ -92,6 +93,9 @@
                             </td>
                             <td class="currency text-success fw-bold">
                                 {{ return.total_amount|currency }}
+                            </td>
+                            <td class="currency text-danger fw-bold">
+                                {{ return.refund_amount|currency }}
                             </td>
                             <td>
                                 <span class="text-truncate" style="max-width: 150px;" title="{{ return.reason }}">
@@ -370,6 +374,14 @@
                             <p class="mb-2">
                                 <strong>طريقة الاسترداد:</strong> 
                                 ${returnData.refund_method}
+                            </p>
+                            <p class="mb-2">
+                                <strong>إجمالي الاسترداد:</strong> 
+                                <span class="text-success fw-bold">${returnData.total_amount.toFixed(2)} ج.م</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>قيمة المرتجعات:</strong> 
+                                <span class="text-danger fw-bold">${returnData.refund_amount.toFixed(2)} ج.م</span>
                             </p>
                             <p class="mb-2">
                                 <strong>المستخدم:</strong> 

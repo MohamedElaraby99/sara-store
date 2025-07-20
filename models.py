@@ -406,6 +406,7 @@ class Return(db.Model):
     sale_id = db.Column(db.Integer, db.ForeignKey('sale.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=True)
     total_amount = db.Column(db.Float, nullable=False, comment='إجمالي قيمة المرتجع')
+    refund_amount = db.Column(db.Float, nullable=False, default=0, comment='قيمة المرتجعات المخصومة من مبيعات اليوم')
     return_date = db.Column(db.DateTime, default=datetime.utcnow, comment='تاريخ الإرجاع')
     reason = db.Column(db.String(200), nullable=False, comment='سبب الإرجاع')
     status = db.Column(db.String(20), nullable=False, default='pending', comment='حالة المرتجع')  # 'pending', 'approved', 'rejected'

@@ -478,95 +478,7 @@ def send_password_reset_email(user, token):
     
     mail.send(msg)
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    # Get statistics
-    total_products = Product.query.count()
-    low_stock_products = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).count()
-    out_of_stock_products = Product.query.filter(Product.stock_quantity <= 0).count()
-    total_categories = Category.query.count()
-    
-    # Sales statistics
-    today = datetime.now().date()
-    today_sales = Sale.query.filter(func.date(Sale.sale_date) == today).all()
-    today_revenue = sum(sale.total_amount for sale in today_sales)
-    
-    # This month sales
-    month_start = datetime.now().replace(day=1).date()
-    month_sales = Sale.query.filter(func.date(Sale.sale_date) >= month_start).all()
-    month_revenue = sum(sale.total_amount for sale in month_sales)
-    
-    # حساب أرباح ومصاريف الشهر الحالي
-    month_profit = sum(sale.total_profit for sale in month_sales)
-    month_cost = sum(sale.cost_amount for sale in month_sales)
-    
-    # مصاريف الشهر الحالي
-    month_expenses = Expense.query.filter(func.date(Expense.expense_date) >= month_start).all()
-    month_total_expenses = sum(expense.amount for expense in month_expenses)
-    
-    # صافي ربح الشهر
-    month_net_profit = month_profit - month_total_expenses
-    
-    # إحصائيات اليوم
-    today_profit = sum(sale.total_profit for sale in today_sales)
-    today_expenses = Expense.query.filter(func.date(Expense.expense_date) == today).all()
-    today_total_expenses = sum(expense.amount for expense in today_expenses)
-    today_net_profit = today_profit - today_total_expenses
-    
-    # Recent sales
-    recent_sales = Sale.query.order_by(desc(Sale.sale_date)).limit(5).all()
-    
-    # Low stock alerts
-    low_stock_alerts = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).all()
-    
-    # Top selling products (this month)
-    top_products = db.session.query(
-        Product.name_ar,
-        func.sum(SaleItem.quantity).label('total_sold')
-    ).join(SaleItem).join(Sale).filter(
-        func.date(Sale.sale_date) >= month_start
-    ).group_by(Product.id).order_by(desc('total_sold')).limit(5).all()
-    
-    # إحصائيات الديون
-    # حساب إجمالي المبيعات الآجلة (غير المدفوعة بالكامل)
-    unpaid_sales_total = db.session.query(func.sum(Sale.total_amount)).filter(
-        Sale.payment_status != 'paid'
-    ).scalar() or 0
-    
-    # حساب إجمالي الدفعات للمبيعات الآجلة
-    total_payments = db.session.query(func.sum(Payment.amount)).join(Sale).filter(
-        Sale.payment_status != 'paid'
-    ).scalar() or 0
-    
-    # إجمالي الديون = إجمالي المبيعات الآجلة - إجمالي الدفعات
-    total_debt = max(0, unpaid_sales_total - total_payments)
-    
-    customers_with_debt = Customer.query.filter(Customer.id.in_(
-        db.session.query(Sale.customer_id).filter(Sale.payment_status != 'paid').distinct()
-    )).count()
-    
-    return render_template('dashboard.html', 
-                         total_products=total_products,
-                         low_stock_products=low_stock_products,
-                         out_of_stock_products=out_of_stock_products,
-                         total_categories=total_categories,
-                         today_revenue=today_revenue,
-                         month_revenue=month_revenue,
-                         # إحصائيات الأرباح والمصاريف
-                         month_profit=month_profit,
-                         month_cost=month_cost,
-                         month_total_expenses=month_total_expenses,
-                         month_net_profit=month_net_profit,
-                         today_profit=today_profit,
-                         today_expenses=today_total_expenses,  # Fixed: added missing today_expenses
-                         today_total_expenses=today_total_expenses,
-                         today_net_profit=today_net_profit,
-                         recent_sales=recent_sales,
-                         low_stock_alerts=low_stock_alerts,
-                         top_products=top_products,
-                         total_debt=total_debt,
-                         customers_with_debt=customers_with_debt)
+
 
 @app.route('/products')
 @login_required
@@ -1426,95 +1338,7 @@ def send_password_reset_email(user, token):
     
     mail.send(msg)
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    # Get statistics
-    total_products = Product.query.count()
-    low_stock_products = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).count()
-    out_of_stock_products = Product.query.filter(Product.stock_quantity <= 0).count()
-    total_categories = Category.query.count()
-    
-    # Sales statistics
-    today = datetime.now().date()
-    today_sales = Sale.query.filter(func.date(Sale.sale_date) == today).all()
-    today_revenue = sum(sale.total_amount for sale in today_sales)
-    
-    # This month sales
-    month_start = datetime.now().replace(day=1).date()
-    month_sales = Sale.query.filter(func.date(Sale.sale_date) >= month_start).all()
-    month_revenue = sum(sale.total_amount for sale in month_sales)
-    
-    # حساب أرباح ومصاريف الشهر الحالي
-    month_profit = sum(sale.total_profit for sale in month_sales)
-    month_cost = sum(sale.cost_amount for sale in month_sales)
-    
-    # مصاريف الشهر الحالي
-    month_expenses = Expense.query.filter(func.date(Expense.expense_date) >= month_start).all()
-    month_total_expenses = sum(expense.amount for expense in month_expenses)
-    
-    # صافي ربح الشهر
-    month_net_profit = month_profit - month_total_expenses
-    
-    # إحصائيات اليوم
-    today_profit = sum(sale.total_profit for sale in today_sales)
-    today_expenses = Expense.query.filter(func.date(Expense.expense_date) == today).all()
-    today_total_expenses = sum(expense.amount for expense in today_expenses)
-    today_net_profit = today_profit - today_total_expenses
-    
-    # Recent sales
-    recent_sales = Sale.query.order_by(desc(Sale.sale_date)).limit(5).all()
-    
-    # Low stock alerts
-    low_stock_alerts = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).all()
-    
-    # Top selling products (this month)
-    top_products = db.session.query(
-        Product.name_ar,
-        func.sum(SaleItem.quantity).label('total_sold')
-    ).join(SaleItem).join(Sale).filter(
-        func.date(Sale.sale_date) >= month_start
-    ).group_by(Product.id).order_by(desc('total_sold')).limit(5).all()
-    
-    # إحصائيات الديون
-    # حساب إجمالي المبيعات الآجلة (غير المدفوعة بالكامل)
-    unpaid_sales_total = db.session.query(func.sum(Sale.total_amount)).filter(
-        Sale.payment_status != 'paid'
-    ).scalar() or 0
-    
-    # حساب إجمالي الدفعات للمبيعات الآجلة
-    total_payments = db.session.query(func.sum(Payment.amount)).join(Sale).filter(
-        Sale.payment_status != 'paid'
-    ).scalar() or 0
-    
-    # إجمالي الديون = إجمالي المبيعات الآجلة - إجمالي الدفعات
-    total_debt = max(0, unpaid_sales_total - total_payments)
-    
-    customers_with_debt = Customer.query.filter(Customer.id.in_(
-        db.session.query(Sale.customer_id).filter(Sale.payment_status != 'paid').distinct()
-    )).count()
-    
-    return render_template('dashboard.html', 
-                         total_products=total_products,
-                         low_stock_products=low_stock_products,
-                         out_of_stock_products=out_of_stock_products,
-                         total_categories=total_categories,
-                         today_revenue=today_revenue,
-                         month_revenue=month_revenue,
-                         # إحصائيات الأرباح والمصاريف
-                         month_profit=month_profit,
-                         month_cost=month_cost,
-                         month_total_expenses=month_total_expenses,
-                         month_net_profit=month_net_profit,
-                         today_profit=today_profit,
-                         today_expenses=today_total_expenses,  # Fixed: added missing today_expenses
-                         today_total_expenses=today_total_expenses,
-                         today_net_profit=today_net_profit,
-                         recent_sales=recent_sales,
-                         low_stock_alerts=low_stock_alerts,
-                         top_products=top_products,
-                         total_debt=total_debt,
-                         customers_with_debt=customers_with_debt)
+
 
 @app.route('/products')
 @login_required
@@ -3710,6 +3534,7 @@ def api_create_return():
         sale_id = data.get('sale_id')
         reason = data.get('reason', '')
         refund_method = data.get('refund_method', 'نقدي')
+        refund_amount = float(data.get('refund_amount', 0))
         notes = data.get('notes', '')
         items = data.get('items', [])
         
@@ -3727,6 +3552,7 @@ def api_create_return():
             customer_id=sale.customer_id,
             reason=reason,
             refund_method=refund_method,
+            refund_amount=refund_amount,  # قيمة المرتجعات
             notes=notes,
             user_id=current_user.id,
             total_amount=0  # سيتم حسابه لاحقاً
@@ -3765,11 +3591,15 @@ def api_create_return():
                 notes=item_notes
             )
             
+            # حساب total_refund بشكل صريح
+            return_item.total_refund = quantity_returned * sale_item.unit_price
+            
             db.session.add(return_item)
             total_amount += return_item.total_refund
         
-        # تحديث إجمالي المرتجع
+        # تحديث إجمالي المرتجع وقيمة المرتجعات
         return_obj.total_amount = total_amount
+        return_obj.refund_amount = total_amount  # قيمة المرتجعات تساوي إجمالي المرتجع
         
         db.session.commit()
         
@@ -3815,6 +3645,7 @@ def api_return_details(return_id):
         'sale_id': return_obj.sale_id,
         'customer_name': return_obj.customer.name if return_obj.customer else 'زبون نقدي',
         'total_amount': float(return_obj.total_amount),
+        'refund_amount': float(return_obj.refund_amount),
         'return_date': egypt_time.strftime('%d/%m/%Y'),
         'return_time': egypt_time.strftime('%I:%M:%S %p').replace('AM', 'ص').replace('PM', 'م'),
         'reason': return_obj.reason,
@@ -5273,6 +5104,13 @@ def dashboard():
     today_total_expenses = sum(expense.amount for expense in today_expenses)
     today_net_profit = today_profit - today_total_expenses
     
+    # حساب المرتجعات اليوم
+    today_returns = Return.query.filter(func.date(Return.return_date) == today).all()
+    today_refunds = sum(return_transaction.refund_amount for return_transaction in today_returns)
+    
+    # صافي الإيرادات اليوم (المبيعات - المرتجعات)
+    today_net_revenue = today_revenue - today_refunds
+    
     # Recent sales
     recent_sales = Sale.query.order_by(desc(Sale.sale_date)).limit(5).all()
     
@@ -5321,6 +5159,8 @@ def dashboard():
                          today_expenses=today_total_expenses,  # Fixed: added missing today_expenses
                          today_total_expenses=today_total_expenses,
                          today_net_profit=today_net_profit,
+                         today_refunds=today_refunds,
+                         today_net_revenue=today_net_revenue,
                          recent_sales=recent_sales,
                          low_stock_alerts=low_stock_alerts,
                          top_products=top_products,
