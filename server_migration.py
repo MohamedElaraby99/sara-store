@@ -13,10 +13,12 @@ def add_refund_amount_column():
     
     # تحديد مسار قاعدة البيانات
     db_paths = [
+        'sara.db',  # قاعدة البيانات الموجودة
+        'instance/sara.db',
         'instance/sara_store.db',
         'sara_store.db',
-        '/app/instance/sara_store.db',
-        '/var/www/sara_store.db'
+        '/app/instance/sara.db',
+        '/var/www/sara.db'
     ]
     
     db_path = None
