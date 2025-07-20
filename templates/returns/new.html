@@ -114,29 +114,47 @@
             </h5>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="saleItemsTable">
-                    <thead class="table-dark">
-                        <tr>
-                            <th class="text-center" style="width: 50px;">
-                                <input type="checkbox" id="selectAll" class="form-check-input"
-                                    onchange="toggleSelectAll()">
-                            </th>
-                            <th>المنتج</th>
-                            <th class="text-center">الكمية الإجمالية</th>
-                            <th class="text-center">الكمية المرتجعة سابقاً</th>
-                            <th class="text-center">الكمية المتاحة للإرجاع</th>
-                            <th class="text-center">الكمية المراد إرجاعها</th>
-                            <th class="text-center">حالة المنتج</th>
-                            <th class="text-center">سعر الوحدة</th>
-                            <th class="text-center">الإجمالي</th>
-                            <th>ملاحظات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="itemsTableBody">
-                        <!-- سيتم تحميل البيانات بواسطة JavaScript -->
-                    </tbody>
-                </table>
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-3 text-muted">جاري تحميل أصناف البيع...</p>
+            </div>
+
+            <!-- Error message -->
+            <div id="errorMessage" class="text-center py-5" style="display: none;">
+                <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                <p class="mt-3 text-danger">حدث خطأ في تحميل البيانات</p>
+                <button class="btn btn-primary" onclick="loadSaleItems()">إعادة المحاولة</button>
+            </div>
+
+            <!-- Table content -->
+            <div id="tableContent" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="saleItemsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">
+                                    <input type="checkbox" id="selectAll" class="form-check-input"
+                                        onchange="toggleSelectAll()">
+                                </th>
+                                <th>المنتج</th>
+                                <th class="text-center">الكمية الإجمالية</th>
+                                <th class="text-center">الكمية المرتجعة سابقاً</th>
+                                <th class="text-center">الكمية المتاحة للإرجاع</th>
+                                <th class="text-center">الكمية المراد إرجاعها</th>
+                                <th class="text-center">حالة المنتج</th>
+                                <th class="text-center">سعر الوحدة</th>
+                                <th class="text-center">الإجمالي</th>
+                                <th>ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <!-- سيتم تحميل البيانات بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="card-footer bg-light">
@@ -168,28 +186,12 @@
         </div>
     </div>
 </div>
-
-<!-- Loading Modal -->
-<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center py-4">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">جاري التحميل...</span>
-                </div>
-                <h5>جاري إنشاء المرتجع...</h5>
-                <p class="text-muted">يرجى الانتظار</p>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     let saleItems = [];
     let selectedItems = {};
-    let loadingModalInstance = null;
 
     // تحميل أصناف البيع عند تحميل الصفحة
     window.addEventListener('DOMContentLoaded', function () {
@@ -216,7 +218,12 @@
 
     function loadSaleItems() {
         console.log('Start loading sale items');
-        showLoading(true);
+
+        // إظهار مؤشر التحميل
+        document.getElementById('loadingIndicator').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('tableContent').style.display = 'none';
+
         fetch(`/api/sale/{{ sale.id }}/items`)
             .then(response => {
                 if (!response.ok) {
@@ -227,27 +234,22 @@
             .then(data => {
                 saleItems = data;
                 renderSaleItems();
-                showLoading(false);
+
+                // إخفاء مؤشر التحميل وإظهار الجدول
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('tableContent').style.display = 'block';
+
                 console.log('Finished loading sale items');
             })
             .catch(error => {
                 console.error('Error loading sale items:', error);
-                showError('حدث خطأ في تحميل أصناف البيع');
-                showLoading(false);
+
+                // إظهار رسالة الخطأ
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+
                 console.log('Error occurred in loadSaleItems');
             });
-    }
-
-    function showLoading(show) {
-        const modalElement = document.getElementById('loadingModal');
-        if (!loadingModalInstance) {
-            loadingModalInstance = new bootstrap.Modal(modalElement);
-        }
-        if (show) {
-            loadingModalInstance.show();
-        } else {
-            loadingModalInstance.hide();
-        }
     }
 
     function showError(message) {
@@ -467,7 +469,11 @@
             }))
         };
 
-        showLoading(true);
+        // إظهار مؤشر التحميل على الزر
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري الإنشاء...';
+        submitBtn.disabled = true;
 
         fetch('/api/returns', {
             method: 'POST',
@@ -483,7 +489,10 @@
                 return response.json();
             })
             .then(data => {
-                showLoading(false);
+                // إعادة الزر لحالته الأصلية
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
                 if (data.success) {
                     showSuccess('تم إنشاء المرتجع بنجاح');
                     setTimeout(() => {
@@ -494,7 +503,10 @@
                 }
             })
             .catch(error => {
-                showLoading(false);
+                // إعادة الزر لحالته الأصلية
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
                 console.error('Error:', error);
                 showError('حدث خطأ في إنشاء المرتجع');
             });
