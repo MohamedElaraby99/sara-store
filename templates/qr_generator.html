@@ -3,10 +3,49 @@
 {% block title %}مولد رموز QR{% endblock %}
 
 {% block extra_head %}
-<!-- Preload QR Code Libraries for Better Performance -->
-<script async crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script async crossorigin="anonymous" src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script async crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+<!-- QR Code Libraries - Multiple fallbacks for reliability -->
+<script>
+    // Preload QR libraries with better error handling
+    window.qrLibraries = [
+        'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+        'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+        'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js'
+    ];
+    
+    // Load QR library immediately
+    (function() {
+        let loaded = false;
+        
+        function tryLoadLibrary(index = 0) {
+            if (loaded || index >= window.qrLibraries.length) return;
+            
+            const script = document.createElement('script');
+            script.src = window.qrLibraries[index];
+            script.async = true;
+            script.crossOrigin = 'anonymous';
+            
+            script.onload = function() {
+                if (typeof QRCode !== 'undefined') {
+                    loaded = true;
+                    console.log('✅ QR library loaded successfully from:', window.qrLibraries[index]);
+                } else {
+                    console.warn('⚠️ Script loaded but QRCode not defined, trying next...');
+                    tryLoadLibrary(index + 1);
+                }
+            };
+            
+            script.onerror = function() {
+                console.warn('❌ Failed to load QR library from:', window.qrLibraries[index]);
+                tryLoadLibrary(index + 1);
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Start loading
+        tryLoadLibrary();
+    })();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -537,26 +576,39 @@
 
     // Load QR library with enhanced multiple fallbacks
     async function loadQRLibrary() {
-        const libraries = [
-            'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-            'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
-            'https://cdn.skypack.dev/qrcode@1.5.3',
-            'https://esm.sh/qrcode@1.5.3'
-        ];
-
-        // First check if QRCode is already available (cached)
+        // First check if QRCode is already available (from preloaded libraries)
         if (typeof QRCode !== 'undefined') {
-            console.log('QRCode library already available');
+            console.log('✅ QRCode library already available');
             return true;
         }
+
+        // Check if we have preloaded libraries
+        if (window.qrLibraries && window.qrLibraries.length > 0) {
+            console.log('📡 Using preloaded QR libraries...');
+            
+            // Wait a bit for preloaded scripts to finish
+            for (let i = 0; i < 10; i++) {
+                if (typeof QRCode !== 'undefined') {
+                    console.log('✅ QRCode library loaded from preloaded sources');
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        // Fallback: try loading manually
+        const libraries = [
+            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+            'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+            'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js'
+        ];
 
         // Try loading from different CDNs
         for (let i = 0; i < libraries.length; i++) {
             const url = libraries[i];
             try {
-                console.log(`📡 Attempting QR library load ${i + 1}/${libraries.length}: ${url}`);
-                await loadScript(url, 6000); // Reduced timeout per source
+                console.log(`📡 Attempting manual QR library load ${i + 1}/${libraries.length}: ${url}`);
+                await loadScript(url, 8000);
 
                 if (typeof QRCode !== 'undefined') {
                     console.log(`✅ QRCode library loaded successfully from: ${url}`);
@@ -569,11 +621,11 @@
             }
 
             // Small delay between attempts
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // If all CDNs fail, try alternative approaches
-        console.warn('All CDN sources failed, attempting fallback creation...');
+        // If all CDNs fail, create fallback
+        console.warn('All CDN sources failed, creating fallback system...');
 
         try {
             const fallbackCreated = createSimpleFallback();
@@ -656,12 +708,12 @@
                 const size = options.width || 200;
                 const encodedText = encodeURIComponent(text);
 
-                // Array of fallback APIs
+                // Array of fallback APIs (prioritized by reliability)
                 const qrAPIs = [
                     `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedText}&format=png&margin=2&ecc=M`,
-                    `https://qr.io/api/qr?data=${encodedText}&size=${size}&format=png`,
+                    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodedText}&choe=UTF-8`,
                     `https://quickchart.io/qr?text=${encodedText}&size=${size}`,
-                    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodedText}&choe=UTF-8`
+                    `https://qr.io/api/qr?data=${encodedText}&size=${size}&format=png`
                 ];
 
                 let currentAPIIndex = 0;
@@ -694,35 +746,45 @@
                     img.style.borderRadius = '6px';
                     img.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                     img.alt = 'QR Code';
+                    img.crossOrigin = 'anonymous';
 
                     img.onload = function () {
                         container.innerHTML = '';
                         container.appendChild(img);
-                        console.log(`QR generated successfully using API ${currentAPIIndex + 1}: ${qrAPIs[currentAPIIndex]}`);
+                        console.log(`✅ QR generated successfully using API ${currentAPIIndex + 1}: ${qrAPIs[currentAPIIndex]}`);
                         if (callback) callback(null);
                     };
 
                     img.onerror = function () {
-                        console.warn(`QR API ${currentAPIIndex + 1} failed: ${qrAPIs[currentAPIIndex]}`);
+                        console.warn(`❌ QR API ${currentAPIIndex + 1} failed: ${qrAPIs[currentAPIIndex]}`);
                         currentAPIIndex++;
-                        tryNextAPI();
+                        setTimeout(tryNextAPI, 100); // Small delay before next attempt
                     };
 
                     // Set a timeout for each API attempt
-                    setTimeout(() => {
+                    const timeoutId = setTimeout(() => {
                         if (img.complete === false) {
-                            console.warn(`QR API ${currentAPIIndex + 1} timeout: ${qrAPIs[currentAPIIndex]}`);
+                            console.warn(`⏰ QR API ${currentAPIIndex + 1} timeout: ${qrAPIs[currentAPIIndex]}`);
                             currentAPIIndex++;
                             tryNextAPI();
                         }
-                    }, 8000);
+                    }, 5000); // Reduced timeout
+
+                    // Clear timeout if image loads successfully
+                    img.onload = function() {
+                        clearTimeout(timeoutId);
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                        console.log(`✅ QR generated successfully using API ${currentAPIIndex + 1}: ${qrAPIs[currentAPIIndex]}`);
+                        if (callback) callback(null);
+                    };
                 }
 
                 try {
                     container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...</div>';
                     tryNextAPI();
                 } catch (error) {
-                    console.error('Fallback QR generation error:', error);
+                    console.error('❌ Fallback QR generation error:', error);
                     container.innerHTML = `
                     <div class="alert alert-warning p-2 small">
                         <i class="fas fa-exclamation-triangle"></i> 
@@ -734,7 +796,7 @@
             }
         };
 
-        console.log('Enhanced QR fallback system initialized with multiple APIs');
+        console.log('✅ Enhanced QR fallback system initialized with multiple APIs');
         return true;
     }
 

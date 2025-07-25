@@ -3613,97 +3613,7 @@ def api_create_return():
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/returns/<int:return_id>')
-@login_required
-def api_return_details(return_id):
-    """API لعرض تفاصيل المرتجع"""
-    return_obj = Return.query.get_or_404(return_id)
-    
-    # التحقق من الصلاحية
-    if not current_user.is_admin() and return_obj.user_id != current_user.id:
-        return jsonify({'error': 'ليس لديك صلاحية لعرض هذا المرتجع'}), 403
-    
-    # تفاصيل أصناف المرتجع
-    items = []
-    for item in return_obj.return_items:
-        items.append({
-            'product_name': item.product.name_ar,
-            'quantity_returned': float(item.quantity_returned),
-            'original_quantity': float(item.original_quantity),
-            'unit_price': float(item.unit_price),
-            'total_refund': float(item.total_refund),
-            'condition': item.condition,
-            'condition_ar': item.condition_ar,
-            'notes': item.notes or ''
-        })
-    
-    # تحويل التاريخ إلى توقيت مصر
-    egypt_time = get_egypt_time(return_obj.return_date)
-    
-    return jsonify({
-        'id': return_obj.id,
-        'sale_id': return_obj.sale_id,
-        'customer_name': return_obj.customer.name if return_obj.customer else 'زبون نقدي',
-        'total_amount': float(return_obj.total_amount),
-        'refund_amount': float(return_obj.refund_amount),
-        'return_date': egypt_time.strftime('%d/%m/%Y'),
-        'return_time': egypt_time.strftime('%I:%M:%S %p').replace('AM', 'ص').replace('PM', 'م'),
-        'reason': return_obj.reason,
-        'status': return_obj.status,
-        'status_ar': return_obj.status_ar,
-        'refund_method': return_obj.refund_method,
-        'notes': return_obj.notes or '',
-        'user_name': return_obj.user.username,
-        'processor_name': return_obj.processor.username if return_obj.processor else '',
-        'processed_date': return_obj.processed_date.strftime('%d/%m/%Y') if return_obj.processed_date else '',
-        'items': items
-    })
-
-@app.route('/api/returns/<int:return_id>/process', methods=['POST'])
-@login_required
-@admin_required
-def api_process_return(return_id):
-    """API لمعالجة المرتجع (قبول/رفض)"""
-    try:
-        data = request.get_json()
-        action = data.get('action')  # 'approve' or 'reject'
-        notes = data.get('notes', '')
-        
-        if action not in ['approve', 'reject']:
-            return jsonify({'success': False, 'message': 'إجراء غير صحيح'}), 400
-        
-        return_obj = Return.query.get_or_404(return_id)
-        
-        if not return_obj.can_be_processed:
-            return jsonify({'success': False, 'message': 'لا يمكن معالجة هذا المرتجع'}), 400
-        
-        # تحديث حالة المرتجع
-        return_obj.status = 'approved' if action == 'approve' else 'rejected'
-        return_obj.processed_by = current_user.id
-        return_obj.processed_date = datetime.utcnow()
-        if notes:
-            return_obj.notes = (return_obj.notes or '') + f'\n\nملاحظات المعالجة: {notes}'
-        
-        # إذا تم قبول المرتجع، تحديث المخزون
-        if action == 'approve':
-            for return_item in return_obj.return_items:
-                # إضافة الكمية المرتجعة إلى المخزون إذا كانت في حالة جيدة
-                if return_item.condition in ['جيد', 'good']:
-                    product = return_item.product
-                    product.stock_quantity += return_item.quantity_returned
-        
-        db.session.commit()
-        
-        status_message = 'تم قبول المرتجع وإضافة الكمية للمخزون' if action == 'approve' else 'تم رفض المرتجع'
-        
-        return jsonify({
-            'success': True,
-            'message': status_message
-        })
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
+# Removed duplicate API endpoint - keeping only the one at line 7437
 
 @app.route('/api/sale/<int:sale_id>/items')
 @login_required
@@ -4478,7 +4388,7 @@ def service_worker_root():
         # إنشاء service worker أساسي إذا لم يكن موجود
         basic_sw = """
 // Basic Service Worker للطوارئ
-const CACHE_NAME = 'norko-store-basic-v1';
+const CACHE_NAME = 'sarastore-store-basic-v1';
 
 self.addEventListener('install', event => {
     console.log('Basic Service Worker: Installing...');
@@ -5104,8 +5014,11 @@ def dashboard():
     today_total_expenses = sum(expense.amount for expense in today_expenses)
     today_net_profit = today_profit - today_total_expenses
     
-    # حساب المرتجعات اليوم
-    today_returns = Return.query.filter(func.date(Return.return_date) == today).all()
+    # حساب المرتجعات اليوم (فقط المقبولة أو قيد المراجعة)
+    today_returns = Return.query.filter(
+        func.date(Return.return_date) == today,
+        Return.status.in_(['pending', 'approved'])
+    ).all()
     today_refunds = sum(return_transaction.refund_amount for return_transaction in today_returns)
     
     # صافي الإيرادات اليوم (المبيعات - المرتجعات)
@@ -7378,6 +7291,7 @@ def api_create_return():
             customer_id=sale.customer_id,
             reason=reason,
             refund_method=refund_method,
+            refund_amount=0,  # سيتم تحديثه لاحقاً
             notes=notes,
             user_id=current_user.id,
             total_amount=0  # سيتم حسابه لاحقاً
@@ -7416,11 +7330,15 @@ def api_create_return():
                 notes=item_notes
             )
             
+            # حساب total_refund بشكل صريح
+            return_item.total_refund = quantity_returned * sale_item.unit_price
+            
             db.session.add(return_item)
             total_amount += return_item.total_refund
         
-        # تحديث إجمالي المرتجع
+        # تحديث إجمالي المرتجع وقيمة المرتجعات
         return_obj.total_amount = total_amount
+        return_obj.refund_amount = total_amount  # قيمة المرتجعات تساوي إجمالي المرتجع
         
         db.session.commit()
         
@@ -7438,46 +7356,51 @@ def api_create_return():
 @login_required
 def api_return_details(return_id):
     """API لعرض تفاصيل المرتجع"""
-    return_obj = Return.query.get_or_404(return_id)
-    
-    # التحقق من الصلاحية
-    if not current_user.is_admin() and return_obj.user_id != current_user.id:
-        return jsonify({'error': 'ليس لديك صلاحية لعرض هذا المرتجع'}), 403
-    
-    # تفاصيل أصناف المرتجع
-    items = []
-    for item in return_obj.return_items:
-        items.append({
-            'product_name': item.product.name_ar,
-            'quantity_returned': float(item.quantity_returned),
-            'original_quantity': float(item.original_quantity),
-            'unit_price': float(item.unit_price),
-            'total_refund': float(item.total_refund),
-            'condition': item.condition,
-            'condition_ar': item.condition_ar,
-            'notes': item.notes or ''
+    try:
+        return_obj = Return.query.get_or_404(return_id)
+        
+        # التحقق من الصلاحية
+        if not current_user.is_admin() and return_obj.user_id != current_user.id:
+            return jsonify({'error': 'ليس لديك صلاحية لعرض هذا المرتجع'}), 403
+        
+        # تفاصيل أصناف المرتجع
+        items = []
+        for item in return_obj.return_items:
+            items.append({
+                'product_name': item.product.name_ar,
+                'quantity_returned': float(item.quantity_returned),
+                'original_quantity': float(item.original_quantity),
+                'unit_price': float(item.unit_price),
+                'total_refund': float(item.total_refund),
+                'condition': item.condition,
+                'condition_ar': item.condition_ar,
+                'notes': item.notes or ''
+            })
+        
+        # تحويل التاريخ إلى توقيت مصر
+        egypt_time = get_egypt_time(return_obj.return_date)
+        
+        return jsonify({
+            'id': return_obj.id,
+            'sale_id': return_obj.sale_id,
+            'customer_name': return_obj.customer.name if return_obj.customer else 'زبون نقدي',
+            'total_amount': float(return_obj.total_amount),
+            'refund_amount': float(return_obj.refund_amount),
+            'return_date': egypt_time.strftime('%d/%m/%Y'),
+            'return_time': egypt_time.strftime('%I:%M:%S %p').replace('AM', 'ص').replace('PM', 'م'),
+            'reason': return_obj.reason,
+            'status': return_obj.status,
+            'status_ar': return_obj.status_ar,
+            'refund_method': return_obj.refund_method,
+            'notes': return_obj.notes or '',
+            'user_name': return_obj.user.username,
+            'processor_name': return_obj.processor.username if return_obj.processor else '',
+            'processed_date': return_obj.processed_date.strftime('%d/%m/%Y') if return_obj.processed_date else '',
+            'items': items
         })
-    
-    # تحويل التاريخ إلى توقيت مصر
-    egypt_time = get_egypt_time(return_obj.return_date)
-    
-    return jsonify({
-        'id': return_obj.id,
-        'sale_id': return_obj.sale_id,
-        'customer_name': return_obj.customer.name if return_obj.customer else 'زبون نقدي',
-        'total_amount': float(return_obj.total_amount),
-        'return_date': egypt_time.strftime('%d/%m/%Y'),
-        'return_time': egypt_time.strftime('%I:%M:%S %p').replace('AM', 'ص').replace('PM', 'م'),
-        'reason': return_obj.reason,
-        'status': return_obj.status,
-        'status_ar': return_obj.status_ar,
-        'refund_method': return_obj.refund_method,
-        'notes': return_obj.notes or '',
-        'user_name': return_obj.user.username,
-        'processor_name': return_obj.processor.username if return_obj.processor else '',
-        'processed_date': return_obj.processed_date.strftime('%d/%m/%Y') if return_obj.processed_date else '',
-        'items': items
-    })
+    except Exception as e:
+        print(f"Error in api_return_details: {str(e)}")
+        return jsonify({'error': f'حدث خطأ في تحميل تفاصيل المرتجع: {str(e)}'}), 500
 
 @app.route('/api/returns/<int:return_id>/process', methods=['POST'])
 @login_required
@@ -7511,6 +7434,9 @@ def api_process_return(return_id):
                 if return_item.condition in ['جيد', 'good']:
                     product = return_item.product
                     product.stock_quantity += return_item.quantity_returned
+        else:
+            # إذا تم رفض المرتجع، إعادة قيمة المرتجعات إلى صفر
+            return_obj.refund_amount = 0
         
         db.session.commit()
         
@@ -8298,7 +8224,7 @@ def service_worker_root():
         # إنشاء service worker أساسي إذا لم يكن موجود
         basic_sw = """
 // Basic Service Worker للطوارئ
-const CACHE_NAME = 'norko-store-basic-v1';
+const CACHE_NAME = 'sarastore-store-basic-v1';
 
 self.addEventListener('install', event => {
     console.log('Basic Service Worker: Installing...');
@@ -8435,6 +8361,131 @@ def clear_cache():
 def cache_settings():
     """صفحة إعدادات الكاش"""
     return render_template('cache_settings.html')
+
+@app.route('/test-service-worker')
+def test_service_worker():
+    """صفحة اختبار Service Worker"""
+    return send_from_directory('.', 'test_service_worker.html')
+
+@app.route('/api/sales/daily-revenue')
+@login_required
+@seller_or_admin_required
+def api_daily_revenue():
+    """API لجلب إيرادات الأيام"""
+    try:
+        # الحصول على المعاملات
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+        
+        # التحقق من صحة التواريخ
+        date_from_dt = None
+        date_to_dt = None
+        
+        if date_from:
+            try:
+                date_from_dt = datetime.strptime(date_from, '%Y-%m-%d').date()
+                # التحقق من أن التاريخ ليس في المستقبل
+                if date_from_dt > datetime.now().date():
+                    return jsonify({
+                        'success': False,
+                        'error': 'تاريخ البداية لا يمكن أن يكون في المستقبل'
+                    }), 400
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'error': 'صيغة تاريخ البداية غير صحيحة'
+                }), 400
+        
+        if date_to:
+            try:
+                date_to_dt = datetime.strptime(date_to, '%Y-%m-%d').date()
+                # التحقق من أن التاريخ ليس في المستقبل
+                if date_to_dt > datetime.now().date():
+                    return jsonify({
+                        'success': False,
+                        'error': 'تاريخ النهاية لا يمكن أن يكون في المستقبل'
+                    }), 400
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'error': 'صيغة تاريخ النهاية غير صحيحة'
+                }), 400
+        
+        # التحقق من أن تاريخ البداية قبل تاريخ النهاية
+        if date_from_dt and date_to_dt and date_from_dt > date_to_dt:
+            return jsonify({
+                'success': False,
+                'error': 'تاريخ البداية يجب أن يكون قبل تاريخ النهاية'
+            }), 400
+        
+        # بناء الاستعلام الأساسي
+        query = db.session.query(
+            func.date(Sale.sale_date).label('date'),
+            func.count(Sale.id).label('sales_count'),
+            func.sum(Sale.total_amount).label('total_revenue'),
+            func.sum(Sale.discount_amount).label('total_discounts'),
+            func.avg(Sale.total_amount).label('avg_sale')
+        ).group_by(func.date(Sale.sale_date))
+        
+        # تطبيق الفلاتر
+        if date_from_dt:
+            query = query.filter(func.date(Sale.sale_date) >= date_from_dt)
+        
+        if date_to_dt:
+            query = query.filter(func.date(Sale.sale_date) <= date_to_dt)
+        
+        # تطبيق صلاحيات المستخدم
+        if not current_user.is_admin():
+            query = query.filter(Sale.user_id == current_user.id)
+        
+        # ترتيب النتائج
+        daily_revenue = query.order_by(desc(func.date(Sale.sale_date))).all()
+        
+        # تحويل النتائج إلى JSON
+        result = []
+        for day in daily_revenue:
+            # التعامل مع التاريخ بشكل آمن
+            if isinstance(day.date, str):
+                date_str = day.date
+                date_obj = datetime.strptime(day.date, '%Y-%m-%d').date()
+            else:
+                date_str = day.date.strftime('%Y-%m-%d')
+                date_obj = day.date
+            
+            # حساب المرتجعات لهذا اليوم (فقط المقبولة أو قيد المراجعة)
+            day_returns = Return.query.filter(
+                func.date(Return.return_date) == date_obj,
+                Return.status.in_(['pending', 'approved'])
+            ).all()
+            day_refunds = sum(return_obj.refund_amount for return_obj in day_returns)
+            
+            result.append({
+                'date': date_str,
+                'date_ar': date_obj.strftime('%d/%m/%Y') if hasattr(date_obj, 'strftime') else str(date_obj),
+                'sales_count': int(day.sales_count),
+                'total_revenue': float(day.total_revenue or 0),
+                'total_discounts': float(day.total_discounts or 0),
+                'total_refunds': float(day_refunds),
+                'avg_sale': float(day.avg_sale or 0),
+                'net_revenue': float((day.total_revenue or 0) - (day.total_discounts or 0) - day_refunds)
+            })
+        
+        return jsonify({
+            'success': True,
+            'data': result,
+            'total_days': len(result),
+            'date_range': {
+                'from': date_from,
+                'to': date_to
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error in api_daily_revenue: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'خطأ في الخادم: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     with app.app_context():

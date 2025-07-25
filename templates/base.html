@@ -25,42 +25,121 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Service Worker Fix Script -->
+    <script src="{{ url_for('static', filename='js/service-worker-fix.js') }}"></script>
 
     <!-- Offline Support Scripts -->
     <script>
-        // تسجيل Service Worker
+        // تسجيل Service Worker مع معالجة شاملة للأخطاء
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('/static/js/service-worker.js')
-                    .then(function (registration) {
-                        console.log('ServiceWorker registration successful');
+                // التحقق من أن الصفحة آمنة (HTTPS أو localhost)
+                if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                    navigator.serviceWorker.register('/static/js/service-worker.js')
+                        .then(function (registration) {
+                            console.log('ServiceWorker registration successful');
 
-                        // التحقق من وجود تحديثات
-                        registration.addEventListener('updatefound', function () {
-                            console.log('New service worker found, installing...');
+                            // التحقق من حالة Service Worker بعد التسجيل
+                            setTimeout(checkServiceWorkerStatus, 1000);
 
-                            registration.installing.addEventListener('statechange', function () {
-                                if (registration.installing.state === 'installed') {
-                                    if (navigator.serviceWorker.controller) {
-                                        // إشعار المستخدم بوجود تحديث
-                                        showUpdateNotification(registration);
+                            // التحقق من وجود تحديثات
+                            if (registration && typeof registration.addEventListener === 'function') {
+                                registration.addEventListener('updatefound', function () {
+                                    console.log('New service worker found, installing...');
+
+                                    // التحقق من وجود installing worker قبل إضافة event listener
+                                    if (registration && registration.installing) {
+                                        try {
+                                            registration.installing.addEventListener('statechange', function () {
+                                                // التحقق مرة أخرى من وجود installing worker
+                                                if (registration && registration.installing && registration.installing.state === 'installed') {
+                                                    if (navigator.serviceWorker.controller) {
+                                                        // إشعار المستخدم بوجود تحديث
+                                                        showUpdateNotification(registration);
+                                                    }
+                                                }
+                                            });
+                                        } catch (error) {
+                                            console.log('Error adding statechange listener:', error);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
+                        })
+                        .catch(function (err) {
+                            console.log('ServiceWorker registration failed: ', err);
                         });
-                    })
-                    .catch(function (err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                } else {
+                    console.log('ServiceWorker not registered: HTTPS required');
+                }
             });
         }
 
         function showUpdateNotification(registration) {
             if (confirm('يتوفر تحديث جديد للتطبيق. هل تريد تحديثه الآن؟')) {
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                window.location.reload();
+                if (registration && registration.waiting) {
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                }
             }
         }
+
+        // دالة مساعدة للتحقق من حالة Service Worker
+        function checkServiceWorkerStatus() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(function(registration) {
+                    if (registration) {
+                        console.log('Service Worker Status:', {
+                            scope: registration.scope,
+                            active: !!registration.active,
+                            installing: !!registration.installing,
+                            waiting: !!registration.waiting
+                        });
+                    } else {
+                        console.log('No Service Worker registered');
+                    }
+                }).catch(function(error) {
+                    console.log('Error checking Service Worker status:', error);
+                });
+            }
+        }
+
+        // دالة لتنظيف Service Worker في حالة وجود مشاكل
+        async function cleanupServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        await registration.unregister();
+                        console.log('Service Worker unregistered for cleanup');
+                    }
+                    
+                    // مسح جميع التخزين المؤقت
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
+                        console.log('All caches cleared');
+                    }
+                    
+                    // إعادة تحميل الصفحة
+                    window.location.reload();
+                } catch (error) {
+                    console.log('Error during Service Worker cleanup:', error);
+                }
+            }
+        }
+
+        // إضافة دالة للتنظيف في حالة وجود أخطاء
+        window.cleanupServiceWorker = cleanupServiceWorker;
+
+        // معالج الأخطاء العام للـ Service Worker
+        window.addEventListener('error', function(event) {
+            if (event.error && event.error.message && event.error.message.includes('state')) {
+                console.log('Service Worker state error detected, attempting cleanup...');
+                // تأخير قليل قبل التنظيف
+                setTimeout(cleanupServiceWorker, 1000);
+            }
+        });
 
         // توفير CSRF token للتطبيق
         {% if csrf_token %}

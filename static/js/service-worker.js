@@ -1,6 +1,6 @@
-const CACHE_NAME = "norko-store-v1.2.1";
-const STATIC_CACHE = "norko-static-v1.2.1";
-const API_CACHE = "norko-api-v1.2.1";
+const CACHE_NAME = "sarastore-store-v1.2.2";
+const STATIC_CACHE = "sarastore-static-v1.2.2";
+const API_CACHE = "sarastore-api-v1.2.2";
 
 // قائمة الملفات المهمة للتخزين المؤقت
 const STATIC_FILES = [
@@ -82,7 +82,11 @@ self.addEventListener("install", (event) => {
       // تخزين الملفات الثابتة
       caches.open(STATIC_CACHE).then((cache) => {
         console.log("Service Worker: Caching static files");
-        return cache.addAll(STATIC_FILES);
+        return cache.addAll(STATIC_FILES).catch((err) => {
+          console.log("Service Worker: Failed to cache static files:", err);
+          // لا نريد أن يفشل التثبيت بسبب فشل التخزين المؤقت
+          return Promise.resolve();
+        });
       }),
       // تخزين بيانات API الأساسية
       caches.open(API_CACHE).then((cache) => {
@@ -97,6 +101,8 @@ self.addEventListener("install", (event) => {
               })
               .catch((err) => {
                 console.log(`Service Worker: Failed to cache ${url}:`, err);
+                // لا نريد أن يفشل التثبيت بسبب فشل التخزين المؤقت
+                return Promise.resolve();
               });
           })
         );
@@ -104,6 +110,10 @@ self.addEventListener("install", (event) => {
     ]).then(() => {
       console.log("Service Worker: Installation complete");
       return self.skipWaiting();
+    }).catch((err) => {
+      console.log("Service Worker: Installation failed:", err);
+      // حتى لو فشل التثبيت، نريد أن نستمر
+      return Promise.resolve();
     })
   );
 });
@@ -123,14 +133,23 @@ self.addEventListener("activate", (event) => {
               cacheName !== CACHE_NAME
             ) {
               console.log("Service Worker: Deleting old cache:", cacheName);
-              return caches.delete(cacheName);
+              return caches.delete(cacheName).catch((err) => {
+                console.log("Service Worker: Failed to delete cache:", cacheName, err);
+                return Promise.resolve();
+              });
             }
+            return Promise.resolve();
           })
         );
       })
       .then(() => {
         console.log("Service Worker: Activation complete");
         return self.clients.claim();
+      })
+      .catch((err) => {
+        console.log("Service Worker: Activation failed:", err);
+        // حتى لو فشل التفعيل، نريد أن نستمر
+        return Promise.resolve();
       })
   );
 });

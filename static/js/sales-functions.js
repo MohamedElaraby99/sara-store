@@ -552,10 +552,78 @@ function generatePrintableInvoice(sale) {
     <div class="footer">
         <div class="payment-method">تم الدفع نقداً</div>
         <div class="thank-you">شكراً لثقتكم بنا</div>
-        <div class="validity">هذه الفاتورة صالحة لمدة 30 يوماً</div>
+        <div class="validity">هذه الفاتورة صالحة لمدة 7 أياماً</div>
         <div class="validity">للاستفسارات: 01093126299</div>
     </div>
     `;
+}
+
+// Filter functions for sales page
+function applyFilters() {
+  console.log("applyFilters called");
+  
+  const form = document.getElementById('filterForm');
+  if (!form) {
+    console.error('Filter form not found');
+    return;
+  }
+  
+  const formData = new FormData(form);
+  const params = new URLSearchParams();
+  
+  // Add all form data to params
+  for (let [key, value] of formData.entries()) {
+    if (value) {
+      params.append(key, value);
+    }
+  }
+  
+  // Redirect to filtered sales page
+  const currentUrl = window.location.pathname;
+  const newUrl = `${currentUrl}?${params.toString()}`;
+  window.location.href = newUrl;
+}
+
+function clearFilters() {
+  console.log("clearFilters called");
+  window.location.href = window.location.pathname;
+}
+
+function setTodayFilter() {
+  console.log("setTodayFilter called");
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date_from').value = today;
+  document.getElementById('date_to').value = today;
+  applyFilters();
+}
+
+function setWeekFilter() {
+  console.log("setWeekFilter called");
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  
+  document.getElementById('date_from').value = startOfWeek.toISOString().split('T')[0];
+  document.getElementById('date_to').value = today.toISOString().split('T')[0];
+  applyFilters();
+}
+
+function setMonthFilter() {
+  console.log("setMonthFilter called");
+  const today = new Date();
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+  document.getElementById('date_from').value = startOfMonth.toISOString().split('T')[0];
+  document.getElementById('date_to').value = today.toISOString().split('T')[0];
+  applyFilters();
+}
+
+function debounceFilter() {
+  console.log("debounceFilter called");
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    applyFilters();
+  }, 500);
 }
 
 // Initialize when DOM is loaded
@@ -567,6 +635,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // Make functions globally available
   window.viewSaleDetails = viewSaleDetails;
   window.printSale = printSale;
+  window.applyFilters = applyFilters;
+  window.clearFilters = clearFilters;
+  window.setTodayFilter = setTodayFilter;
+  window.setWeekFilter = setWeekFilter;
+  window.setMonthFilter = setMonthFilter;
+  window.debounceFilter = debounceFilter;
 
   console.log("Functions made globally available");
 });

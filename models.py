@@ -195,6 +195,11 @@ class Product(db.Model):
             return 'مخزون منخفض'
         else:
             return 'متوفر'
+    
+    @property
+    def is_whole_unit(self):
+        """Check if the product is sold as a whole unit"""
+        return self.unit_type == 'كامل'
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

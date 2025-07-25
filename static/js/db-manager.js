@@ -1,7 +1,7 @@
 // مدير قاعدة البيانات المحلية باستخدام IndexedDB
 class DatabaseManager {
   constructor() {
-    this.dbName = "NorkoStoreDB";
+    this.dbName = "sarastoreStoreDB";
     this.dbVersion = 1;
     this.db = null;
     this.isInitialized = false;

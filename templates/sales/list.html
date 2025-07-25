@@ -12,6 +12,316 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ range(1, 1000) | random }}">
 <style>
+    /* Enhanced Daily Revenue Styles */
+    .revenue-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .revenue-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+    }
+
+    .revenue-header h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .revenue-header i {
+        font-size: 1.3rem;
+        margin-left: 10px;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-section .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+
+    .filter-section .form-control {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 3px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+
+    .btn-group .btn-outline-success {
+        border-color: #198754;
+        color: #198754;
+    }
+
+    .btn-group .btn-outline-success:hover {
+        background-color: #198754;
+        border-color: #198754;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-group .btn-outline-secondary {
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+    .btn-group .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .revenue-summary {
+        margin-bottom: 25px;
+    }
+
+    .revenue-summary-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .revenue-summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+    }
+
+    .revenue-summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .revenue-summary-card .card-body {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .revenue-summary-card h6 {
+        margin: 0 0 10px 0;
+        font-weight: 600;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .revenue-summary-card h4 {
+        margin: 0;
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    .revenue-summary-card.bg-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .revenue-summary-card.bg-success {
+        background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    }
+
+    .revenue-summary-card.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    }
+
+    .revenue-summary-card.bg-info {
+        background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+    }
+
+    .revenue-table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    #dailyRevenueTable {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    #dailyRevenueTable th {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        padding: 15px 12px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    #dailyRevenueTable td {
+        vertical-align: middle;
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+    .revenue-row {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .revenue-row:hover {
+        background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%) !important;
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.15);
+    }
+
+    .revenue-row:hover .text-success {
+        color: #198754 !important;
+        font-weight: bold;
+    }
+
+    .revenue-row:hover .revenue-actions {
+        opacity: 1;
+    }
+
+    .revenue-actions {
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+
+    .revenue-actions .btn {
+        border-radius: 6px;
+        margin: 0 2px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        border: 1px solid;
+    }
+
+    .revenue-actions .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .revenue-actions .btn-outline-primary {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    .revenue-actions .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .revenue-actions .btn-outline-success {
+        border-color: #198754;
+        color: #198754;
+    }
+
+    .revenue-actions .btn-outline-success:hover {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .revenue-actions .btn-outline-info {
+        border-color: #0dcaf0;
+        color: #0dcaf0;
+    }
+
+    .revenue-actions .btn-outline-info:hover {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+
+    .loading-container {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: #198754;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .revenue-section {
+            padding: 15px;
+        }
+
+        .filter-section {
+            padding: 15px;
+        }
+
+        .btn-group .btn {
+            margin: 2px;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+
+        .revenue-summary-card .card-body {
+            padding: 15px;
+        }
+
+        .revenue-summary-card h4 {
+            font-size: 1.5rem;
+        }
+
+        #dailyRevenueTable th,
+        #dailyRevenueTable td {
+            padding: 8px 6px;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Animation for loading */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* Existing styles for other components */
     .sale-row {
         transition: all 0.3s ease;
     }
@@ -108,12 +418,6 @@
         border-bottom: 2px solid #dee2e6;
     }
 
-    .btn-outline-success:hover,
-    .btn-outline-warning:hover,
-    .btn-outline-info:hover {
-        transform: translateY(-1px);
-    }
-
     .filter-badge {
         animation: pulse 2s infinite;
     }
@@ -122,11 +426,9 @@
         0% {
             transform: scale(1);
         }
-
         50% {
             transform: scale(1.05);
         }
-
         100% {
             transform: scale(1);
         }
@@ -153,6 +455,132 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- Daily Revenue Section -->
+<div class="revenue-section">
+    <div class="revenue-header">
+        <h5>
+            <i class="bi bi-graph-up"></i>
+            إيرادات الأيام
+        </h5>
+    </div>
+    
+    <!-- Revenue Filters -->
+    <div class="filter-section">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="revenue_date_from" class="form-label">
+                    <i class="bi bi-calendar-date"></i>
+                    من تاريخ
+                </label>
+                <input type="date" class="form-control" id="revenue_date_from" 
+                       onchange="loadDailyRevenue()">
+            </div>
+            <div class="col-md-3">
+                <label for="revenue_date_to" class="form-label">
+                    <i class="bi bi-calendar-check"></i>
+                    إلى تاريخ
+                </label>
+                <input type="date" class="form-control" id="revenue_date_to" 
+                       onchange="loadDailyRevenue()">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-success" onclick="setRevenueToday()">
+                        <i class="bi bi-calendar-day"></i>
+                        اليوم
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="setRevenueWeek()">
+                        <i class="bi bi-calendar-week"></i>
+                        هذا الأسبوع
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="setRevenueMonth()">
+                        <i class="bi bi-calendar-month"></i>
+                        هذا الشهر
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearRevenueFilters()">
+                        <i class="bi bi-x-circle"></i>
+                        مسح
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Summary -->
+    <div class="revenue-summary" id="revenueSummary" style="display: none;">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white revenue-summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title">إجمالي الأيام</h6>
+                        <h4 id="totalDays">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white revenue-summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title">إجمالي الإيرادات</h6>
+                        <h4 id="totalRevenue">0 ج.م</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark revenue-summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title">إجمالي الخصومات</h6>
+                        <h4 id="totalDiscounts">0 ج.م</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white revenue-summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title">صافي الإيرادات</h6>
+                        <h4 id="netRevenue">0 ج.م</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Table -->
+    <div class="revenue-table-container">
+        <div class="table-responsive">
+            <table class="table table-hover" id="dailyRevenueTable">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>عدد المبيعات</th>
+                        <th>إجمالي الإيرادات</th>
+                        <th>إجمالي الخصومات</th>
+                        <th>متوسط البيع</th>
+                        <th>صافي الإيرادات</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyRevenueBody">
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            <i class="bi bi-calendar-x"></i>
+                            اختر فترة زمنية لعرض الإيرادات
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="revenueLoading" class="loading-container" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+        <p class="mt-3 text-muted">جاري تحميل بيانات الإيرادات...</p>
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
@@ -283,6 +711,8 @@
             </form>
         </div>
     </div>
+
+   
 
     <!-- Sales Table -->
     <div class="card">
@@ -501,10 +931,13 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/sales.js') }}"></script>
+<!-- Sales functions are included in sales-functions.js -->
 
 <!-- Include external sales functions -->
 <script src="{{ url_for('static', filename='js/sales-functions.js') }}?v={{ range(1, 1000) | random }}"></script>
+
+<!-- Daily Revenue Functions -->
+<script src="{{ url_for('static', filename='js/daily-revenue.js') }}?v={{ range(1, 1000) | random }}"></script>
 
 <!-- Service Worker Fix -->
 <script src="{{ url_for('static', filename='js/fix-service-worker.js') }}"></script>
@@ -584,5 +1017,8 @@
             document.querySelector('.container').appendChild(testDiv);
         }
     });
+
+    // Daily Revenue functionality is now handled by daily-revenue.js
+    // All functions are available globally from the external file
 </script>
 {% endblock %}

@@ -280,15 +280,24 @@
 
         // Fetch return details
         fetch(`/api/returns/${returnId}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(returnData => {
+                if (returnData.error) {
+                    throw new Error(returnData.error);
+                }
                 content.innerHTML = generateReturnDetailsHTML(returnData);
             })
             .catch(error => {
+                console.error('Error loading return details:', error);
                 content.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle"></i>
-                        حدث خطأ في تحميل تفاصيل المرتجع
+                        حدث خطأ في تحميل تفاصيل المرتجع: ${error.message}
                     </div>
                 `;
             });

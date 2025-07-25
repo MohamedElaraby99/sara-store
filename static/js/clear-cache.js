@@ -46,7 +46,7 @@ async function clearAllCache() {
     if (progressBar) progressBar.style.width = "50%";
 
     if ("indexedDB" in window) {
-      const databases = ["NorkoStoreDB", "norko-store-db", "offline-store"];
+      const databases = ["sarastoreStoreDB", "sarastore-store-db", "offline-store"];
       for (let dbName of databases) {
         try {
           await indexedDB.deleteDatabase(dbName);

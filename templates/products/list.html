@@ -308,80 +308,12 @@
     </div>
 </div>
 
-<!-- Excel Import Modal -->
-<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="importExcelModalLabel">
-                    <i class="bi bi-file-earmark-excel text-success me-2"></i>
-                    استيراد منتجات من ملف Excel
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>تعليمات مهمة:</strong>
-                    <ul class="mb-0 mt-2">
-                        <li>يجب أن يحتوي ملف Excel على الأعمدة التالية: <strong>اسم المنتج، الفئة، سعر الجملة، سعر
-                                البيع، الكمية</strong></li>
-                        <li>يجب أن تكون أسماء الفئات موجودة مسبقاً في النظام</li>
-                        <li>سيتم تجاهل المنتجات المكررة (نفس الاسم)</li>
-                        <li>الحد الأقصى لحجم الملف: 5 ميجابايت</li>
-                    </ul>
-                </div>
-
-                <!-- Download template button -->
-                <div class="mb-3">
-                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadTemplate()">
-                        <i class="bi bi-download me-1"></i>
-                        تحميل نموذج Excel
-                    </button>
-                    <button type="button" class="btn btn-outline-info btn-sm ms-2" onclick="debugExcel()">
-                        <i class="bi bi-bug me-1"></i>
-                        اختبار الملف
-                    </button>
-                </div>
-
-                <form id="importForm" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="excelFile" class="form-label">اختر ملف Excel:</label>
-                        <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx,.xls" required>
-                        <div class="form-text">يدعم ملفات .xlsx و .xls فقط</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="updateExisting" name="update_existing">
-                            <label class="form-check-label" for="updateExisting">
-                                تحديث المنتجات الموجودة (إذا كان اسم المنتج موجود)
-                            </label>
-                        </div>
-                    </div>
-
-                    <div id="importProgress" class="d-none">
-                        <div class="progress mb-3">
-                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                        </div>
-                        <div id="importStatus">جاري المعالجة...</div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <button type="button" class="btn btn-success" onclick="importExcel()" id="importBtn">
-                    <i class="bi bi-upload me-1"></i>
-                    استيراد
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- JavaScript for instant search and filtering -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        console.log('Products page JavaScript loaded');
+        
+        // Get DOM elements
         const quickSearch = document.getElementById('quickSearch');
         const categoryFilter = document.getElementById('categoryFilter');
         const stockFilter = document.getElementById('stockFilter');
@@ -392,117 +324,191 @@
         const resultsCount = document.getElementById('resultsCount');
         const productRows = document.querySelectorAll('.product-row');
 
+        console.log('Elements found:', {
+            quickSearch: !!quickSearch,
+            categoryFilter: !!categoryFilter,
+            stockFilter: !!stockFilter,
+            unitFilter: !!unitFilter,
+            sortFilter: !!sortFilter,
+            productRows: productRows.length
+        });
+
+        // Check if essential elements exist
+        if (!quickSearch || !categoryFilter || !stockFilter || !unitFilter || !sortFilter) {
+            console.warn('Some filter elements not found, skipping filter initialization');
+            return;
+        }
+
+        if (!productRows || productRows.length === 0) {
+            console.warn('No product rows found, skipping filter initialization');
+            return;
+        }
+
         // Instant search function
         function filterProducts() {
-            const searchTerm = quickSearch.value.toLowerCase();
-            const categoryValue = categoryFilter.value;
-            const stockValue = stockFilter.value;
-            const unitValue = unitFilter.value;
+            try {
+                const searchTerm = quickSearch.value.toLowerCase();
+                const categoryValue = categoryFilter.value;
+                const stockValue = stockFilter.value;
+                const unitValue = unitFilter.value;
 
-            let visibleCount = 0;
-
-            productRows.forEach(row => {
-                const name = row.dataset.name;
-                const description = row.dataset.description;
-                const category = row.dataset.category;
-                const stockStatus = row.dataset.stockStatus;
-                const unitType = row.dataset.unitType;
-
-                let show = true;
-
-                // Search filter
-                if (searchTerm && !name.includes(searchTerm) && !description.includes(searchTerm)) {
-                    show = false;
+                // Check if elements exist
+                if (!productRows || productRows.length === 0) {
+                    console.warn('No product rows found for filtering');
+                    if (resultsCount) {
+                        resultsCount.textContent = '0 منتج';
+                    }
+                    return;
                 }
 
-                // Category filter
-                if (categoryValue && category !== categoryValue) {
-                    show = false;
-                }
+                let visibleCount = 0;
 
-                // Stock status filter
-                if (stockValue && stockStatus !== stockValue) {
-                    show = false;
-                }
+                productRows.forEach(row => {
+                    const name = row.dataset.name || '';
+                    const description = row.dataset.description || '';
+                    const category = row.dataset.category || '';
+                    const stockStatus = row.dataset.stockStatus || '';
+                    const unitType = row.dataset.unitType || '';
 
-                // Unit type filter
-                if (unitValue && unitType !== unitValue) {
-                    show = false;
-                }
+                    let show = true;
 
-                if (show) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+                    // Search filter
+                    if (searchTerm && !name.includes(searchTerm) && !description.includes(searchTerm)) {
+                        show = false;
+                    }
 
-            resultsCount.textContent = visibleCount + ' منتج';
+                    // Category filter
+                    if (categoryValue && category !== categoryValue) {
+                        show = false;
+                    }
+
+                    // Stock status filter
+                    if (stockValue && stockStatus !== stockValue) {
+                        show = false;
+                    }
+
+                    // Unit type filter
+                    if (unitValue && unitType !== unitValue) {
+                        show = false;
+                    }
+
+                    if (show) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (resultsCount) {
+                    resultsCount.textContent = visibleCount + ' منتج';
+                }
+            } catch (error) {
+                console.error('Error in filterProducts:', error);
+            }
         }
 
         // Sort function
         function sortProducts() {
-            const sortBy = sortFilter.value;
-            const tbody = document.querySelector('#productsTable tbody');
-            const rows = Array.from(tbody.querySelectorAll('.product-row'));
-
-            rows.sort((a, b) => {
-                let aValue, bValue;
-
-                switch (sortBy) {
-                    case 'name':
-                        aValue = a.dataset.name;
-                        bValue = b.dataset.name;
-                        return aValue.localeCompare(bValue, 'ar');
-                    case 'price':
-                        aValue = parseFloat(a.dataset.price);
-                        bValue = parseFloat(b.dataset.price);
-                        return bValue - aValue;
-                    case 'stock':
-                        aValue = parseInt(a.dataset.stock);
-                        bValue = parseInt(b.dataset.stock);
-                        return bValue - aValue;
-                    case 'date':
-                        aValue = new Date(a.dataset.date);
-                        bValue = new Date(b.dataset.date);
-                        return bValue - aValue;
-                    default:
-                        return 0;
+            try {
+                const sortBy = sortFilter ? sortFilter.value : 'name';
+                const tbody = document.querySelector('#productsTable tbody');
+                
+                // Check if tbody exists
+                if (!tbody) {
+                    console.warn('Products table tbody not found');
+                    return;
                 }
-            });
+                
+                const rows = Array.from(tbody.querySelectorAll('.product-row'));
+                
+                // Check if there are rows to sort
+                if (rows.length === 0) {
+                    console.warn('No product rows found to sort');
+                    return;
+                }
 
-            rows.forEach(row => tbody.appendChild(row));
+                rows.sort((a, b) => {
+                    let aValue, bValue;
+
+                    switch (sortBy) {
+                        case 'name':
+                            aValue = a.dataset.name || '';
+                            bValue = b.dataset.name || '';
+                            return aValue.localeCompare(bValue, 'ar');
+                        case 'price':
+                            aValue = parseFloat(a.dataset.price) || 0;
+                            bValue = parseFloat(b.dataset.price) || 0;
+                            return bValue - aValue;
+                        case 'stock':
+                            aValue = parseInt(a.dataset.stock) || 0;
+                            bValue = parseInt(b.dataset.stock) || 0;
+                            return bValue - aValue;
+                        case 'date':
+                            aValue = new Date(a.dataset.date || '1970-01-01');
+                            bValue = new Date(b.dataset.date || '1970-01-01');
+                            return bValue - aValue;
+                        default:
+                            return 0;
+                    }
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            } catch (error) {
+                console.error('Error in sortProducts:', error);
+            }
         }
 
         // Event listeners
-        quickSearch.addEventListener('input', filterProducts);
-        categoryFilter.addEventListener('change', filterProducts);
-        stockFilter.addEventListener('change', filterProducts);
-        unitFilter.addEventListener('change', filterProducts);
-        sortFilter.addEventListener('change', function () {
-            sortProducts();
-            filterProducts();
-        });
+        if (quickSearch) {
+            quickSearch.addEventListener('input', filterProducts);
+        }
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', filterProducts);
+        }
+        if (stockFilter) {
+            stockFilter.addEventListener('change', filterProducts);
+        }
+        if (unitFilter) {
+            unitFilter.addEventListener('change', filterProducts);
+        }
+        if (sortFilter) {
+            sortFilter.addEventListener('change', function () {
+                sortProducts();
+                filterProducts();
+            });
+        }
 
-        clearSearch.addEventListener('click', function () {
-            quickSearch.value = '';
-            filterProducts();
-        });
+        if (clearSearch) {
+            clearSearch.addEventListener('click', function () {
+                if (quickSearch) {
+                    quickSearch.value = '';
+                }
+                filterProducts();
+            });
+        }
 
-        resetFilters.addEventListener('click', function () {
-            quickSearch.value = '';
-            categoryFilter.value = '';
-            stockFilter.value = '';
-            unitFilter.value = '';
-            sortFilter.value = 'name';
-            filterProducts();
-            sortProducts();
-        });
+        if (resetFilters) {
+            resetFilters.addEventListener('click', function () {
+                if (quickSearch) quickSearch.value = '';
+                if (categoryFilter) categoryFilter.value = '';
+                if (stockFilter) stockFilter.value = '';
+                if (unitFilter) unitFilter.value = '';
+                if (sortFilter) sortFilter.value = 'name';
+                filterProducts();
+                sortProducts();
+            });
+        }
 
         // Initial filter and sort
-        filterProducts();
-        sortProducts();
+        try {
+            console.log('Running initial filter and sort');
+            filterProducts();
+            sortProducts();
+            console.log('Initial filter and sort completed');
+        } catch (error) {
+            console.error('Error during initial filter/sort:', error);
+        }
     });
 
     // Delete product function
@@ -526,164 +532,6 @@
                     alert('حدث خطأ أثناء حذف المنتج');
                 });
         }
-    }
-
-    // Excel import functions
-    function downloadTemplate() {
-        // Create a template Excel file
-        fetch('/api/products/excel-template')
-            .then(response => response.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'نموذج_المنتجات.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error('Error downloading template:', error);
-                alert('حدث خطأ أثناء تحميل النموذج');
-            });
-    }
-
-    function importExcel() {
-        const fileInput = document.getElementById('excelFile');
-        const updateExisting = document.getElementById('updateExisting').checked;
-        const importBtn = document.getElementById('importBtn');
-        const importProgress = document.getElementById('importProgress');
-        const importStatus = document.getElementById('importStatus');
-        const progressBar = document.querySelector('.progress-bar');
-
-        if (!fileInput.files[0]) {
-            alert('الرجاء اختيار ملف Excel');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-        formData.append('update_existing', updateExisting);
-
-        // Show progress
-        importBtn.disabled = true;
-        importProgress.classList.remove('d-none');
-        progressBar.style.width = '20%';
-        importStatus.textContent = 'جاري رفع الملف...';
-
-        fetch('/api/products/import-excel', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                progressBar.style.width = '80%';
-                importStatus.textContent = 'جاري معالجة البيانات...';
-                return response.json();
-            })
-            .then(data => {
-                progressBar.style.width = '100%';
-
-                if (data.success) {
-                    importStatus.innerHTML = `
-                    <div class="text-success">
-                        <i class="bi bi-check-circle me-1"></i>
-                        تم الاستيراد بنجاح!<br>
-                        تم إضافة: ${data.added_count} منتج<br>
-                        تم تحديث: ${data.updated_count} منتج<br>
-                        تم تجاهل: ${data.skipped_count} منتج
-                    </div>
-                `;
-
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    importStatus.innerHTML = `
-                    <div class="text-danger">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-                        خطأ: ${data.message}
-                    </div>
-                `;
-                    if (data.errors && data.errors.length > 0) {
-                        importStatus.innerHTML += '<br><small>الأخطاء:<br>' + data.errors.join('<br>') + '</small>';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                importStatus.innerHTML = `
-                <div class="text-danger">
-                    <i class="bi bi-exclamation-triangle me-1"></i>
-                    حدث خطأ أثناء الاستيراد
-                </div>
-            `;
-            })
-            .finally(() => {
-                importBtn.disabled = false;
-            });
-    }
-
-    function debugExcel() {
-        const fileInput = document.getElementById('excelFile');
-
-        if (!fileInput.files[0]) {
-            alert('الرجاء اختيار ملف Excel أولاً');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-
-        fetch('/api/products/debug-excel', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('خطأ: ' + data.error);
-                    return;
-                }
-
-                let debugInfo = `معلومات الملف:\n`;
-                debugInfo += `عدد الصفوف الكلي: ${data.total_rows}\n`;
-                debugInfo += `اسم الورقة: ${data.worksheet_name}\n\n`;
-                debugInfo += `العناوين: ${data.headers.join(', ')}\n\n`;
-                debugInfo += `عينة من البيانات:\n`;
-
-                data.sample_rows.forEach(row => {
-                    debugInfo += `الصف ${row.row_number}:\n`;
-                    Object.entries(row.data).forEach(([key, value]) => {
-                        debugInfo += `  ${key}: ${value}\n`;
-                    });
-                    debugInfo += '\n';
-                });
-
-                // إظهار النتائج في نافذة منبثقة
-                const debugWindow = window.open('', '_blank', 'width=600,height=800,scrollbars=yes');
-                debugWindow.document.write(`
-                <html dir="rtl">
-                <head>
-                    <title>تشخيص ملف Excel</title>
-                    <meta charset="utf-8">
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
-                    </style>
-                </head>
-                <body>
-                    <h2>تشخيص ملف Excel</h2>
-                    <pre>${debugInfo}</pre>
-                    <button onclick="window.close()">إغلاق</button>
-                </body>
-                </html>
-            `);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('حدث خطأ أثناء تشخيص الملف');
-            });
     }
 </script>
 
@@ -717,4 +565,4 @@
         padding: 0.25rem 0.5rem;
     }
 </style>
-{% endblock %}
+{% endblock %} 

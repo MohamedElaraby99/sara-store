@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Worker Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Service Worker Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Service Worker Status</h2>
+        <div id="sw-status" class="status info">Checking service worker status...</div>
+        <button onclick="checkServiceWorker()">Check Service Worker</button>
+        <button onclick="unregisterServiceWorker()">Unregister Service Worker</button>
+        <button onclick="clearCaches()">Clear Caches</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Logs</h2>
+        <div id="console-logs" style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logsDiv = document.getElementById('console-logs');
+
+        function addLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? 'red' : 'black';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '));
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+
+        async function checkServiceWorker() {
+            const statusDiv = document.getElementById('sw-status');
+            
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    
+                    if (registration) {
+                        statusDiv.className = 'status success';
+                        statusDiv.innerHTML = `
+                            <strong>✅ Service Worker Registered</strong><br>
+                            Scope: ${registration.scope}<br>
+                            Active: ${registration.active ? 'Yes' : 'No'}<br>
+                            Installing: ${registration.installing ? 'Yes' : 'No'}<br>
+                            Waiting: ${registration.waiting ? 'Yes' : 'No'}
+                        `;
+                    } else {
+                        statusDiv.className = 'status error';
+                        statusDiv.innerHTML = '<strong>❌ No Service Worker Registered</strong>';
+                    }
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '<strong>❌ Service Worker Not Supported</strong>';
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function unregisterServiceWorker() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        await registration.unregister();
+                        console.log('Service Worker unregistered successfully');
+                        checkServiceWorker();
+                    } else {
+                        console.log('No Service Worker to unregister');
+                    }
+                }
+            } catch (error) {
+                console.error('Error unregistering Service Worker:', error);
+            }
+        }
+
+        async function clearCaches() {
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    console.log('All caches cleared successfully');
+                } else {
+                    console.log('Cache API not supported');
+                }
+            } catch (error) {
+                console.error('Error clearing caches:', error);
+            }
+        }
+
+        // Check service worker on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, checking service worker...');
+            checkServiceWorker();
+        });
+
+        // Listen for service worker messages
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                console.log('Service Worker message:', event.data);
+            });
+        }
+    </script>
+</body>
+</html> 
